@@ -179,3 +179,17 @@ def test_special_time_p_forces_a_multiple_of_nine():
         assert lrc.covers(v=speed, j=47, k=8, p=47, denominator=9) == (
             speed % 9 == 0
         )
+
+
+def test_normalized_one_gap_covers_are_isolated_by_one_exchange():
+    fixtures = (
+        ((51, 62, 78, 103, 134, 165, 180, 196), 3),
+        ((54, 58, 110, 112, 139, 166, 168, 197), 4),
+    )
+    for selection, expected_minimum in fixtures:
+        assert lrc.uncovered_times(selection, k=8, p=47, denominator=9) == (1,)
+        exchanges = lrc.best_gap_closing_exchanges(
+            selection, gap=1, k=8, p=47, denominator=9
+        )
+        assert len(exchanges[0][2]) == expected_minimum
+        assert all(len(new_gaps) == expected_minimum for _, _, new_gaps in exchanges)

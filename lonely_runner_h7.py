@@ -154,6 +154,48 @@ def scale_speeds(
     return tuple(sorted(representatives))
 
 
+def best_gap_closing_exchanges(
+    speeds: tuple[int, ...], *, gap: int, k: int, p: int, denominator: int
+) -> tuple[tuple[int, int, tuple[int, ...]], ...]:
+    """Return one-speed replacements that close a gap and open fewest gaps."""
+    modulus = (k + 1) * p
+    limit = modulus // 2
+    candidates = tuple(v for v in range(1, limit + 1) if v % p != 0)
+    masks = {}
+    for speed in candidates:
+        mask = 0
+        for j in range(1, limit + 1):
+            if covers(v=speed, j=j, k=k, p=p, denominator=denominator):
+                mask |= 1 << (j - 1)
+        masks[speed] = mask
+
+    best_count = limit + 1
+    best = []
+    for removed in speeds:
+        remaining = tuple(v for v in speeds if v != removed)
+        base_mask = 0
+        for speed in remaining:
+            base_mask |= masks[speed]
+        for added in candidates:
+            if added in remaining or not covers(
+                v=added, j=gap, k=k, p=p, denominator=denominator
+            ):
+                continue
+            replacement = tuple(sorted((*remaining, added)))
+            if not gcd_constraint(replacement, k=k, p=p):
+                continue
+            union = base_mask | masks[added]
+            new_gaps = tuple(
+                j for j in range(1, limit + 1) if not union & (1 << (j - 1))
+            )
+            if len(new_gaps) < best_count:
+                best_count = len(new_gaps)
+                best = [(removed, added, new_gaps)]
+            elif len(new_gaps) == best_count:
+                best.append((removed, added, new_gaps))
+    return tuple(best)
+
+
 def find_bad_cover(*, k: int, p: int, denominator: int) -> tuple[int, ...] | None:
     """Find a k-element cover satisfying the gcd constraint, if one exists."""
     modulus = (k + 1) * p

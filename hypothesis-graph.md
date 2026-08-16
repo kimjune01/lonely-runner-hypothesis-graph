@@ -499,7 +499,16 @@ H0  original LRC is open and correctly normalized
 
     Both facts replay in the test suite. This shows the finite obstruction is exactly tight: a proof must distinguish full coverage from a one-point defect.
   - At the special time `j=p=47`, coverage is equivalent to `9 | v`; hence every hypothetical cover contains a multiple of `9`. More generally, `j=3p` forces a multiple of `3`.
+  - A second normalized one-gap witness was found:
+
+    ```text
+    (54,58,110,112,139,166,168,197).
+    ```
+
+    It has gcd profile `(six g=1, one g=3, one g=9)`, unlike the first witness's `(four g=1, three g=3, one g=9)`. Counts by divisibility class therefore do not classify the tight configurations.
+  - Both witnesses are isolated in the graph whose edges replace one speed while retaining coverage of all times except `1`. Moreover, replacing one speed by any speed that covers `1` opens at least three new gaps for the first witness and four for the second. This exact exchange calculation replays in `test_normalized_one_gap_covers_are_isolated_by_one_exchange`.
   - Adding the sound symmetry break `speed 1 is selected` and then also fixing the multiple `180` did not finish within the bounded solver run. These interrupted searches are `UNKNOWN`, not `UNSAT`.
+  - A lean normalized CNF—speed `1` fixed, at most seven additional speeds, already-covered clauses deleted—reduced the encoding from `3663` variables and `6990` clauses to `1599` variables and `3144` clauses. Kissat still timed out, including after fixing second unit speed `2`; raw encoding size is not the dominant difficulty.
 
 - Verdict: open frontier.
 - Credence: medium as a structural reduction; low as a complete proof route.
