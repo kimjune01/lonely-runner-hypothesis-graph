@@ -313,6 +313,47 @@ H0  original LRC is open and correctly normalized
   4. Search for a small family of test times that no such pair-plus-six decomposition covers.
   5. Convert that family into a pigeonhole or interval-length inequality with explicit endpoint error in `p`.
 
+- Observed outcome:
+
+  - CP-SAT assumption cores calibrate and replay, but the `p=47` run exceeded one minute and returned `UNKNOWN` when interrupted. Changing the pseudo-Boolean solver did not expose a core.
+  - Weighted MaxSAT was then used to seek the admissible eight-selection covering the most test times. It too exceeded the bounded budget at `p=47`; finding a relaxed witness is easy, but certifying the closest near-cover is equivalent in difficulty to the UNSAT question.
+  - Direct modular inspection finds exactly four test times that no nonmultiple of `3` can cover: `p,2p,3p,4p`. At `p,2p,4p`, a covering speed must be divisible by `9`; at `3p`, it must be divisible by `3`. These force lattice participation but do not alone force seven lattice residues.
+
+- Verdict: open. The solver-core and global-optimization routes are killed under the present budget; the direct modular route survives.
+- Credence: low.
+- Edge generated: H14.
+
+### H14 — Coverage capacity plus forced overlap proves the exchange obstruction
+
+- Mode: deduction followed by abduction
+- Hypothesis: exact coverage sizes, combined with an unavoidable-overlap bound between congruence classes, show that six multiples of `3` and two nonmultiples cannot cover the half-grid.
+- Exact lemma: let `D=9p`, let `p != 3` be prime, let `p` not divide `v`, and put `g=gcd(v,D)=gcd(v,9)`. On the half-grid `j=1,...,(D-1)/2`, the number of times covered by `v` at threshold `1/9` is
+
+  ```text
+  |C_v| = (g(2 floor((p-1)/g) + 1) - 1) / 2.
+  ```
+
+  Reason: multiplication by `v` maps the cyclic group onto the multiples of `g`, each with `g` preimages. The open interval of residues at distance less than `p` from zero contains `2 floor((p-1)/g)+1` such image points. Remove `j=0`, then quotient the remaining points by the symmetry `j <-> D-j`.
+
+- Replay: the formula is exhaustively checked for every candidate at `k=8,p=47` by `test_exact_coverage_size_formula_at_boundary`.
+- Kill condition for a capacity-only proof: the sum of the eight largest permitted coverage sizes already exceeds the universe.
+- Observed outcome: capacity alone dies. At `p=47`, two nonmultiples contribute at most `46` times each and six `g=9` multiples contribute at most `49` each, totaling `386` incidences over a universe of `211` times. A proof must account for at least `175` repeated incidences; it cannot use only marginal set sizes.
+- Verdict: the exact-size lemma is witnessed; the capacity-only hypothesis is killed.
+- Credence: deductive for the lemma and kill, low for the proposed overlap completion.
+- Edge generated: H15 — derive exact or lower-bounded pairwise intersections as a function of `gcd(v,w,9p)` and use the modulo-`3` split to force enough wasted incidence.
+
+### H15 — Congruence classes force excessive pairwise overlap
+
+- Mode: abduction from H14’s exact deficit
+- Hypothesis: among six multiples of `3`, periodic bad-time sets overlap so heavily that two nonmultiples cannot supply the missing distinct coverage. A Bonferroni or Fourier bound sensitive to `gcd(v,w,9p)` closes the `175`-incidence gap at `p=47` and scales with `p`.
+- Kill condition: construct admissible selections whose pairwise intersections meet the needed bound while higher-order intersections defeat every second-order union estimate.
+- Trial:
+
+  1. Derive an exact pair-intersection counter using the simultaneous congruences `|jv|_D < p` and `|jw|_D < p`.
+  2. Aggregate it separately for `(0,0)`, `(0,nonzero)`, and `(nonzero,nonzero)` residue classes modulo `3`.
+  3. Optimize the resulting second-order upper bound over six-plus-two selections.
+  4. If second order dies, retain the counterexample as the kill edge to a Fourier or higher-order argument.
+
 - Observed outcome: not run.
 - Verdict: open frontier.
 - Credence: low.
@@ -329,11 +370,12 @@ H0  original LRC is open and correctly normalized
 8. Independent UNSAT certification works on the calibration case but exceeded the interactive budget at the `k=8` boundary.
 9. Constraint ablation isolates the boundary mechanism: coverage remains possible, but only with too many multiples of `3` to satisfy the minimal-counterexample gcd condition.
 10. The relaxed SAT branch is explained by the canonical Dirichlet cover `{9,18,...,72}`; admissibility demands at least two exchanges out of this divisible lattice.
-11. The next falsifiable research node is H13. No general theorem or new Lonely Runner case was proved.
+11. Exact single-speed coverage counts are now proved, but their capacity bound dies with 175 excess incidences at the first boundary.
+12. The next falsifiable research node is H15: quantify forced overlap. No general theorem or new Lonely Runner case was proved.
 
 ## Frontier
 
-- Primary: prove or kill the H13 two-exchange obstruction by decomposing coverage masks modulo `3`.
+- Primary: prove or kill H15 by deriving pairwise intersection counts sensitive to gcd and residue class.
 - Secondary: extend the prime scan beyond `67`, with explicit timeouts recorded as `unknown`, never as `UNSAT`.
 - Secondary: return to H2 only with an overlap inequality that explicitly depends on gcd/ratio data and therefore respects H4.
 - Pruned: first-moment-only proofs, independently shifted formulations, and embeddings that retain only interval lengths.

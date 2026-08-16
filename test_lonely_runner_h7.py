@@ -103,3 +103,32 @@ def test_canonical_dirichlet_cover_replays_across_boundary():
     canonical = tuple(9 * multiplier for multiplier in range(1, 9))
     for p in (43, 47, 53, 59, 67):
         assert lrc.covers_universe(canonical, k=8, p=p, denominator=9)
+
+
+def test_cpsat_coverage_core_replays_on_calibration_case():
+    core = lrc.unsat_coverage_core_cpsat(k=3, p=7, denominator=4)
+    assert core
+    assert all(1 <= j <= 14 for j in core)
+    assert lrc.replay_coverage_core_cpsat(k=3, p=7, denominator=4, core=core)
+
+
+def test_max_coverage_finds_a_complete_preboundary_cover():
+    result, uncovered = lrc.max_coverage_candidate(
+        k=8, p=11, denominator=9, prime=3, minimum_nonmultiples=2
+    )
+    assert len(result) == 8
+    assert sum(v % 3 != 0 for v in result) >= 2
+    assert uncovered == ()
+
+
+def test_exact_coverage_size_formula_at_boundary():
+    k, p = 8, 47
+    limit = ((k + 1) * p) // 2
+    for v in range(1, limit + 1):
+        if v % p == 0:
+            continue
+        actual = sum(
+            lrc.covers(v=v, j=j, k=k, p=p, denominator=9)
+            for j in range(1, limit + 1)
+        )
+        assert actual == lrc.coverage_size(k=k, p=p, v=v)

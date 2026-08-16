@@ -19,6 +19,18 @@ def covers(*, v: int, j: int, k: int, p: int, denominator: int) -> bool:
     return distance_numerator * denominator < modulus
 
 
+def coverage_size(*, k: int, p: int, v: int) -> int:
+    """Exact half-grid coverage count at threshold 1/(k+1), for odd D."""
+    modulus = (k + 1) * p
+    if modulus % 2 == 0:
+        raise ValueError("formula currently requires an odd modulus")
+    if v % p == 0:
+        raise ValueError("candidate must not be divisible by p")
+    common = gcd(v, modulus)
+    radius_steps = (p - 1) // common
+    return (common * (2 * radius_steps + 1) - 1) // 2
+
+
 def gcd_constraint(speeds: tuple[int, ...], *, k: int, p: int) -> bool:
     """Check gcd(D, all speeds except each one) = 1."""
     if len(speeds) != k:
@@ -444,3 +456,128 @@ def find_cover_with_min_nonmultiples(
             return None
         positive = {literal for literal in solver.get_model() if literal > 0}
     return tuple(v for v in candidates if variables[v] in positive)
+
+
+def _coverage_cpsat_model(
+    *, k: int, p: int, denominator: int, core: tuple[int, ...] | None = None
+):
+    from ortools.sat.python import cp_model
+
+    modulus = (k + 1) * p
+    limit = modulus // 2
+    candidates = tuple(v for v in range(1, limit + 1) if v % p != 0)
+    model = cp_model.CpModel()
+    chosen = {v: model.new_bool_var(f"choose_{v}") for v in candidates}
+    model.add(sum(chosen.values()) == k)
+    for prime in active_gcd_primes(k=k, p=p):
+        model.add(sum(chosen[v] for v in candidates if v % prime != 0) >= 2)
+
+    selectors = {}
+    times = range(1, limit + 1) if core is None else core
+    for j in times:
+        covering = [
+            chosen[v]
+            for v in candidates
+            if covers(v=v, j=j, k=k, p=p, denominator=denominator)
+        ]
+        if core is None:
+            selector = model.new_bool_var(f"require_cover_j_{j}")
+            selectors[selector.index] = j
+            model.add(sum(covering) >= 1).only_enforce_if(selector)
+            model.add_assumption(selector)
+        else:
+            model.add(sum(covering) >= 1)
+    return model, selectors
+
+
+def unsat_coverage_core_cpsat(
+    *, k: int, p: int, denominator: int
+) -> tuple[int, ...]:
+    """Return test-time indices from a CP-SAT sufficient assumption core."""
+    from ortools.sat.python import cp_model
+
+    model, selectors = _coverage_cpsat_model(k=k, p=p, denominator=denominator)
+    solver = cp_model.CpSolver()
+    status = solver.solve(model)
+    if status != cp_model.INFEASIBLE:
+        raise ValueError(f"expected INFEASIBLE instance, got {solver.status_name(status)}")
+    literal_indices = solver.sufficient_assumptions_for_infeasibility()
+    core = tuple(sorted(selectors[index] for index in literal_indices if index in selectors))
+    if not core:
+        raise RuntimeError("CP-SAT returned INFEASIBLE without a coverage core")
+    return core
+
+
+def replay_coverage_core_cpsat(
+    *, k: int, p: int, denominator: int, core: tuple[int, ...]
+) -> bool:
+    from ortools.sat.python import cp_model
+
+    limit = ((k + 1) * p) // 2
+    if any(j < 1 or j > limit for j in core):
+        return False
+    model, _ = _coverage_cpsat_model(
+        k=k, p=p, denominator=denominator, core=core
+    )
+    solver = cp_model.CpSolver()
+    return solver.solve(model) == cp_model.INFEASIBLE
+
+
+def max_coverage_candidate(
+    *,
+    k: int,
+    p: int,
+    denominator: int,
+    prime: int,
+    minimum_nonmultiples: int,
+) -> tuple[tuple[int, ...], tuple[int, ...]]:
+    """Find an admissible-size selection minimizing uncovered test times."""
+    from pysat.card import CardEnc, EncType
+    from pysat.examples.rc2 import RC2
+    from pysat.formula import IDPool, WCNF
+
+    modulus = (k + 1) * p
+    limit = modulus // 2
+    candidates = tuple(v for v in range(1, limit + 1) if v % p != 0)
+    pool = IDPool()
+    variables = {v: pool.id(f"choose_{v}") for v in candidates}
+    formula = WCNF()
+    formula.extend(
+        CardEnc.equals(
+            lits=list(variables.values()),
+            bound=k,
+            vpool=pool,
+            encoding=EncType.seqcounter,
+        ).clauses
+    )
+    formula.extend(
+        CardEnc.atleast(
+            lits=[variables[v] for v in candidates if v % prime != 0],
+            bound=minimum_nonmultiples,
+            vpool=pool,
+            encoding=EncType.seqcounter,
+        ).clauses
+    )
+    for j in range(1, limit + 1):
+        formula.append(
+            [
+                variables[v]
+                for v in candidates
+                if covers(v=v, j=j, k=k, p=p, denominator=denominator)
+            ],
+            weight=1,
+        )
+
+    with RC2(formula) as solver:
+        model = solver.compute()
+    positive = {literal for literal in model if literal > 0}
+    selected = tuple(v for v in candidates if variables[v] in positive)
+    uncovered = tuple(
+        j
+        for j in range(1, limit + 1)
+        if not any(
+            covers(v=v, j=j, k=k, p=p, denominator=denominator)
+            for v in selected
+        )
+    )
+    return selected, uncovered
