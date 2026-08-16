@@ -239,9 +239,59 @@ H0  original LRC is open and correctly normalized
   4. Attempt to state the shared core as a symbolic counting or divisibility lemma.
   5. Export an independently checkable proof certificate for each finite UNSAT result.
 
+- Observed outcome:
+
+  - Named Z3 core extraction was calibrated on `k=3,p=7`; its returned core replays as UNSAT.
+  - At `k=8,p=47`, tracked Z3 did not finish in approximately one minute and returned `unknown` when interrupted.
+  - At `k=8,p=53`, tracked Z3 likewise did not finish within the trial budget.
+  - The lower-level CNF encoding was independently calibrated: Glucose emitted a 63-step DRUP proof for `k=3,p=7`, and `drat-trim` verified it against the exported 94-variable, 168-clause DIMACS instance using 716 resolution steps.
+  - Proof-producing Glucose and external CaDiCaL runs for `k=8,p=53` were each interrupted after roughly one minute. Both are recorded as `unknown`, not `UNSAT`; no partial proof is treated as evidence.
+
+- Verdict: open. Core extraction and independent certification work, but proof production at the `k=8` boundary exceeds the present interactive budget.
+- Credence: low.
+- Edge generated: H11 — reduce the CNF before requesting a proof, rather than asking a proof logger to rediscover every symmetry and dominated candidate.
+
+### H11 — Preprocessing exposes a small certificate-bearing obstruction
+
+- Mode: abduction from search-budget failure
+- Hypothesis: symmetry breaking, candidate domination, and clause subsumption reduce the `k=8` boundary instance enough for proof logging and core extraction to terminate cheaply.
+- Kill condition: independently checked preprocessing leaves proof generation at the same scale, or removes a known SAT witness from a calibration instance.
+- Trial:
+
+  1. Differentially validate every reduction against SAT witnesses for `p <= 43` and UNSAT verdicts for `p >= 47`.
+  2. Remove coverage clauses implied by stricter coverage clauses.
+  3. Identify candidates whose coverage mask and divisibility signature are dominated by another candidate.
+  4. Add one sound orbit-breaking constraint under multiplication by units modulo `D`, with a written lifting argument.
+  5. Export reduced DIMACS, obtain DRAT/LRAT, and verify it with an independent checker.
+
+- Observed outcome:
+
+  - Coverage-clause subsumption is sound but weak. At `p=53`, 238 time clauses reduce to 236 unique clauses and 235 inclusion-minimal clauses; the other tested moduli remove the same order of only three clauses.
+  - Candidate-independent gcd preprocessing is stronger. For `k=8,p=53`, the modulus is `D=9p`, whose prime divisors are `3` and `p`. Multiples of `p` are excluded from the candidate set, so selecting eight candidates automatically satisfies the `p` constraint. Only the prime `3` remains active.
+  - Removing that active `3` constraint makes the coverage problem SAT at `p=47,53,59`. Thus coverage itself does not cause the transition.
+  - Restoring the constraint makes the calibrated full instances UNSAT. Equivalently, every eight-element cover in these finite instances contains at least seven multiples of `3`; the main lemma forbids it because every omitted-speed gcd must remain `1`.
+  - Omitting the redundant `p` constraint did not make boundary proof production cheap; a `p=53` CaDiCaL run was interrupted after approximately 30 seconds and recorded as `unknown`.
+
+- Verdict: the broad preprocessing hypothesis is killed—generic subsumption barely reduces the instance—but it exposes the load-bearing arithmetic obstruction.
+- Credence: low.
+- Edge generated: H12 — prove directly that an eight-residue cover at sufficiently large `p` requires at least seven multiples of `3`.
+
+### H12 — Eight-residue coverage forces seven multiples of `3`
+
+- Mode: abduction from constraint ablation
+- Hypothesis: for sufficiently large primes `p`, if eight residues cover every `j in {1,...,floor(9p/2)}` at threshold `1/9`, then at most one selected residue is nonzero modulo `3`.
+- Kill condition: find a prime beyond the tested boundary and an eight-cover containing two residues nonzero modulo `3`, or derive a covering construction with two such residues for infinitely many `p`.
+- Trial:
+
+  1. Partition test times and candidate residues by their classes modulo `3`.
+  2. Write each coverage mask as three scaled interval systems.
+  3. Bound the union contributed by two nonmultiples of `3` plus six arbitrary candidates.
+  4. Identify the finite exceptional range where endpoint rounding can defeat the bound.
+  5. Compare the resulting threshold with the observed last SAT modulus `43` and first UNSAT modulus `47`.
+
 - Observed outcome: not run.
 - Verdict: open frontier.
-- Credence: low.
+- Credence: low, but more specific than H10: it names the exact arithmetic statement a general proof must establish.
 
 ## What the graph established
 
@@ -252,11 +302,13 @@ H0  original LRC is open and correctly normalized
 5. The strongest surviving branch is a modular set-cover certificate that converts coverage into divisibility.
 6. The printed set-cover threshold fails differential replay; `1/(k+1)` matches the lemma and published fixtures.
 7. At `k=8`, the corrected finite predicate is SAT through `p=43` and UNSAT for the completed tests `p=47,53,59,61,67`.
-8. The next falsifiable research node is H10. No general theorem or new Lonely Runner case was proved.
+8. Independent UNSAT certification works on the calibration case but exceeded the interactive budget at the `k=8` boundary.
+9. Constraint ablation isolates the boundary mechanism: coverage remains possible, but only with too many multiples of `3` to satisfy the minimal-counterexample gcd condition.
+10. The next falsifiable research node is H12. No general theorem or new Lonely Runner case was proved.
 
 ## Frontier
 
-- Primary: extract and compare UNSAT cores for the tested `k=8` moduli, then export proof certificates.
+- Primary: prove or kill H12 by decomposing coverage masks modulo `3`.
 - Secondary: extend the prime scan beyond `67`, with explicit timeouts recorded as `unknown`, never as `UNSAT`.
 - Secondary: return to H2 only with an overlap inequality that explicitly depends on gcd/ratio data and therefore respects H4.
 - Pruned: first-moment-only proofs, independently shifted formulations, and embeddings that retain only interval lengths.

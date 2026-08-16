@@ -126,6 +126,18 @@ def _prime_divisors(value: int) -> tuple[int, ...]:
     return tuple(factors)
 
 
+def active_gcd_primes(*, k: int, p: int) -> tuple[int, ...]:
+    """Prime gcd constraints not implied by selecting exactly k candidates."""
+    modulus = (k + 1) * p
+    limit = modulus // 2
+    candidates = tuple(v for v in range(1, limit + 1) if v % p != 0)
+    return tuple(
+        prime
+        for prime in _prime_divisors(modulus)
+        if sum(v % prime == 0 for v in candidates) >= k - 1
+    )
+
+
 def find_bad_cover_smt(*, k: int, p: int, denominator: int) -> tuple[int, ...] | None:
     """Solve the finite cover instance with Z3; return a SAT witness or None."""
     from z3 import Bool, If, Or, Solver, Sum, sat, unsat
@@ -148,7 +160,7 @@ def find_bad_cover_smt(*, k: int, p: int, denominator: int) -> tuple[int, ...] |
 
     # gcd(D, all selected speeds except any one) = 1 iff, for each prime
     # q dividing D, at least two selected speeds are not divisible by q.
-    for prime in _prime_divisors(modulus):
+    for prime in active_gcd_primes(k=k, p=p):
         solver.add(
             Sum(
                 [
@@ -188,7 +200,7 @@ def _named_smt_constraints(*, k: int, p: int, denominator: int):
                 if covers(v=v, j=j, k=k, p=p, denominator=denominator)
             ]
         )
-    for prime in _prime_divisors(modulus):
+    for prime in active_gcd_primes(k=k, p=p):
         constraints[f"gcd_prime_{prime}"] = (
             Sum(
                 [
@@ -231,11 +243,9 @@ def replay_unsat_core(
     return solver.check() == unsat
 
 
-def find_bad_cover_sat(*, k: int, p: int, denominator: int) -> tuple[int, ...] | None:
-    """Solve the finite cover as CNF with CaDiCaL; return a SAT witness."""
+def _build_sat_cnf(*, k: int, p: int, denominator: int):
     from pysat.card import CardEnc, EncType
     from pysat.formula import CNF, IDPool
-    from pysat.solvers import Solver
 
     modulus = (k + 1) * p
     limit = modulus // 2
@@ -259,7 +269,7 @@ def find_bad_cover_sat(*, k: int, p: int, denominator: int) -> tuple[int, ...] |
                 if covers(v=v, j=j, k=k, p=p, denominator=denominator)
             ]
         )
-    for prime in _prime_divisors(modulus):
+    for prime in active_gcd_primes(k=k, p=p):
         cnf.extend(
             CardEnc.atleast(
                 lits=[variables[v] for v in candidates if v % prime != 0],
@@ -269,8 +279,49 @@ def find_bad_cover_sat(*, k: int, p: int, denominator: int) -> tuple[int, ...] |
             ).clauses
         )
 
+    return candidates, variables, cnf
+
+
+def find_bad_cover_sat(*, k: int, p: int, denominator: int) -> tuple[int, ...] | None:
+    """Solve the finite cover as CNF with CaDiCaL; return a SAT witness."""
+    from pysat.solvers import Solver
+
+    candidates, variables, cnf = _build_sat_cnf(
+        k=k, p=p, denominator=denominator
+    )
+
     with Solver(name="cadical195", bootstrap_with=cnf.clauses) as solver:
         if not solver.solve():
             return None
         positive = {literal for literal in solver.get_model() if literal > 0}
     return tuple(v for v in candidates if variables[v] in positive)
+
+
+def export_unsat_certificate(
+    *, k: int, p: int, denominator: int, cnf_path, proof_path
+) -> dict[str, int | str]:
+    """Write DIMACS CNF plus a DRUP proof emitted by Glucose 4."""
+    from pathlib import Path
+
+    from pysat.solvers import Solver
+
+    _, _, cnf = _build_sat_cnf(k=k, p=p, denominator=denominator)
+    with Solver(
+        name="glucose4", bootstrap_with=cnf.clauses, with_proof=True
+    ) as solver:
+        if solver.solve():
+            raise ValueError("cannot export an UNSAT certificate for a SAT instance")
+        proof = solver.get_proof() or []
+    if not proof:
+        raise RuntimeError("solver returned UNSAT without a proof trace")
+
+    cnf_path = Path(cnf_path)
+    proof_path = Path(proof_path)
+    cnf.to_file(str(cnf_path))
+    proof_path.write_text("\n".join(proof) + "\n")
+    return {
+        "status": "UNSAT",
+        "variables": cnf.nv,
+        "clauses": len(cnf.clauses),
+        "proof_steps": len(proof),
+    }

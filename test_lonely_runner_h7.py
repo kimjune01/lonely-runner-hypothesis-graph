@@ -61,3 +61,23 @@ def test_cadical_search_matches_calibration_cases():
     assert result is not None
     assert lrc.gcd_constraint(result, k=6, p=17)
     assert lrc.covers_universe(result, k=6, p=17, denominator=7)
+
+
+def test_exports_dimacs_and_drup_certificate(tmp_path):
+    cnf_path = tmp_path / "k3-p7.cnf"
+    proof_path = tmp_path / "k3-p7.drup"
+    metadata = lrc.export_unsat_certificate(
+        k=3,
+        p=7,
+        denominator=4,
+        cnf_path=cnf_path,
+        proof_path=proof_path,
+    )
+    assert cnf_path.read_text().startswith("p cnf ")
+    assert proof_path.read_text().rstrip().endswith("0")
+    assert metadata["status"] == "UNSAT"
+    assert metadata["proof_steps"] > 0
+
+
+def test_only_three_is_a_nonredundant_gcd_prime_at_k8_p53():
+    assert lrc.active_gcd_primes(k=8, p=53) == (3,)
