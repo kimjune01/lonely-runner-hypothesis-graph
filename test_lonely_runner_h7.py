@@ -222,3 +222,7 @@ def test_local_phase_cover_requires_three_classes_with_two_unit_speeds():
 
 def test_two_unit_fiber_obstruction_is_unsat():
     assert lrc.two_unit_fiber_obstruction_is_unsat(p=47)
+
+
+def test_three_unit_fiber_obstruction_is_unsat():
+    assert lrc.three_unit_fiber_obstruction_is_unsat(p=47)

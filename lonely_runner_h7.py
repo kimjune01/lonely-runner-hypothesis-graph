@@ -146,18 +146,84 @@ def two_unit_fiber_obstruction_is_unsat(*, p: int) -> bool:
         return not solver.solve()
 
 
-def export_two_unit_fiber_certificate(*, p: int, cnf_path, proof_path):
-    """Export the reduced two-unit obstruction and a DRUP certificate."""
+def _build_three_unit_fiber_cnf(*, p: int):
+    """Exact normalized k=8 branch with three units plus a phase lemma."""
+    from pysat.card import CardEnc, EncType
+    from pysat.formula import CNF, IDPool
+
+    k = 8
+    modulus = (k + 1) * p
+    limit = modulus // 2
+    candidates = tuple(v for v in range(2, limit + 1) if v % p != 0)
+    units = tuple(v for v in candidates if gcd(v, 9) == 1)
+    gcd3 = tuple(v for v in candidates if gcd(v, 9) == 3)
+    gcd9 = tuple(v for v in candidates if gcd(v, 9) == 9)
+    nonunits = (*gcd3, *gcd9)
+    pool = IDPool()
+    variables = {v: pool.id(f"choose_{v}") for v in candidates}
+    cnf = CNF()
+    # Speed 1 is already selected by unit normalization.
+    cnf.extend(
+        CardEnc.equals(
+            lits=[variables[v] for v in units],
+            bound=2,
+            vpool=pool,
+            encoding=EncType.seqcounter,
+        ).clauses
+    )
+    cnf.extend(
+        CardEnc.equals(
+            lits=[variables[v] for v in nonunits],
+            bound=5,
+            vpool=pool,
+            encoding=EncType.seqcounter,
+        ).clauses
+    )
+    cnf.append([variables[v] for v in gcd9])
+    for j in range(p, limit + 1):
+        cnf.append(
+            [
+                variables[v]
+                for v in candidates
+                if covers(v=v, j=j, k=k, p=p, denominator=k + 1)
+            ]
+        )
+    # Speed 1 covers phases 0 and 8 on each nonzero fiber. With only two
+    # other unit edges, every fiber not covered wholesale needs phase class 1.
+    for residue in range(1, p):
+        whole_fiber = [
+            variables[v]
+            for v in gcd9
+            if coverage_fiber(v=v, residue=residue, k=k, p=p)
+        ]
+        phase_one = []
+        for v in gcd3:
+            fiber = coverage_fiber(v=v, residue=residue, k=k, p=p)
+            if fiber and fiber[0] % 3 == 1:
+                phase_one.append(variables[v])
+        cnf.append(whole_fiber + phase_one)
+    return cnf
+
+
+def three_unit_fiber_obstruction_is_unsat(*, p: int) -> bool:
+    """Check the exact normalized three-unit branch plus its phase lemma."""
+    from pysat.solvers import Solver
+
+    cnf = _build_three_unit_fiber_cnf(p=p)
+    with Solver(name="cadical195", bootstrap_with=cnf.clauses) as solver:
+        return not solver.solve()
+
+
+def _export_cnf_certificate(*, cnf, cnf_path, proof_path):
     from pathlib import Path
 
     from pysat.solvers import Solver
 
-    cnf = _build_two_unit_fiber_cnf(p=p)
     with Solver(
         name="glucose4", bootstrap_with=cnf.clauses, with_proof=True
     ) as solver:
         if solver.solve():
-            raise ValueError("two-unit fiber obstruction is SAT")
+            raise ValueError("cannot export a certificate for a SAT instance")
         proof = solver.get_proof() or []
     if not proof:
         raise RuntimeError("solver returned UNSAT without a proof trace")
@@ -171,6 +237,22 @@ def export_two_unit_fiber_certificate(*, p: int, cnf_path, proof_path):
         "clauses": len(cnf.clauses),
         "proof_steps": len(proof),
     }
+
+
+def export_two_unit_fiber_certificate(*, p: int, cnf_path, proof_path):
+    """Export the reduced two-unit obstruction and a DRUP certificate."""
+    cnf = _build_two_unit_fiber_cnf(p=p)
+    return _export_cnf_certificate(
+        cnf=cnf, cnf_path=cnf_path, proof_path=proof_path
+    )
+
+
+def export_three_unit_fiber_certificate(*, p: int, cnf_path, proof_path):
+    """Export the exact normalized three-unit branch and a DRUP proof."""
+    cnf = _build_three_unit_fiber_cnf(p=p)
+    return _export_cnf_certificate(
+        cnf=cnf, cnf_path=cnf_path, proof_path=proof_path
+    )
 
 
 def max_fourier_positivity_ratio(

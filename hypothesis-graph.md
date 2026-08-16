@@ -539,8 +539,13 @@ H0  original LRC is open and correctly normalized
   - With speed `1` normalized and exact phase coverage retained, three-second profile splits already return `INFEASIBLE` for `(u,t,h)=(2,5,1),(2,2,4),(2,1,5),(2,0,6),(3,0,5)`. All other completed bounded runs returned `UNKNOWN`; these are search directions, not proof claims.
   - The whole `u=2` branch can be consolidated without fixing `(t,h)`: select exactly six nonunit speeds, require at least one `g=9` speed, and on each nonzero fiber require either whole-fiber coverage or an active `g=3` speed in each of the three phase classes. The resulting necessary CNF has 825 variables and 1,651 clauses.
   - Glucose 4 proved that consolidated CNF `UNSAT` in 330,722 DRUP steps. `drat-trim` independently returned `s VERIFIED`; the compressed CNF, proof, checksums, semantic scope, and replay command are stored under `artifacts/k8-p47-two-unit-fiber.*`. This is a certificate for the exact-two-unit branch only, not for the full `k=8` instance.
+  - After normalizing one of three unit speeds to `1`, its edge is `{0,8}` on every nonzero fiber. If no `g=9` speed covers that fiber wholesale, phase class `1` must be active among the `g=3` speeds: the two remaining unit edges otherwise hit at most two of the three class-`1` points.
+  - Only 174 five-nonunit selections satisfy this necessary phase-`1` condition, and an exhaustive pair check shows that none can be completed by two more unit speeds. The exact augmented CNF has 1,386 variables and 2,572 clauses. Glucose 4 emitted a 410,310-step DRUP proof, independently accepted by `drat-trim`; it and its replay metadata are stored as `artifacts/k8-p47-three-unit-fiber.*`.
+  - For `u=4`, the weaker local requirement is that at least one `g=3` phase class be active whenever no `g=9` speed covers the fiber wholesale. Exactly 208,104 four-nonunit selections satisfy this condition. An exhaustive indexed-pair check found that none can be completed by three further unit speeds after normalization to speed `1`; the smallest residual before those three speeds has 40 points. Verification grade: replay, not independent certificate.
+  - For `u=5`, all 37,214 nonunit triples containing at least one `g=9` speed were exhaustively tested. None can be completed by four further unit speeds after speed `1`; the smallest residual before completion has 63 points. Verification grade: replay, not independent certificate.
+  - Two attempted checks of `u=6`—recursive unit completion and incremental SAT over 1,311 nonunit pairs—were interrupted after poor scaling. Fixing a selected `g=9` speed to `9` by unit symmetry also left the full and `u=7` CNFs unresolved in bounded runs. Every interrupted result is `UNKNOWN`.
 
-- Verdict: survives, with the entire `u=2` profile now rigorously eliminated. Profiles with at least three unit speeds remain open.
+- Verdict: survives. The `u=2` and `u=3` profiles have independent DRUP certificates; `u=4` and `u=5` have exhaustive replay checks. The `u=6` and `u=7` profiles remain open.
 - Credence: medium.
 
 ## What the graph established
@@ -563,11 +568,13 @@ H0  original LRC is open and correctly normalized
 16. The first boundary is tight. A legal eight-speed selection covers `210/211` test times, and unit symmetry normalizes its sole gap to `1`.
 17. Normalized one-gap witnesses are isolated under one-speed exchanges, but their divisibility profiles differ.
 18. Modulo-`p` fibers give an exact new representation: unit speeds are oriented two-point edges on `Z/9`, `g=3` speeds are three-point phase classes, and `g=9` speeds are all-or-nothing.
-19. The next falsifiable node is H20: use these phase rules to eliminate every divisibility profile. No general theorem or new Lonely Runner case was proved.
+19. Fiber phases plus exact completion eliminate `u=2,3,4,5`; the first two branches are independently certified, while the latter two are currently replay-grade computations.
+20. The next falsifiable node is H20's high-unit tail: eliminate `u=6,7` and upgrade the `u=4,5` replays to certificates. No general theorem or new Lonely Runner case was proved.
 
 ## Frontier
 
-- Primary: prove or kill H20 by translating each finite `Z/9` phase-cover pattern into a global constraint over `Z/pZ`.
+- Primary: finish H20 by replacing the failed recursive search for `u=6,7` with a bounded-memory meet-in-the-middle or proof-producing split.
+- Secondary: export independently checked certificates for the replay-grade `u=4,5` branches.
 - Secondary: retain H19's one-gap exchange fixtures as boundary tests for any proposed H20 lemma.
 - Secondary: extract a rational dual certificate for the H18 minimax value `40/23`; until then it remains a solver verdict.
 - Secondary: extend the prime scan beyond `67`, with explicit timeouts recorded as `unknown`, never as `UNSAT`.

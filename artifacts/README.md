@@ -32,3 +32,32 @@ SHA-256 checksums:
 The uncompressed instance has 825 variables and 1,651 clauses. Glucose 4
 emitted 330,722 proof steps. `drat-trim` independently verified the proof on
 2026-08-16.
+
+## `k8-p47-three-unit-fiber`
+
+This certificate eliminates the branch with exactly three speeds coprime to
+`9`. Unit symmetry fixes one of them to speed `1`; the CNF selects two other
+unit speeds and five nonunit speeds and enforces exact coverage.
+
+It also includes a proved necessary fiber clause: on each nonzero fiber,
+either a selected `g=9` speed covers the whole fiber or an active `g=3` speed
+occupies phase class `1`. Speed `1` covers phases `{0,8}`; if class `1` were
+absent, the other two unit edges could cover at most two of its three points.
+
+```bash
+gzip -dc artifacts/k8-p47-three-unit-fiber.cnf.gz > /tmp/k8-p47-three-unit-fiber.cnf
+gzip -dc artifacts/k8-p47-three-unit-fiber.drup.gz > /tmp/k8-p47-three-unit-fiber.drup
+drat-trim /tmp/k8-p47-three-unit-fiber.cnf /tmp/k8-p47-three-unit-fiber.drup
+```
+
+Expected result: `s VERIFIED`.
+
+```text
+f400cf4904c496441f2e846625b12523935a1ef5e6dcc85bf91cea2c95cbafeb  k8-p47-three-unit-fiber.cnf.gz
+4c4bf3d192b85ef1bdbd732b34056eda0f802e27fb3ae4d13d0b6658f6f978be  k8-p47-three-unit-fiber.drup.gz
+```
+
+The uncompressed instance has 1,386 variables and 2,572 clauses. Glucose 4
+emitted 410,310 proof steps. `drat-trim` independently verified the proof on
+2026-08-16. This certificate still covers only one divisibility-profile
+branch, not the full finite instance.
