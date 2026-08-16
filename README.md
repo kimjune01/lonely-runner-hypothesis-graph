@@ -1,6 +1,6 @@
-# Lonely Runner experiment
+# Lonely Runner proof audit
 
-A hypothesis-graph inquiry into the modular set-cover obstruction used in recent work on the Lonely Runner Conjecture.
+A hypothesis-graph inquiry into the modular set-cover obstruction used in recent work on the Lonely Runner Conjecture. The initially selected nine-runner case was already solved in two independent 2025 preprints. This repository now records an independent replay of Trakulthongchai's published nine-runner sieve; it makes no novelty claim.
 
 ## Replay
 
@@ -8,7 +8,7 @@ A hypothesis-graph inquiry into the modular set-cover obstruction used in recent
 uv run --with pytest --with z3-solver --with python-sat --with ortools pytest -q
 ```
 
-The project contains exploratory code, finite certificates, and killed hypotheses. It does not claim a proof of the general conjecture or a new bounded-runner case.
+The project contains exploratory code, finite certificates, killed hypotheses, and a full replay receipt for the known nine-runner theorem. It does not claim a proof of the general conjecture or a new bounded-runner case.
 
 The `k=8,p=47` finite obstruction is closed across every gcd profile. Under
 Rosenfeld's finite reduction, this proves that `47` divides the product of the
@@ -29,3 +29,9 @@ clang++ -O3 -std=c++20 -Wall -Wextra -pedantic \
   verify_high_unit_branches.cpp -o /tmp/verify_high_unit_branches
 for branch in 4 5 6 7; do /tmp/verify_high_unit_branches 47 "$branch"; done
 ```
+
+The complete published nine-runner sieve audit is summarized in
+[`artifacts/nine-runner-sieve-audit.md`](artifacts/nine-runner-sieve-audit.md).
+Its 39 exact intermediate counts are in
+[`artifacts/nine-runner-sieve-replay.tsv`](artifacts/nine-runner-sieve-replay.tsv)
+and are checked, together with the final product inequality, by the test suite.

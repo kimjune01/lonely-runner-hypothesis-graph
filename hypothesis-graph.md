@@ -1,7 +1,7 @@
 # Lonely Runner Conjecture — hypothesis graph
 
 Date: 2026-08-16  
-Status: open inquiry; no proof or new mathematical result claimed  
+Status: nine-runner case independently replayed; general conjecture remains open; no novelty claimed
 Method: [The Proof Manual](/the-proof-manual) recorded using the replay contract from [The Hypothesis Graph](/the-hypothesis-graph-semantic-memory-methodeutics)
 
 ## Target
@@ -21,12 +21,16 @@ Sources:
 - Malikiosis, Santos, and Schymura, “Linearly-exponential checking is enough for the Lonely Runner Conjecture and some of its variants”: https://doi.org/10.1017/fms.2025.10107
 - Perarnau and Serra, “The Lonely Runner Conjecture turns 60”: https://arxiv.org/abs/2409.20160
 - Rosenfeld, “The lonely runner conjecture holds for eight runners”: https://arxiv.org/abs/2509.14111
+- Trakulthongchai, “Nine and ten lonely runners”: https://arxiv.org/abs/2511.22427
+- Rosenfeld, “The lonely runner conjecture holds for nine runners”: https://arxiv.org/abs/2512.01912
+- Sungkawichai and Trakulthongchai, “Eleven, twelve, and thirteen lonely runners”: https://arxiv.org/abs/2604.23906
 - Blanco, Criado, and Santos, “Coloopless zonotopes and counterexamples to the Shifted Lonely Runner Conjecture”: https://arxiv.org/abs/2603.24784
 
 ## Graph
 
 ```text
-H0  original LRC is open and correctly normalized
+H0  selected nine-runner target is open
+ |   KILLED: two independent 2025 proofs were found on dated recheck
  |
  +--H1  first-moment / union-bound proof reaches 1/(n+1)
  |    KILLED: it stops at 1/(2n)
@@ -55,20 +59,25 @@ H0  original LRC is open and correctly normalized
                              |
                              +--H9  corrected finite predicate becomes UNSAT
                                      for large enough p at k=8
-                                     WITNESSED for p=47,53,59,61,67 only
+                                     WITNESSED through p=107 on the H21 target list
+                                        |
+                                        +--H22  published 1→3→9 sieve closes
+                                                the complete nine-runner proof
+                                                REPLAYED for all 39 primes
 ```
 
 ## Nodes
 
-### H0 — The selected target is genuinely open
+### H0 — The selected nine-runner target is genuinely open
 
 - Mode: induction from current literature
-- Hypothesis: the general Lonely Runner Conjecture remains unresolved as of 2026-08-16, while fixed small cases and finite-checking reductions are known.
-- Kill condition: a dated primary source proves or disproves the general formulation.
-- Trial: inspect the current survey and the 2025–2026 papers listed under Sources; compare their theorem statements with the target above.
-- Observed outcome: the survey calls the general problem open; subsequent papers prove bounded-runner cases, finite reduction, or disprove shifted variants, not the original general conjecture.
-- Verdict: witnessed at artifact-replay grade.
-- Credence: high, capped below certainty because literature status can change.
+- Hypothesis: the selected next bounded case—nine runners—remains unresolved as of 2026-08-16.
+- Kill condition: a dated primary source proves the nine-runner case.
+- Trial: re-run the literature-status search against 2025–2026 primary sources rather than relying on the older survey or the initial problem-selection pass.
+- Observed outcome: killed. Trakulthongchai announced a computer-assisted proof for nine and ten runners in November 2025; Rosenfeld independently announced a different nine-runner proof in December 2025. Revised 2026 versions state the results explicitly. The general conjecture remains open, but the selected bounded target does not.
+- Verdict: killed at primary-source grade.
+- Credence: high.
+- Edge generated: H22—replace attempted novelty with reconstruction and independent replay of the known theorem.
 
 ### H1 — A first-moment argument proves the conjectured threshold
 
@@ -158,9 +167,9 @@ H0  original LRC is open and correctly normalized
   4. Test candidate strengthenings: prime powers, at least two speeds divisible by `p`, or interacting moduli.
   5. Compare the certified divisor-product lower bound against the published upper bound on a minimal counterexample.
 
-- Observed outcome: not run. This is the surviving frontier, not a result.
-- Verdict: open.
-- Credence: low.
+- Observed outcome: witnessed for fixed bounded cases, not uniformly. Trakulthongchai's lifting sieve closes `n=8,9`, Rosenfeld independently closes `n=8`, and Sungkawichai–Trakulthongchai extend the computational framework through `n=12`. No uniform-in-`n` theorem follows.
+- Verdict: open as a general mechanism; proved for the cited bounded cases.
+- Credence: high for the bounded results, low for uniform extrapolation.
 
 ### H8 — The printed `1/(k-1)` coverage threshold is the intended predicate
 
@@ -588,13 +597,47 @@ H0  original LRC is open and correctly normalized
 - Observed outcome:
 
   - `p=47` is now closed at all unit profiles. By the corrected finite reformulation, this proves that `47` divides the product of the eight relative speeds in any hypothetical nine-runner counterexample.
-  - The low-unit CNFs and parameterized high-unit verifier now close the first thirteen target primes `47,53,59,61,67,71,73,79,83,89,97,101,103`. Exact branch counts are recorded in `artifacts/h21-prime-replay.tsv`.
+  - The low-unit CNFs and parameterized high-unit verifier now close the first fourteen target primes `47,53,59,61,67,71,73,79,83,89,97,101,103,107`. Exact branch counts are recorded in `artifacts/h21-prime-replay.tsv`.
   - Parameterization exposed and repaired a verifier-width bug: the first version used three 64-bit words for candidate coverer sets, sufficient through `p=61` but not beyond. All `p>=67` high-unit results were withdrawn and recomputed with the full 17-word width. Address/undefined-behavior sanitizers replay the corrected `p=67,u=4` branch without error.
   - A Claude/Sonnet review proposed a finite carry automaton on the nine-phase masks. The coarse relaxation is killed: locally covered edge configurations admit self-loops when carry choices are independent. A refinement would have to retain mechanical-word carry feasibility. It remains finite, but is deferred unless it avoids an open prime-distribution problem.
   - The same review recommended proof-producing SAT plus an independent formula regenerator. This matches the surviving certificate route; rerunning the same generator and solver is not counted as independent verification.
 
-- Verdict: open frontier. Seven of 37 sufficient prime obstructions are closed at replay level; only the `p=47` low-unit branches currently have archived independent DRUP proofs.
+- Verdict: superseded as the route to the selected target. Fourteen of 37 proposed obstructions were closed by the local profile split, but the published lifting sieve proves a stronger 39-prime statement and completes the nine-runner case.
 - Credence: medium that the finite computations extend, low that brute force alone is the right final proof.
+
+### H22 — The published lifting sieve proves the nine-runner case
+
+- Mode: reconstruction, independent replay, and exact arithmetic
+- Hypothesis: Trakulthongchai's `1 -> 3 -> 9` lifting sieve proves `I(8,9,p)=empty` for a prime set whose product exceeds the finite-checking bound, thereby excluding every nine-runner counterexample.
+- Kill condition: any target prime has a nonempty final improper set; any local intermediate cardinality differs from the published receipt; the prime list is not pairwise coprime; the forced product does not exceed the bound; or a lifting/divisibility implication fails semantic inspection.
+- Trial:
+
+  1. Check Lemmas 5 and 7 and the proof of Theorem 2 in Trakulthongchai's 2026 revision.
+  2. Pin public verifier commit `e17c415b807258806cd9192a17e9a51e20455a75` and source digest `25a417a...d200d0a5`.
+  3. Run the unmodified verifier for all 39 primes `47,...,241`.
+  4. Compare every level-1, level-3, and level-9 cardinality against the authors' receipt.
+  5. Verify primality and the final product inequality with exact integers.
+- Observed outcome:
+
+  - All 39 runs completed successfully. Every intermediate cardinality matches the published receipt, and every final level-9 set has size zero. The exact rows are in `artifacts/nine-runner-sieve-replay.tsv`.
+  - The forced prime product is
+
+    ```text
+    19570880530831227159611114469289180443865177656785618176063821114999202895619850591,
+    ```
+
+    while the minimal-counterexample bound is
+
+    ```text
+    (36^7 / 8)^8
+    = 84765698874878218361067180729674171436543015292348049288994557831877912686493696.
+    ```
+
+    The former is about `230.882` times larger.
+  - Rosenfeld's independent proof supplies a different corroborating route using prime powers and extra divisibility conditions.
+- Verdict: the nine-runner theorem is proved in the cited literature and completely reproduced here at semantic-match plus independent-replay grade. This is not a new theorem and not a proof of the general conjecture.
+- Credence: high. Remaining computational trust is common-mode source/compiler error because the sieve does not emit formal proof certificates.
+- Artifact: `artifacts/nine-runner-sieve-audit.md`.
 
 ## What the graph established
 
@@ -604,7 +647,7 @@ H0  original LRC is open and correctly normalized
 4. A generic covering proof cannot work alone if it forgets that arithmetic.
 5. The strongest surviving branch is a modular set-cover certificate that converts coverage into divisibility.
 6. The printed set-cover threshold fails differential replay; `1/(k+1)` matches the lemma and published fixtures.
-7. At `k=8`, the corrected finite predicate is SAT through `p=43` and UNSAT for the completed tests `p=47,53,59,61,67`.
+7. At `k=8`, the corrected finite predicate is SAT through `p=43`; the local H21 profile split closed the first fourteen target primes from `47` through `107`.
 8. Independent UNSAT certification works on the calibration case but exceeded the interactive budget at the `k=8` boundary.
 9. Constraint ablation isolates the boundary mechanism: coverage remains possible, but only with too many multiples of `3` to satisfy the minimal-counterexample gcd condition.
 10. The relaxed SAT branch is explained by the canonical Dirichlet cover `{9,18,...,72}`; admissibility demands at least two exchanges out of this divisible lattice.
@@ -618,14 +661,16 @@ H0  original LRC is open and correctly normalized
 18. Modulo-`p` fibers give an exact new representation: unit speeds are oriented two-point edges on `Z/9`, `g=3` speeds are three-point phase classes, and `g=9` speeds are all-or-nothing.
 19. Fiber phases plus exact completion eliminate every possible unit-count profile at `k=8,p=47`; the first two branches are independently certified and the remaining four replay in a bounded-memory verifier.
 20. This finite result proves one prime divisor, `47`, for any hypothetical nine-runner counterexample. It does not alone prove the nine-runner case.
-21. Thirty-seven primes from `47` through `233` would cross the known product bound. H21 is the next falsifiable node. No general theorem or new Lonely Runner case was proved.
+21. The local 37-prime H21 route was overtaken by current literature before completion.
+22. Trakulthongchai's published 39-prime lifting sieve was replayed in full: every final improper set is empty and the forced divisor product exceeds the counterexample bound by a factor greater than 230. The known nine-runner theorem is thereby reconstructed, not newly discovered.
 
 ## Frontier
 
-- Primary: parameterize H20 by `p` and prove or kill H21 across the 37-prime target, looking first for a symbolic large-`p` argument.
-- Secondary: export independently checked certificates for the replay-grade `u=4,...,7` branches at `p=47`.
+- Primary: for the general conjecture, study whether the published lifting and polynomial sieves admit a uniform argument; do not present this as part of the completed nine-runner result.
+- Secondary: if stronger auditability is desired, make the published sieve proof-producing or independently reimplement its three levels.
+- Historical: the local H21 37-prime scan and p=47 branch certificates remain useful cross-checks, but no longer block the nine-runner theorem.
 - Secondary: retain H19's one-gap exchange fixtures as boundary tests for any proposed H20 lemma.
 - Secondary: extract a rational dual certificate for the H18 minimax value `40/23`; until then it remains a solver verdict.
-- Secondary: extend the prime scan beyond `67`, with explicit timeouts recorded as `unknown`, never as `UNSAT`.
+- Secondary: extend the prime scan beyond `107`, with explicit timeouts recorded as `unknown`, never as `UNSAT`.
 - Secondary: return to H2 only with an overlap inequality that explicitly depends on gcd/ratio data and therefore respects H4.
 - Pruned: first-moment-only proofs, independently shifted formulations, and embeddings that retain only interval lengths.

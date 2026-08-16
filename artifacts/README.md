@@ -101,3 +101,16 @@ The verifier is parameterized for `p <= 233`. Recorded H21 runs are in
 used only three words for the candidate-coverer packing mask; that was enough
 through `p=61` but not beyond. All rows from `p=67` onward in the table were
 withdrawn and rerun after changing that mask to the full compile-time width.
+
+## Published nine-runner sieve replay
+
+[`nine-runner-sieve-audit.md`](nine-runner-sieve-audit.md) records a complete
+2026-08-16 replay of Trakulthongchai's independently published `1 -> 3 -> 9`
+lifting sieve for all 39 primes in the nine-runner proof. The durable receipt
+[`nine-runner-sieve-replay.tsv`](nine-runner-sieve-replay.tsv) records the
+three intermediate set sizes; every final `U` size is zero and every row
+matches the authors' receipt.
+
+This is an independent execution of pinned source, not an independently
+generated formal certificate. Its semantic scope, provenance, exact integer
+contradiction, and remaining trust assumptions are documented in the audit.

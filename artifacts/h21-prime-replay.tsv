@@ -12,3 +12,4 @@ p	u2_fiber_cnf	u3_augmented_cnf	u4_checked	u5_checked	u6_checked	u7_checked	stat
 97	UNSAT	UNSAT	1959168	344464	5736	48	closed
 101	UNSAT	UNSAT	2167800	389600	6225	50	closed
 103	UNSAT	UNSAT	2309484	413576	6477	51	closed
+107	UNSAT	UNSAT	2404928	464439	6996	53	closed

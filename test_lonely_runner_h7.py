@@ -1,4 +1,6 @@
 import importlib.util
+import csv
+import math
 import shutil
 import subprocess
 from pathlib import Path
@@ -251,3 +253,25 @@ def test_high_unit_exhaustive_verifier(tmp_path):
             text=True,
         )
         assert f"VERIFIED branch={branch} checked={count}" in result.stdout
+
+
+def test_published_nine_runner_sieve_receipt_crosses_product_bound():
+    receipt = Path(__file__).with_name("artifacts") / "nine-runner-sieve-replay.tsv"
+    with receipt.open(newline="") as stream:
+        rows = list(csv.DictReader(stream, delimiter="\t"))
+
+    primes = tuple(int(row["p"]) for row in rows)
+    assert len(primes) == 39
+    assert primes[:3] == (47, 53, 59)
+    assert primes[-3:] == (233, 239, 241)
+    assert all(int(row["u_size"]) == 0 for row in rows)
+    assert all(row["matches_published"] == "yes" for row in rows)
+    assert all(
+        p > 1 and all(p % divisor for divisor in range(2, math.isqrt(p) + 1))
+        for p in primes
+    )
+
+    product = math.prod(primes)
+    bound_numerator = 36**56
+    bound_denominator = 8**8
+    assert product * bound_denominator > bound_numerator
