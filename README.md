@@ -11,3 +11,7 @@ uv run --with pytest --with z3-solver --with python-sat --with ortools pytest -q
 The project contains exploratory code, finite certificates, and killed hypotheses. It does not claim a proof of the general conjecture or a new bounded-runner case.
 
 UNSAT certificate export uses Glucose through `python-sat`. The resulting DIMACS and DRUP files should be checked independently with [`drat-trim`](https://github.com/marijnheule/drat-trim); solver output alone is not treated as a certificate.
+
+See [`artifacts/README.md`](artifacts/README.md) for each certificate's exact
+semantic scope and replay command. In particular, the `k8-p47-two-unit-fiber`
+artifact certifies one divisibility-profile branch, not the full `k=8` case.

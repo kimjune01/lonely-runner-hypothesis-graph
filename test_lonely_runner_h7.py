@@ -211,3 +211,14 @@ def test_mod_p_fibers_reduce_to_small_phase_patterns():
                 assert len({phase % 3 for phase in fiber}) <= 1
             elif common == 9:
                 assert len(fiber) in (0, 9)
+
+
+def test_local_phase_cover_requires_three_classes_with_two_unit_speeds():
+    assert lrc.minimum_g3_phase_classes(unit_speeds=2) == 3
+    assert lrc.minimum_g3_phase_classes(unit_speeds=3) == 1
+    assert lrc.minimum_g3_phase_classes(unit_speeds=4) == 1
+    assert lrc.minimum_g3_phase_classes(unit_speeds=5) == 0
+
+
+def test_two_unit_fiber_obstruction_is_unsat():
+    assert lrc.two_unit_fiber_obstruction_is_unsat(p=47)

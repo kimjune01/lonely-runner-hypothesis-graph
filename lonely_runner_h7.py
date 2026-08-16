@@ -86,6 +86,93 @@ def coverage_fiber(*, v: int, residue: int, k: int, p: int) -> tuple[int, ...]:
     )
 
 
+def minimum_g3_phase_classes(*, unit_speeds: int) -> int:
+    """Necessary distinct three-point classes for a nine-phase local cover."""
+    if unit_speeds < 0:
+        raise ValueError("unit_speeds must be nonnegative")
+    if unit_speeds <= 2:
+        return 3
+    if unit_speeds <= 4:
+        return 1
+    return 0
+
+
+def _build_two_unit_fiber_cnf(*, p: int):
+    """Necessary fiber constraints for a k=8 cover with exactly two units."""
+    from pysat.card import CardEnc, EncType
+    from pysat.formula import CNF, IDPool
+
+    k = 8
+    modulus = (k + 1) * p
+    limit = modulus // 2
+    candidates = tuple(v for v in range(1, limit + 1) if v % p != 0)
+    gcd3 = tuple(v for v in candidates if gcd(v, 9) == 3)
+    gcd9 = tuple(v for v in candidates if gcd(v, 9) == 9)
+    pool = IDPool()
+    variables = {v: pool.id(f"choose_{v}") for v in (*gcd3, *gcd9)}
+    cnf = CNF()
+    cnf.extend(
+        CardEnc.equals(
+            lits=list(variables.values()),
+            bound=6,
+            vpool=pool,
+            encoding=EncType.seqcounter,
+        ).clauses
+    )
+    # The special fiber r=0 forces at least one speed divisible by 9.
+    cnf.append([variables[v] for v in gcd9])
+    for residue in range(1, p):
+        whole_fiber = [
+            variables[v]
+            for v in gcd9
+            if coverage_fiber(v=v, residue=residue, k=k, p=p)
+        ]
+        for phase_class in range(3):
+            active_class = []
+            for v in gcd3:
+                fiber = coverage_fiber(v=v, residue=residue, k=k, p=p)
+                if fiber and fiber[0] % 3 == phase_class:
+                    active_class.append(variables[v])
+            cnf.append(whole_fiber + active_class)
+    return cnf
+
+
+def two_unit_fiber_obstruction_is_unsat(*, p: int) -> bool:
+    """Check the reduced necessary constraints with an independent SAT model."""
+    from pysat.solvers import Solver
+
+    cnf = _build_two_unit_fiber_cnf(p=p)
+    with Solver(name="cadical195", bootstrap_with=cnf.clauses) as solver:
+        return not solver.solve()
+
+
+def export_two_unit_fiber_certificate(*, p: int, cnf_path, proof_path):
+    """Export the reduced two-unit obstruction and a DRUP certificate."""
+    from pathlib import Path
+
+    from pysat.solvers import Solver
+
+    cnf = _build_two_unit_fiber_cnf(p=p)
+    with Solver(
+        name="glucose4", bootstrap_with=cnf.clauses, with_proof=True
+    ) as solver:
+        if solver.solve():
+            raise ValueError("two-unit fiber obstruction is SAT")
+        proof = solver.get_proof() or []
+    if not proof:
+        raise RuntimeError("solver returned UNSAT without a proof trace")
+    cnf_path = Path(cnf_path)
+    proof_path = Path(proof_path)
+    cnf.to_file(str(cnf_path))
+    proof_path.write_text("\n".join(proof) + "\n")
+    return {
+        "status": "UNSAT",
+        "variables": cnf.nv,
+        "clauses": len(cnf.clauses),
+        "proof_steps": len(proof),
+    }
+
+
 def max_fourier_positivity_ratio(
     speeds: tuple[int, ...], *, k: int, p: int, denominator: int
 ) -> tuple[float, int]:

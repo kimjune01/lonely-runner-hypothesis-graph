@@ -521,7 +521,7 @@ H0  original LRC is open and correctly normalized
 - Kill condition: the exact fiber formulation is merely a relabeling with no profile-level constraint stronger than the already-killed incidence bounds.
 - Exact fiber lemma: fix `r in Z/pZ` and write the fiber as `r + a p`, `a in Z/9Z`.
 
-  - If `gcd(v,9)=1`, the covered phases form a two-point cyclic arc when `r != 0`, and a singleton when `r=0`.
+  - If `gcd(v,9)=1`, the covered phases form a two-point edge when `r != 0`, and a singleton when `r=0`. The edge difference is `±v^(-1) mod 9`, so different speeds need not share one cyclic adjacency relation.
   - If `gcd(v,9)=3`, the covered phases are either empty or one full congruence class modulo `3` (three points).
   - If `gcd(v,9)=9`, the speed covers either all nine phases or none.
 
@@ -537,8 +537,10 @@ H0  original LRC is open and correctly normalized
 
   - The first relaxation, retaining only total incidence at least `9` per fiber, is too weak. CP-SAT finds `(9,54,63,66,72,75,200,202)`, which satisfies every fiber-capacity inequality but misses 12 actual times. Phase positions, not just fiber totals, are essential.
   - With speed `1` normalized and exact phase coverage retained, three-second profile splits already return `INFEASIBLE` for `(u,t,h)=(2,5,1),(2,2,4),(2,1,5),(2,0,6),(3,0,5)`. All other completed bounded runs returned `UNKNOWN`; these are search directions, not proof claims.
+  - The whole `u=2` branch can be consolidated without fixing `(t,h)`: select exactly six nonunit speeds, require at least one `g=9` speed, and on each nonzero fiber require either whole-fiber coverage or an active `g=3` speed in each of the three phase classes. The resulting necessary CNF has 825 variables and 1,651 clauses.
+  - Glucose 4 proved that consolidated CNF `UNSAT` in 330,722 DRUP steps. `drat-trim` independently returned `s VERIFIED`; the compressed CNF, proof, checksums, semantic scope, and replay command are stored under `artifacts/k8-p47-two-unit-fiber.*`. This is a certificate for the exact-two-unit branch only, not for the full `k=8` instance.
 
-- Verdict: open frontier. Unlike H18, the reduction retains the exact overlap geometry while exposing a fixed nine-point local problem.
+- Verdict: survives, with the entire `u=2` profile now rigorously eliminated. Profiles with at least three unit speeds remain open.
 - Credence: medium.
 
 ## What the graph established
@@ -560,7 +562,7 @@ H0  original LRC is open and correctly normalized
 15. Even arbitrary nonnegative test-time weights fail numerically: the minimax additive-incidence value at `p=47` is `40/23`, pending an exact dual replay.
 16. The first boundary is tight. A legal eight-speed selection covers `210/211` test times, and unit symmetry normalizes its sole gap to `1`.
 17. Normalized one-gap witnesses are isolated under one-speed exchanges, but their divisibility profiles differ.
-18. Modulo-`p` fibers give an exact new representation: unit speeds are two-arcs on `Z/9`, `g=3` speeds are three-point phase classes, and `g=9` speeds are all-or-nothing.
+18. Modulo-`p` fibers give an exact new representation: unit speeds are oriented two-point edges on `Z/9`, `g=3` speeds are three-point phase classes, and `g=9` speeds are all-or-nothing.
 19. The next falsifiable node is H20: use these phase rules to eliminate every divisibility profile. No general theorem or new Lonely Runner case was proved.
 
 ## Frontier
