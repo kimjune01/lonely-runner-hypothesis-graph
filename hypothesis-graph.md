@@ -354,9 +354,155 @@ H0  original LRC is open and correctly normalized
   3. Optimize the resulting second-order upper bound over six-plus-two selections.
   4. If second order dies, retain the counterexample as the kill edge to a Fourier or higher-order argument.
 
-- Observed outcome: not run.
-- Verdict: open frontier.
+- Observed outcome:
+
+  - Pair intersections are not determined by the natural gcd signature. At `p=47`, pairs with signature `(gcd(v,D),gcd(w,D),gcd(v,w,D)) = (1,1,1)` have intersections ranging from `5` to `23`; `(9,9,9)` ranges from `4` to `22`.
+  - More strongly, two admissibility-shaped selections have identical first and second incidence moments but different union sizes:
+
+    ```text
+    A = (23,78,86,126,138,159,183,192): (S1,S2,|union|) = (371,271,184)
+    B = (12,49,57,93,102,116,144,150):  (S1,S2,|union|) = (371,271,190)
+    ```
+
+    Both contain six multiples of `3` and two nonmultiples. The fixture is replayed by `test_first_two_incidence_moments_do_not_determine_union`.
+  - The abstract occupancy equations with `S1=371` and `S2=271` permit a union of `300` points—for example multiplicities `{n1=288,n2=1,n3=1,n6=1,n8=9}`—far above the actual universe size `211`. Thus the first two moments cannot certify noncoverage even when known exactly.
+
+- Verdict: killed. Gcd-class pairwise bounds and second-order incidence moments discard the higher-order alignment that controls the union.
 - Credence: low.
+- Edge generated: H16 — retain the whole multiplicity profile or move to Fourier characters that preserve simultaneous alignment.
+
+### H16 — Fourier support exposes the two-exchange obstruction
+
+- Mode: abduction from the second-moment collision
+- Hypothesis: the indicator of each bad-time set has explicit Fourier support on multiples of `D/gcd(v,D)`. Six speeds divisible by `3` concentrate on a shared character subgroup; two nonmultiples cannot cancel the resulting uncovered coefficient once `p` is large.
+- Kill condition: the Fourier inequalities reduce to the same first two incidence moments, or admissible near-covers satisfy every tractable low-frequency constraint.
+- Trial:
+
+  1. Write the discrete Fourier transform of `1[|jv|_D < p]` exactly.
+  2. Separate characters divisible by `3` from the other characters.
+  3. Express complete coverage as the pointwise inequality `sum_i 1[C_vi] >= 1` and test it against a character supported on the shared subgroup.
+  4. Optimize the resulting inequality over six multiples and two nonmultiples.
+  5. If one character is insufficient, retain the explicit near-cover as the kill edge to a small semidefinite or flag-algebra certificate.
+
+- Exact transform: for `D=9p`, `g=gcd(v,D)`, and character `r`, the coefficient vanishes unless `g | r`. When `r=gs`, let `u` be the inverse of `v/g` modulo `D/g` and let `m=floor((p-1)/g)`. Then
+
+  ```text
+  Fourier(C_v)(r) = g * sum_{q=-m}^{m} exp(-2 pi i s q u / (D/g)).
+  ```
+
+  This is a rotated Dirichlet kernel. It retains the ratio information that gcd-only pair bounds discarded.
+- Observed outcome for the most natural order-three character `r=D/3` at `p=47`:
+
+  - nonmultiples of `3` have residue counts `(31,31,31)`, hence coefficient `0`;
+  - speeds with `gcd(v,9)=3` have counts `(33,30,30)`, hence coefficient `3` up to phase;
+  - multiples of `9` have counts `(33,33,33)`, hence coefficient `0`.
+
+  The fixture is replayed by `test_order_three_fourier_counts_at_first_boundary`. Against complete coverage, positivity allows a nonzero Fourier coefficient as large as the zero-frequency excess, which here is hundreds of incidences. A coefficient of at most `18` from six multiples is far too small.
+- Verdict: the single order-three character is killed. The full transform survives, but any useful character must adapt to the selected ratios rather than merely to their modulo-`3` classes.
+- Credence: low.
+- Edge generated: H17.
+
+### H17 — An adaptive Dirichlet-kernel character separates every admissible selection
+
+- Mode: abduction from the exact transform
+- Hypothesis: for every six-plus-two selection, some character `r` simultaneously aligns the six rotated Dirichlet kernels from the multiples of `3` while the two nonmultiple kernels remain too small to satisfy positivity of `sum_i 1[C_vi]-1`.
+- Kill condition: find an admissibility-shaped near-cover for which every character satisfies the positive-function Fourier bound with slack.
+- Trial:
+
+  1. Compute, for each finite selection, the maximum normalized violation
+     `max_r |sum_i Fourier(C_vi)(r)| / (sum_i |C_vi| - D)`.
+  2. Search for the selection minimizing that maximum at `p=47`.
+  3. Inspect the maximizing characters and infer their relation to inverses of `v_i/3 mod 3p`.
+  4. Attempt a simultaneous-approximation lemma selecting one character that aligns six phases.
+  5. Verify the derived inequality symbolically, not by floating-point Fourier output.
+
+- Observed outcome:
+
+  - A deterministic sample of 20,000 six-plus-two selections at `p=47` produced zero single-character violations.
+  - The strongest counterexample found was
+
+    ```text
+    (27,42,96,157,162,176,189,207).
+    ```
+
+    Its largest nonzero Fourier coefficient is less than `0.251` times the zero-frequency surplus. Thus every single-character positivity inequality holds with a factor-of-four margin even though the selection does not cover.
+  - The ratio is independently recomputed by `test_single_character_fourier_bound_has_large_slack`; the maximizing character is nonzero.
+
+- Verdict: killed. Adapting one character to the selection still compresses away the joint phase information needed to locate an uncovered point.
+- Credence: low.
+- Edge generated: H18 — use a positive trigonometric polynomial, equivalently a weighted combination of characters, as a separating certificate.
+
+### H18 — A low-degree positive trigonometric polynomial separates every admissible selection
+
+- Mode: abduction from the single-character kill
+- Hypothesis: there is a bounded-degree nonnegative test polynomial `P(j)` whose weighted coverage satisfies `sum_j P(j)(sum_i 1[C_vi](j)-1) < 0` for every six-plus-two selection. In Fourier language, several characters combine to localize where any admissible selection must leave a gap.
+- Kill condition: the minimum separating degree grows with `p`, or finite SDP certificates show no common polynomial even across the first few UNSAT moduli.
+- Trial:
+
+  1. For a fixed selection, solve the dual linear program for nonnegative weights on test times; inspect sparsity and modular pattern.
+  2. Seek one weight pattern valid across all selections via a cutting-plane loop: propose weights, find the worst selection, add it, repeat.
+  3. Constrain weights to a low-degree sum-of-squares trigonometric polynomial.
+  4. Rationalize the coefficients and check the final inequalities exactly.
+  5. Compare certificates across `p=47,53,59` to infer a symbolic family.
+
+- Observed outcome:
+
+  - The stronger unrestricted problem was solved numerically at `p=47`: allow an arbitrary nonnegative weight `w_j` on every test time, with `sum_j w_j=1`, and minimize the largest weighted incidence of an eight-speed selection having at least two nonmultiples of `3`.
+  - A cutting-plane LP converged after 81 selection cuts to
+
+    ```text
+    min_w max_selection sum_j w_j multiplicity_selection(j)
+      = 1.7391304347826... = 40/23.
+    ```
+
+    The displayed primal optimum is uniform weight `1/23` on
+
+    ```text
+    3,12,15,21,33,48,60,69,75,78,84,87,
+    102,105,111,114,123,132,147,165,183,186,192.
+    ```
+
+  - Since the optimum is far above `1`, even unrestricted nonnegative test-time weights cannot separate every admissible selection by additive incidence. A low-degree positive polynomial is a restriction of this failed class.
+  - Verification grade: solver verdict. The `40/23` value still needs a rational dual certificate before it should be cited as a proof-grade optimization result.
+
+- Verdict: killed computationally. Additive weighting cannot recover the overlap information lost by the first moment.
+- Credence: very low.
+- Edge generated: H19 — use an overlap-sensitive functional or analyze the tight one-gap configurations directly.
+
+### H19 — Tight one-gap configurations expose the missing local exchange lemma
+
+- Mode: abduction from the failure of all additive weights
+- Hypothesis: every admissible selection at the first boundary misses a test time; after unit normalization, the obstruction can be expressed as a local exchange law around a configuration that covers every time except `1`.
+- Kill condition: admissible one-gap configurations have no stable arithmetic pattern under normalization, or the required exchange law is equivalent in complexity to the original set-cover instance.
+- Trial:
+
+  1. Search directly for high-coverage legal selections rather than a common linear separator.
+  2. Normalize any unit gap to `1` using the action `v -> a v (mod D)`, taking representatives modulo sign.
+  3. Classify normalized one-gap configurations by `gcd(v,9)`, their private points, and the changes caused by replacing a speed with one that covers the gap.
+  4. Use the special times `p,2p,3p,4p` to force divisibility classes before analyzing the remaining exchanges.
+  5. State and test the smallest local lemma that rules out closing the final gap without opening another.
+
+- Observed outcome:
+
+  - A deterministic swap search found the admissible selection
+
+    ```text
+    (33,46,57,149,150,160,206,207),
+    ```
+
+    which covers `210` of the `211` half-grid times and misses only `181`.
+  - Since `gcd(181,423)=1`, scaling all speeds by `181` moves the sole gap to `1` and gives
+
+    ```text
+    (51,62,78,103,134,165,180,196).
+    ```
+
+    Both facts replay in the test suite. This shows the finite obstruction is exactly tight: a proof must distinguish full coverage from a one-point defect.
+  - At the special time `j=p=47`, coverage is equivalent to `9 | v`; hence every hypothetical cover contains a multiple of `9`. More generally, `j=3p` forces a multiple of `3`.
+  - Adding the sound symmetry break `speed 1 is selected` and then also fixing the multiple `180` did not finish within the bounded solver run. These interrupted searches are `UNKNOWN`, not `UNSAT`.
+
+- Verdict: open frontier.
+- Credence: medium as a structural reduction; low as a complete proof route.
 
 ## What the graph established
 
@@ -371,11 +517,17 @@ H0  original LRC is open and correctly normalized
 9. Constraint ablation isolates the boundary mechanism: coverage remains possible, but only with too many multiples of `3` to satisfy the minimal-counterexample gcd condition.
 10. The relaxed SAT branch is explained by the canonical Dirichlet cover `{9,18,...,72}`; admissibility demands at least two exchanges out of this divisible lattice.
 11. Exact single-speed coverage counts are now proved, but their capacity bound dies with 175 excess incidences at the first boundary.
-12. The next falsifiable research node is H15: quantify forced overlap. No general theorem or new Lonely Runner case was proved.
+12. Pairwise gcd data and the first two incidence moments are provably insufficient; they admit abstract unions larger than the universe and collide on actual selections with different union sizes.
+13. The exact Fourier transform is a rotated Dirichlet kernel; the obvious order-three character is rigorously too weak.
+14. Even an adaptive single Fourier character is too compressed: a concrete selection satisfies every character bound with factor-of-four slack.
+15. Even arbitrary nonnegative test-time weights fail numerically: the minimax additive-incidence value at `p=47` is `40/23`, pending an exact dual replay.
+16. The first boundary is tight. A legal eight-speed selection covers `210/211` test times, and unit symmetry normalizes its sole gap to `1`.
+17. The next falsifiable node is H19: classify these normalized one-gap configurations and prove a local exchange law. No general theorem or new Lonely Runner case was proved.
 
 ## Frontier
 
-- Primary: prove or kill H15 by deriving pairwise intersection counts sensitive to gcd and residue class.
+- Primary: prove or kill H19 by classifying normalized one-gap configurations and the exchanges that attempt to cover their final gap.
+- Secondary: extract a rational dual certificate for the H18 minimax value `40/23`; until then it remains a solver verdict.
 - Secondary: extend the prime scan beyond `67`, with explicit timeouts recorded as `unknown`, never as `UNSAT`.
 - Secondary: return to H2 only with an overlap inequality that explicitly depends on gcd/ratio data and therefore respects H4.
 - Pruned: first-moment-only proofs, independently shifted formulations, and embeddings that retain only interval lengths.

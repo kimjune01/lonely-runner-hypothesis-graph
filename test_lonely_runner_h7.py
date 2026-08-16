@@ -132,3 +132,50 @@ def test_exact_coverage_size_formula_at_boundary():
             for j in range(1, limit + 1)
         )
         assert actual == lrc.coverage_size(k=k, p=p, v=v)
+
+
+def test_first_two_incidence_moments_do_not_determine_union():
+    first = (23, 78, 86, 126, 138, 159, 183, 192)
+    second = (12, 49, 57, 93, 102, 116, 144, 150)
+    first_moments = lrc.selection_moments(first, k=8, p=47, denominator=9)
+    second_moments = lrc.selection_moments(second, k=8, p=47, denominator=9)
+    assert first_moments[:2] == second_moments[:2] == (371, 271)
+    assert first_moments[2] == 184
+    assert second_moments[2] == 190
+
+
+def test_order_three_fourier_counts_at_first_boundary():
+    assert lrc.coverage_residue_counts(v=1, k=8, p=47, modulus=3) == (31, 31, 31)
+    assert lrc.coverage_residue_counts(v=3, k=8, p=47, modulus=3) == (33, 30, 30)
+    assert lrc.coverage_residue_counts(v=9, k=8, p=47, modulus=3) == (33, 33, 33)
+
+
+def test_single_character_fourier_bound_has_large_slack():
+    selection = (27, 42, 96, 157, 162, 176, 189, 207)
+    ratio, character = lrc.max_fourier_positivity_ratio(
+        selection, k=8, p=47, denominator=9
+    )
+    assert character != 0
+    assert ratio < 0.251
+
+
+def test_boundary_has_an_admissible_one_gap_cover():
+    selection = (33, 46, 57, 149, 150, 160, 206, 207)
+    assert lrc.gcd_constraint(selection, k=8, p=47)
+    assert lrc.uncovered_times(selection, k=8, p=47, denominator=9) == (181,)
+
+
+def test_unit_action_normalizes_the_one_gap_cover():
+    selection = (33, 46, 57, 149, 150, 160, 206, 207)
+    normalized = lrc.scale_speeds(selection, multiplier=181, k=8, p=47)
+    assert normalized == (51, 62, 78, 103, 134, 165, 180, 196)
+    assert lrc.uncovered_times(normalized, k=8, p=47, denominator=9) == (1,)
+
+
+def test_special_time_p_forces_a_multiple_of_nine():
+    for speed in range(1, 212):
+        if speed % 47 == 0:
+            continue
+        assert lrc.covers(v=speed, j=47, k=8, p=47, denominator=9) == (
+            speed % 9 == 0
+        )

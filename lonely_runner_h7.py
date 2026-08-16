@@ -31,6 +31,76 @@ def coverage_size(*, k: int, p: int, v: int) -> int:
     return (common * (2 * radius_steps + 1) - 1) // 2
 
 
+def selection_moments(
+    speeds: tuple[int, ...], *, k: int, p: int, denominator: int
+) -> tuple[int, int, int]:
+    """Return total incidences, pair incidences, and union size."""
+    limit = ((k + 1) * p) // 2
+    masks = {}
+    for speed in speeds:
+        mask = 0
+        for j in range(1, limit + 1):
+            if covers(v=speed, j=j, k=k, p=p, denominator=denominator):
+                mask |= 1 << (j - 1)
+        masks[speed] = mask
+    first = sum(mask.bit_count() for mask in masks.values())
+    second = sum(
+        (masks[left] & masks[right]).bit_count()
+        for index, left in enumerate(speeds)
+        for right in speeds[index + 1 :]
+    )
+    union = 0
+    for mask in masks.values():
+        union |= mask
+    return first, second, union.bit_count()
+
+
+def coverage_residue_counts(
+    *, v: int, k: int, p: int, modulus: int
+) -> tuple[int, ...]:
+    """Count the full cyclic coverage set in each residue class."""
+    period = (k + 1) * p
+    counts = [0] * modulus
+    for j in range(period):
+        if covers(v=v, j=j, k=k, p=p, denominator=k + 1):
+            counts[j % modulus] += 1
+    return tuple(counts)
+
+
+def max_fourier_positivity_ratio(
+    speeds: tuple[int, ...], *, k: int, p: int, denominator: int
+) -> tuple[float, int]:
+    """Largest single-character coefficient divided by zero-frequency surplus."""
+    import cmath
+    import math
+
+    period = (k + 1) * p
+    incidences = [
+        sum(
+            covers(v=speed, j=j, k=k, p=p, denominator=denominator)
+            for speed in speeds
+        )
+        for j in range(period)
+    ]
+    surplus = sum(incidences) - period
+    if surplus <= 0:
+        raise ValueError("single-character positivity bound needs positive surplus")
+    best_magnitude = -1.0
+    best_character = 0
+    for character in range(1, period):
+        root = cmath.exp(-2j * math.pi * character / period)
+        power = 1 + 0j
+        coefficient = 0j
+        for incidence in incidences:
+            coefficient += incidence * power
+            power *= root
+        magnitude = abs(coefficient)
+        if magnitude > best_magnitude:
+            best_magnitude = magnitude
+            best_character = character
+    return best_magnitude / surplus, best_character
+
+
 def gcd_constraint(speeds: tuple[int, ...], *, k: int, p: int) -> bool:
     """Check gcd(D, all speeds except each one) = 1."""
     if len(speeds) != k:
@@ -54,6 +124,34 @@ def covers_universe(
         any(covers(v=v, j=j, k=k, p=p, denominator=denominator) for v in speeds)
         for j in range(1, limit + 1)
     )
+
+
+def uncovered_times(
+    speeds: tuple[int, ...], *, k: int, p: int, denominator: int
+) -> tuple[int, ...]:
+    """Return the half-grid test times missed by every selected speed."""
+    limit = ((k + 1) * p) // 2
+    return tuple(
+        j
+        for j in range(1, limit + 1)
+        if not any(
+            covers(v=v, j=j, k=k, p=p, denominator=denominator) for v in speeds
+        )
+    )
+
+
+def scale_speeds(
+    speeds: tuple[int, ...], *, multiplier: int, k: int, p: int
+) -> tuple[int, ...]:
+    """Apply a unit scaling and return canonical representatives modulo sign."""
+    modulus = (k + 1) * p
+    if gcd(multiplier, modulus) != 1:
+        raise ValueError("multiplier must be a unit modulo (k + 1)p")
+    representatives = []
+    for speed in speeds:
+        residue = (multiplier * speed) % modulus
+        representatives.append(min(residue, modulus - residue))
+    return tuple(sorted(representatives))
 
 
 def find_bad_cover(*, k: int, p: int, denominator: int) -> tuple[int, ...] | None:
