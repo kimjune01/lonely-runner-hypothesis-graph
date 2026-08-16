@@ -325,3 +325,122 @@ def export_unsat_certificate(
         "clauses": len(cnf.clauses),
         "proof_steps": len(proof),
     }
+
+
+def _coverage_assumption_instance(*, k: int, p: int, denominator: int):
+    from pysat.card import CardEnc, EncType
+    from pysat.formula import CNF, IDPool
+
+    modulus = (k + 1) * p
+    limit = modulus // 2
+    candidates = tuple(v for v in range(1, limit + 1) if v % p != 0)
+    pool = IDPool()
+    variables = {v: pool.id(f"choose_{v}") for v in candidates}
+    cnf = CNF()
+    cnf.extend(
+        CardEnc.equals(
+            lits=list(variables.values()),
+            bound=k,
+            vpool=pool,
+            encoding=EncType.seqcounter,
+        ).clauses
+    )
+    for prime in active_gcd_primes(k=k, p=p):
+        cnf.extend(
+            CardEnc.atleast(
+                lits=[variables[v] for v in candidates if v % prime != 0],
+                bound=2,
+                vpool=pool,
+                encoding=EncType.seqcounter,
+            ).clauses
+        )
+
+    assumptions = {}
+    for j in range(1, limit + 1):
+        selector = pool.id(f"require_cover_j_{j}")
+        assumptions[j] = selector
+        cnf.append(
+            [-selector]
+            + [
+                variables[v]
+                for v in candidates
+                if covers(v=v, j=j, k=k, p=p, denominator=denominator)
+            ]
+        )
+    return cnf, assumptions
+
+
+def unsat_coverage_core_sat(*, k: int, p: int, denominator: int) -> tuple[int, ...]:
+    """Return test-time indices in a CaDiCaL assumption core."""
+    from pysat.solvers import Solver
+
+    cnf, assumptions = _coverage_assumption_instance(
+        k=k, p=p, denominator=denominator
+    )
+    all_assumptions = list(assumptions.values())
+    with Solver(name="cadical195", bootstrap_with=cnf.clauses) as solver:
+        if solver.solve(assumptions=all_assumptions):
+            raise ValueError("expected an UNSAT finite instance")
+        core_literals = set(solver.get_core() or [])
+    if not core_literals:
+        raise RuntimeError("solver returned UNSAT without an assumption core")
+    return tuple(sorted(j for j, literal in assumptions.items() if literal in core_literals))
+
+
+def replay_coverage_core_sat(
+    *, k: int, p: int, denominator: int, core: tuple[int, ...]
+) -> bool:
+    from pysat.solvers import Solver
+
+    cnf, assumptions = _coverage_assumption_instance(
+        k=k, p=p, denominator=denominator
+    )
+    if any(j not in assumptions for j in core):
+        return False
+    with Solver(name="cadical195", bootstrap_with=cnf.clauses) as solver:
+        return not solver.solve(assumptions=[assumptions[j] for j in core])
+
+
+def find_cover_with_min_nonmultiples(
+    *, k: int, p: int, denominator: int, prime: int, minimum: int
+) -> tuple[int, ...] | None:
+    """Find a cover while requiring a chosen number nonzero modulo prime."""
+    from pysat.card import CardEnc, EncType
+    from pysat.formula import CNF, IDPool
+    from pysat.solvers import Solver
+
+    modulus = (k + 1) * p
+    limit = modulus // 2
+    candidates = tuple(v for v in range(1, limit + 1) if v % p != 0)
+    pool = IDPool()
+    variables = {v: pool.id(f"choose_{v}") for v in candidates}
+    cnf = CNF()
+    cnf.extend(
+        CardEnc.equals(
+            lits=list(variables.values()),
+            bound=k,
+            vpool=pool,
+            encoding=EncType.seqcounter,
+        ).clauses
+    )
+    for j in range(1, limit + 1):
+        cnf.append(
+            [
+                variables[v]
+                for v in candidates
+                if covers(v=v, j=j, k=k, p=p, denominator=denominator)
+            ]
+        )
+    cnf.extend(
+        CardEnc.atleast(
+            lits=[variables[v] for v in candidates if v % prime != 0],
+            bound=minimum,
+            vpool=pool,
+            encoding=EncType.seqcounter,
+        ).clauses
+    )
+    with Solver(name="cadical195", bootstrap_with=cnf.clauses) as solver:
+        if not solver.solve():
+            return None
+        positive = {literal for literal in solver.get_model() if literal > 0}
+    return tuple(v for v in candidates if variables[v] in positive)

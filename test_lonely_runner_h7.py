@@ -81,3 +81,25 @@ def test_exports_dimacs_and_drup_certificate(tmp_path):
 
 def test_only_three_is_a_nonredundant_gcd_prime_at_k8_p53():
     assert lrc.active_gcd_primes(k=8, p=53) == (3,)
+
+
+def test_cadical_coverage_core_replays_on_calibration_case():
+    core = lrc.unsat_coverage_core_sat(k=3, p=7, denominator=4)
+    assert core
+    assert all(1 <= j <= 14 for j in core)
+    assert lrc.replay_coverage_core_sat(k=3, p=7, denominator=4, core=core)
+
+
+def test_relaxed_cover_can_require_two_nonmultiples_before_boundary():
+    result = lrc.find_cover_with_min_nonmultiples(
+        k=8, p=11, denominator=9, prime=3, minimum=2
+    )
+    assert result is not None
+    assert sum(v % 3 != 0 for v in result) >= 2
+    assert lrc.covers_universe(result, k=8, p=11, denominator=9)
+
+
+def test_canonical_dirichlet_cover_replays_across_boundary():
+    canonical = tuple(9 * multiplier for multiplier in range(1, 9))
+    for p in (43, 47, 53, 59, 67):
+        assert lrc.covers_universe(canonical, k=8, p=p, denominator=9)

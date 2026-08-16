@@ -289,9 +289,33 @@ H0  original LRC is open and correctly normalized
   4. Identify the finite exceptional range where endpoint rounding can defeat the bound.
   5. Compare the resulting threshold with the observed last SAT modulus `43` and first UNSAT modulus `47`.
 
+- Observed outcome:
+
+  - Assumption-core extraction at `p=47` exceeded one minute and was interrupted; its verdict is `unknown`.
+  - Relaxing the requirement from two nonmultiples of `3` to one produces the explicit `p=47` cover `(9,18,27,36,45,54,63,76)` in 0.406 seconds. The first seven entries form a rigid arithmetic progression.
+  - The eight-element progression `(9,18,27,36,45,54,63,72)` covers the test grid for every checked prime across the boundary. This is not merely experimental: dividing speeds by `9` reduces it to the Dirichlet cover `{1,...,8}` at threshold `1/9`.
+  - Therefore the full-cover SAT witnesses are explained by a universal degenerate construction. Their defect is exactly arithmetic: every speed is divisible by `3`, so they violate the omitted-speed gcd condition.
+
+- Verdict: open, but reformulated. Raw coverage does not force seven multiples of `3`; a universal all-multiple cover exists. The actual claim is that an eight-cover cannot survive the two exchanges required by the gcd condition once `p` is sufficiently large.
+- Credence: low, but more specific than H10: it names the exact arithmetic statement a general proof must establish.
+- Edge generated: H13.
+
+### H13 — Two-exchange obstruction for the Dirichlet cover
+
+- Mode: abduction from a witnessed canonical construction
+- Hypothesis: for sufficiently large prime `p`, replacing two or more members of the canonical cover `{9,18,...,72}` by residues nonzero modulo `3` necessarily exposes at least one test time. More generally, every eight-cover with two nonmultiples of `3` has a structural defect equivalent to such an exchange.
+- Kill condition: construct an eight-cover with two nonmultiples of `3` for any prime beyond the tested boundary, or find a family not reducible to the canonical-cover exchange picture.
+- Trial:
+
+  1. For every pair of nonmultiples `(a,b)`, compute the test times they cover by residue class modulo `3`.
+  2. Ask which six multiples of `3` maximize coverage of the complement.
+  3. Quotient those six speeds by `3`, turning their constraints into a six-multiplier approximation problem modulo `3p`.
+  4. Search for a small family of test times that no such pair-plus-six decomposition covers.
+  5. Convert that family into a pigeonhole or interval-length inequality with explicit endpoint error in `p`.
+
 - Observed outcome: not run.
 - Verdict: open frontier.
-- Credence: low, but more specific than H10: it names the exact arithmetic statement a general proof must establish.
+- Credence: low.
 
 ## What the graph established
 
@@ -304,11 +328,12 @@ H0  original LRC is open and correctly normalized
 7. At `k=8`, the corrected finite predicate is SAT through `p=43` and UNSAT for the completed tests `p=47,53,59,61,67`.
 8. Independent UNSAT certification works on the calibration case but exceeded the interactive budget at the `k=8` boundary.
 9. Constraint ablation isolates the boundary mechanism: coverage remains possible, but only with too many multiples of `3` to satisfy the minimal-counterexample gcd condition.
-10. The next falsifiable research node is H12. No general theorem or new Lonely Runner case was proved.
+10. The relaxed SAT branch is explained by the canonical Dirichlet cover `{9,18,...,72}`; admissibility demands at least two exchanges out of this divisible lattice.
+11. The next falsifiable research node is H13. No general theorem or new Lonely Runner case was proved.
 
 ## Frontier
 
-- Primary: prove or kill H12 by decomposing coverage masks modulo `3`.
+- Primary: prove or kill the H13 two-exchange obstruction by decomposing coverage masks modulo `3`.
 - Secondary: extend the prime scan beyond `67`, with explicit timeouts recorded as `unknown`, never as `UNSAT`.
 - Secondary: return to H2 only with an overlap inequality that explicitly depends on gcd/ratio data and therefore respects H4.
 - Pruned: first-moment-only proofs, independently shifted formulations, and embeddings that retain only interval lengths.
