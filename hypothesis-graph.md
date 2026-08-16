@@ -588,7 +588,7 @@ H0  original LRC is open and correctly normalized
 - Observed outcome:
 
   - `p=47` is now closed at all unit profiles. By the corrected finite reformulation, this proves that `47` divides the product of the eight relative speeds in any hypothetical nine-runner counterexample.
-  - The low-unit CNFs and parameterized high-unit verifier now close the first eight target primes `47,53,59,61,67,71,73,79`. Exact branch counts are recorded in `artifacts/h21-prime-replay.tsv`.
+  - The low-unit CNFs and parameterized high-unit verifier now close the first nine target primes `47,53,59,61,67,71,73,79,83`. Exact branch counts are recorded in `artifacts/h21-prime-replay.tsv`.
   - Parameterization exposed and repaired a verifier-width bug: the first version used three 64-bit words for candidate coverer sets, sufficient through `p=61` but not beyond. All `p>=67` high-unit results were withdrawn and recomputed with the full 17-word width. Address/undefined-behavior sanitizers replay the corrected `p=67,u=4` branch without error.
   - A Claude/Sonnet review proposed a finite carry automaton on the nine-phase masks. The coarse relaxation is killed: locally covered edge configurations admit self-loops when carry choices are independent. A refinement would have to retain mechanical-word carry feasibility. It remains finite, but is deferred unless it avoids an open prime-distribution problem.
   - The same review recommended proof-producing SAT plus an independent formula regenerator. This matches the surviving certificate route; rerunning the same generator and solver is not counted as independent verification.
