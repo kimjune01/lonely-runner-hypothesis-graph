@@ -543,10 +543,58 @@ H0  original LRC is open and correctly normalized
   - Only 174 five-nonunit selections satisfy this necessary phase-`1` condition, and an exhaustive pair check shows that none can be completed by two more unit speeds. The exact augmented CNF has 1,386 variables and 2,572 clauses. Glucose 4 emitted a 410,310-step DRUP proof, independently accepted by `drat-trim`; it and its replay metadata are stored as `artifacts/k8-p47-three-unit-fiber.*`.
   - For `u=4`, the weaker local requirement is that at least one `g=3` phase class be active whenever no `g=9` speed covers the fiber wholesale. Exactly 208,104 four-nonunit selections satisfy this condition. An exhaustive indexed-pair check found that none can be completed by three further unit speeds after normalization to speed `1`; the smallest residual before those three speeds has 40 points. Verification grade: replay, not independent certificate.
   - For `u=5`, all 37,214 nonunit triples containing at least one `g=9` speed were exhaustively tested. None can be completed by four further unit speeds after speed `1`; the smallest residual before completion has 63 points. Verification grade: replay, not independent certificate.
-  - Two attempted checks of `u=6`—recursive unit completion and incremental SAT over 1,311 nonunit pairs—were interrupted after poor scaling. Fixing a selected `g=9` speed to `9` by unit symmetry also left the full and `u=7` CNFs unresolved in bounded runs. Every interrupted result is `UNKNOWN`.
+  - Two initial checks of `u=6`—recursive Python completion and incremental SAT over 1,311 nonunit pairs—were interrupted after poor scaling. Fixing a selected `g=9` speed to `9` by unit symmetry also left the full and `u=7` CNFs unresolved in bounded runs. Every interrupted result remains `UNKNOWN`; none is used below.
+  - A bounded-memory C++ verifier then replaced those searches. It normalizes one unit speed to `1`, enumerates every admissible nonunit choice, and uses exact bitset set-cover search for the remaining unit speeds. Its pruning rules are upper capacity and a packing lower bound from test points with pairwise-disjoint coverer sets.
+  - The same verifier returns:
 
-- Verdict: survives. The `u=2` and `u=3` profiles have independent DRUP certificates; `u=4` and `u=5` have exhaustive replay checks. The `u=6` and `u=7` profiles remain open.
-- Credence: medium.
+    ```text
+    VERIFIED branch=4 checked=208104
+    VERIFIED branch=5 checked=37214
+    VERIFIED branch=6 checked=1311
+    VERIFIED branch=7 checked=23
+    ```
+
+    The counts for `u=4,5` reproduce the earlier Python runs. The `u=6,7` results close the previously open high-unit tail. `test_high_unit_exhaustive_verifier` compiles the source and replays all four branches.
+  - Profiles `u<2` violate the gcd condition. Profile `u=8` is impossible because covering `j=p` requires a `g=9` speed. Therefore `u=2,...,7` exhaust every hypothetical cover.
+
+- Verdict: proved computationally for the finite instance `k=8,p=47`. The `u=2,3` branches have independent DRUP certificates; `u=4,...,7` have a small exhaustive verifier with cross-language replay for `u=4,5`.
+- Credence: high for the finite obstruction; this is not yet a proof of the nine-runner case.
+- Edge generated: H21 — accumulate enough certified primes to cross the global product bound.
+
+### H21 — Enough modular obstructions prove the nine-runner case
+
+- Mode: deduction from Rosenfeld's prime-divisor lemma and the `p=47` obstruction
+- Hypothesis: the finite obstruction can be certified for enough distinct primes that their product, together with `lcm(2,...,9)`, exceeds the explicit upper bound on the product of a minimal counterexample.
+- Exact target for `k=8`:
+
+  ```text
+  B = (36^7 / 8)^8
+    = 84765698874878218361067180729674171436543015292348049288994557831877912686493696.
+  ```
+
+  Starting at `47`, the first 37 primes through `233` satisfy
+
+  ```text
+  lcm(2,...,9) * product(primes 47 through 233) > B.
+  ```
+
+- Trial:
+
+  1. Parameterize the fiber lemmas and exhaustive verifier by `p`.
+  2. Certify the obstruction for the target list
+     `47,53,59,61,67,71,73,79,83,89,97,101,103,107,109,113,127,131,137,139,149,151,157,163,167,173,179,181,191,193,197,199,211,223,227,229,233`.
+  3. Seek a symbolic monotonicity or large-`p` argument before accepting 37 unrelated computations.
+  4. Independently verify every finite certificate and the final integer inequality.
+- Observed outcome:
+
+  - `p=47` is now closed at all unit profiles. By the corrected finite reformulation, this proves that `47` divides the product of the eight relative speeds in any hypothetical nine-runner counterexample.
+  - The low-unit CNFs and parameterized high-unit verifier now close the first seven target primes `47,53,59,61,67,71,73`. At `p=79`, the `u=2,3` CNFs are `UNSAT` and the high-unit branches remain unrun. Exact branch counts are recorded in `artifacts/h21-prime-replay.tsv`.
+  - Parameterization exposed and repaired a verifier-width bug: the first version used three 64-bit words for candidate coverer sets, sufficient through `p=61` but not beyond. All `p>=67` high-unit results were withdrawn and recomputed with the full 17-word width. Address/undefined-behavior sanitizers replay the corrected `p=67,u=4` branch without error.
+  - A Claude/Sonnet review proposed a finite carry automaton on the nine-phase masks. The coarse relaxation is killed: locally covered edge configurations admit self-loops when carry choices are independent. A refinement would have to retain mechanical-word carry feasibility. It remains finite, but is deferred unless it avoids an open prime-distribution problem.
+  - The same review recommended proof-producing SAT plus an independent formula regenerator. This matches the surviving certificate route; rerunning the same generator and solver is not counted as independent verification.
+
+- Verdict: open frontier. Seven of 37 sufficient prime obstructions are closed at replay level; only the `p=47` low-unit branches currently have archived independent DRUP proofs.
+- Credence: medium that the finite computations extend, low that brute force alone is the right final proof.
 
 ## What the graph established
 
@@ -568,13 +616,14 @@ H0  original LRC is open and correctly normalized
 16. The first boundary is tight. A legal eight-speed selection covers `210/211` test times, and unit symmetry normalizes its sole gap to `1`.
 17. Normalized one-gap witnesses are isolated under one-speed exchanges, but their divisibility profiles differ.
 18. Modulo-`p` fibers give an exact new representation: unit speeds are oriented two-point edges on `Z/9`, `g=3` speeds are three-point phase classes, and `g=9` speeds are all-or-nothing.
-19. Fiber phases plus exact completion eliminate `u=2,3,4,5`; the first two branches are independently certified, while the latter two are currently replay-grade computations.
-20. The next falsifiable node is H20's high-unit tail: eliminate `u=6,7` and upgrade the `u=4,5` replays to certificates. No general theorem or new Lonely Runner case was proved.
+19. Fiber phases plus exact completion eliminate every possible unit-count profile at `k=8,p=47`; the first two branches are independently certified and the remaining four replay in a bounded-memory verifier.
+20. This finite result proves one prime divisor, `47`, for any hypothetical nine-runner counterexample. It does not alone prove the nine-runner case.
+21. Thirty-seven primes from `47` through `233` would cross the known product bound. H21 is the next falsifiable node. No general theorem or new Lonely Runner case was proved.
 
 ## Frontier
 
-- Primary: finish H20 by replacing the failed recursive search for `u=6,7` with a bounded-memory meet-in-the-middle or proof-producing split.
-- Secondary: export independently checked certificates for the replay-grade `u=4,5` branches.
+- Primary: parameterize H20 by `p` and prove or kill H21 across the 37-prime target, looking first for a symbolic large-`p` argument.
+- Secondary: export independently checked certificates for the replay-grade `u=4,...,7` branches at `p=47`.
 - Secondary: retain H19's one-gap exchange fixtures as boundary tests for any proposed H20 lemma.
 - Secondary: extract a rational dual certificate for the H18 minimax value `40/23`; until then it remains a solver verdict.
 - Secondary: extend the prime scan beyond `67`, with explicit timeouts recorded as `unknown`, never as `UNSAT`.

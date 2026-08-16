@@ -1,5 +1,9 @@
 import importlib.util
+import shutil
+import subprocess
 from pathlib import Path
+
+import pytest
 
 
 MODULE_PATH = Path(__file__).with_name("lonely_runner_h7.py")
@@ -226,3 +230,24 @@ def test_two_unit_fiber_obstruction_is_unsat():
 
 def test_three_unit_fiber_obstruction_is_unsat():
     assert lrc.three_unit_fiber_obstruction_is_unsat(p=47)
+
+
+def test_high_unit_exhaustive_verifier(tmp_path):
+    compiler = shutil.which("clang++") or shutil.which("g++")
+    if compiler is None:
+        pytest.skip("a C++20 compiler is required for the exhaustive verifier")
+    source = Path(__file__).with_name("verify_high_unit_branches.cpp")
+    executable = tmp_path / "verify_high_unit_branches"
+    subprocess.run(
+        [compiler, "-O3", "-std=c++20", str(source), "-o", str(executable)],
+        check=True,
+    )
+    expected = {4: 208104, 5: 37214, 6: 1311, 7: 23}
+    for branch, count in expected.items():
+        result = subprocess.run(
+            [str(executable), "47", str(branch)],
+            check=True,
+            capture_output=True,
+            text=True,
+        )
+        assert f"VERIFIED branch={branch} checked={count}" in result.stdout

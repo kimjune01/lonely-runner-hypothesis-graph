@@ -61,3 +61,43 @@ The uncompressed instance has 1,386 variables and 2,572 clauses. Glucose 4
 emitted 410,310 proof steps. `drat-trim` independently verified the proof on
 2026-08-16. This certificate still covers only one divisibility-profile
 branch, not the full finite instance.
+
+## High-unit exhaustive replay
+
+[`../verify_high_unit_branches.cpp`](../verify_high_unit_branches.cpp) covers
+the remaining profiles at `k=8,p=47`. It normalizes one selected unit speed to
+`1`, enumerates all nonunit choices, and performs exact bitset set-cover search
+for the remaining unit speeds. Reusing a speed cannot help because its entire
+coverage mask is removed after selection; a completion using fewer than the
+available slots can always be extended with unused unit speeds.
+
+```bash
+clang++ -O3 -std=c++20 -Wall -Wextra -pedantic \
+  verify_high_unit_branches.cpp -o /tmp/verify_high_unit_branches
+for branch in 4 5 6 7; do /tmp/verify_high_unit_branches 47 "$branch"; done
+```
+
+Expected final lines:
+
+```text
+VERIFIED branch=4 checked=208104
+VERIFIED branch=5 checked=37214
+VERIFIED branch=6 checked=1311
+VERIFIED branch=7 checked=23
+```
+
+Source SHA-256 at the recorded run:
+
+```text
+1d98b58f91f00e58a92a83cb2096e45f3d3b056555dd0e7e513973c7309fd534  verify_high_unit_branches.cpp
+```
+
+The recorded environment used Apple clang 21.0.0 on arm64 macOS. These four
+branches are exhaustive replay, not DRUP certificates. Together with the two
+DRUP-certified low-unit branches, they close the `p=47` finite obstruction.
+
+The verifier is parameterized for `p <= 233`. Recorded H21 runs are in
+[`h21-prime-replay.tsv`](h21-prime-replay.tsv). An early parameterized build
+used only three words for the candidate-coverer packing mask; that was enough
+through `p=61` but not beyond. All rows from `p=67` onward in the table were
+withdrawn and rerun after changing that mask to the full compile-time width.
