@@ -193,3 +193,21 @@ def test_normalized_one_gap_covers_are_isolated_by_one_exchange():
         )
         assert len(exchanges[0][2]) == expected_minimum
         assert all(len(new_gaps) == expected_minimum for _, _, new_gaps in exchanges)
+
+
+def test_mod_p_fibers_reduce_to_small_phase_patterns():
+    for residue in range(1, 47):
+        assert len(lrc.coverage_fiber(v=1, residue=residue, k=8, p=47)) == 2
+    for speed in range(1, 212):
+        if speed % 47 == 0:
+            continue
+        for residue in range(47):
+            fiber = lrc.coverage_fiber(v=speed, residue=residue, k=8, p=47)
+            common = __import__("math").gcd(speed, 423)
+            if common == 1:
+                assert len(fiber) == (1 if residue == 0 else 2)
+            elif common == 3:
+                assert len(fiber) in (0, 3)
+                assert len({phase % 3 for phase in fiber}) <= 1
+            elif common == 9:
+                assert len(fiber) in (0, 9)

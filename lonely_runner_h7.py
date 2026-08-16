@@ -67,6 +67,25 @@ def coverage_residue_counts(
     return tuple(counts)
 
 
+def coverage_fiber(*, v: int, residue: int, k: int, p: int) -> tuple[int, ...]:
+    """Phases covered in the nine-point fiber over a residue modulo p."""
+    if k != 8:
+        raise ValueError("nine-point fiber representation requires k=8")
+    if not 0 <= residue < p:
+        raise ValueError("residue must be in range(p)")
+    return tuple(
+        phase
+        for phase in range(9)
+        if covers(
+            v=v,
+            j=residue + phase * p,
+            k=k,
+            p=p,
+            denominator=k + 1,
+        )
+    )
+
+
 def max_fourier_positivity_ratio(
     speeds: tuple[int, ...], *, k: int, p: int, denominator: int
 ) -> tuple[float, int]:

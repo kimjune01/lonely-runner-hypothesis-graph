@@ -512,6 +512,34 @@ H0  original LRC is open and correctly normalized
 
 - Verdict: open frontier.
 - Credence: medium as a structural reduction; low as a complete proof route.
+- Edge generated: H20 — quotient the exact coverage problem into nine-point fibers over `Z/pZ`.
+
+### H20 — Fiber phases force an impossible divisibility profile
+
+- Mode: structural reduction from H19 and the special time `j=p`
+- Hypothesis: partitioning `Z/(9p)Z` by reduction modulo `p` turns every speed into one of three rigid patterns on `Z/9Z`; the requirement that all 47 fibers be covered rules out every admissible `(g=1,g=3,g=9)` profile.
+- Kill condition: the exact fiber formulation is merely a relabeling with no profile-level constraint stronger than the already-killed incidence bounds.
+- Exact fiber lemma: fix `r in Z/pZ` and write the fiber as `r + a p`, `a in Z/9Z`.
+
+  - If `gcd(v,9)=1`, the covered phases form a two-point cyclic arc when `r != 0`, and a singleton when `r=0`.
+  - If `gcd(v,9)=3`, the covered phases are either empty or one full congruence class modulo `3` (three points).
+  - If `gcd(v,9)=9`, the speed covers either all nine phases or none.
+
+  The lemma follows because increasing `a` shifts `jv` by `pv`: respectively all nine `p`-spaced positions, three positions each repeated three times, or zero modulo `9p`. The strict interval `(-p,p)` then gives the stated patterns. It is exhaustively replayed by `test_mod_p_fibers_reduce_to_small_phase_patterns`.
+- Consequence: outside the fibers wholly covered by a `g=9` speed, two unit speeds can hit at most two points of any missing modulo-`3` phase class. Therefore a profile with exactly two unit speeds must have active `g=3` speeds in all three phase classes on every such fiber. Similar finite phase-cover rules apply to the other profiles.
+- Trial:
+
+  1. Split the hypothetical cover by the counts `(u,t,h)` of speeds with gcd `1,3,9` against `9`.
+  2. Derive the minimal `Z/9Z` phase-cover patterns for each `u`.
+  3. Translate those patterns into interval-cover constraints on `r in Z/pZ`.
+  4. Rule out each profile with a counting, cyclic-order, or polynomial argument.
+- Observed outcome:
+
+  - The first relaxation, retaining only total incidence at least `9` per fiber, is too weak. CP-SAT finds `(9,54,63,66,72,75,200,202)`, which satisfies every fiber-capacity inequality but misses 12 actual times. Phase positions, not just fiber totals, are essential.
+  - With speed `1` normalized and exact phase coverage retained, three-second profile splits already return `INFEASIBLE` for `(u,t,h)=(2,5,1),(2,2,4),(2,1,5),(2,0,6),(3,0,5)`. All other completed bounded runs returned `UNKNOWN`; these are search directions, not proof claims.
+
+- Verdict: open frontier. Unlike H18, the reduction retains the exact overlap geometry while exposing a fixed nine-point local problem.
+- Credence: medium.
 
 ## What the graph established
 
@@ -531,11 +559,14 @@ H0  original LRC is open and correctly normalized
 14. Even an adaptive single Fourier character is too compressed: a concrete selection satisfies every character bound with factor-of-four slack.
 15. Even arbitrary nonnegative test-time weights fail numerically: the minimax additive-incidence value at `p=47` is `40/23`, pending an exact dual replay.
 16. The first boundary is tight. A legal eight-speed selection covers `210/211` test times, and unit symmetry normalizes its sole gap to `1`.
-17. The next falsifiable node is H19: classify these normalized one-gap configurations and prove a local exchange law. No general theorem or new Lonely Runner case was proved.
+17. Normalized one-gap witnesses are isolated under one-speed exchanges, but their divisibility profiles differ.
+18. Modulo-`p` fibers give an exact new representation: unit speeds are two-arcs on `Z/9`, `g=3` speeds are three-point phase classes, and `g=9` speeds are all-or-nothing.
+19. The next falsifiable node is H20: use these phase rules to eliminate every divisibility profile. No general theorem or new Lonely Runner case was proved.
 
 ## Frontier
 
-- Primary: prove or kill H19 by classifying normalized one-gap configurations and the exchanges that attempt to cover their final gap.
+- Primary: prove or kill H20 by translating each finite `Z/9` phase-cover pattern into a global constraint over `Z/pZ`.
+- Secondary: retain H19's one-gap exchange fixtures as boundary tests for any proposed H20 lemma.
 - Secondary: extract a rational dual certificate for the H18 minimax value `40/23`; until then it remains a solver verdict.
 - Secondary: extend the prime scan beyond `67`, with explicit timeouts recorded as `unknown`, never as `UNSAT`.
 - Secondary: return to H2 only with an overlap inequality that explicitly depends on gcd/ratio data and therefore respects H4.
