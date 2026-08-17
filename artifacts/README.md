@@ -161,3 +161,6 @@ retain slower-runner handoff events.
 H53 computes the exact number of residue classes needed to block every reset
 when the largest speed is uniquely divisible, proving the prime-modulus and
 `N=4` subcases and showing why the composite `N=6` pattern is tight.
+H54 kills the tempting central-cell escape rule. H55 replaces it with the
+exact two-sided handoff skeleton forced at every unit grid point, pairing
+opposite unit residues through the unique divisible runner.

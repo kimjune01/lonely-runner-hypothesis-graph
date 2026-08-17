@@ -489,6 +489,31 @@ Therefore variable backoff cannot be discretized using only the divisible
 runner's events. A successful sliding-window sweep must also include the
 entry and exit events of the other runners and reason about their handoffs.
 
+A second shortcut, suggested by the first sharp profiles, is also false.
+Those fixtures left the central reset cells uncovered, but a full reset block
+does not force this geometry. For example, `(1,2,3,5,6)` blocks every reset
+index and strictly covers both central cells `k=2,3`; its gaps occur instead
+in cells `1,4`. Any escape-cell theorem must use the full residue pattern,
+not a preferred location such as the midpoint.
+
+The full event sweep does have a forced local skeleton. Assume `w` is the
+unique `N`-divisible speed and let `k` be a unit modulo `N`. At the grid point
+`t=k/N`, `w` is centered at an integer and every slower runner is at distance
+at least `1/N`. More precisely,
+
+```text
+kv =  1 mod N    => v is bad immediately to the left of k/N,
+kv = -1 mod N    => v is bad immediately to the right of k/N.
+```
+
+All other slower runners remain safe in a neighborhood. When the H53 reset
+cover is full, every unit residue occurs, so both sides are present at every
+unit grid point. The sweep is therefore pinched through `w` according to the
+deterministic pairing `r <-> -r` of unit residues. Each paired choice also
+satisfies `N | (v_r+v_{-r})`. This does not yet bound the quotient in that
+divisibility relation, but it is the first height-independent handoff
+skeleton retained after H52 and the central-cell shortcut fail.
+
 The scheduling analogy is pinwheel/windows scheduling, where recurring tasks
 must receive service in every sliding window. Here the direction is dual: the
 periodic bad-window streams are fixed and one seeks a zero-load instant. The

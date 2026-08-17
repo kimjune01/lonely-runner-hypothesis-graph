@@ -196,6 +196,14 @@ H0  selected nine-runner target is open
                                                                                                                                                 +--H53  residue-class
                                                                                                                                                          blocking minimum
                                                                                                                                                          PROVED
+                                                                                                                                                         |
+                                                                                                                                                         +--H54  central-cell
+                                                                                                                                                                  escape
+                                                                                                                                                                  KILLED
+                                                                                                                                                                  |
+                                                                                                                                                                  +--H55  unit-grid
+                                                                                                                                                                           handoff skeleton
+                                                                                                                                                                           PROVED
 ```
 
 ## Nodes
@@ -1204,6 +1212,25 @@ H0  selected nine-runner target is open
 - Verification: `minimum_unique_divisible_reset_blockers` and exact values across prime, prime-power, and mixed composite moduli.
 - Artifact: `artifacts/first-spectral-band-connectivity.md`.
 
+### H54 — A full reset block must escape in a central cell
+
+- Mode: attempted geometric localization after H53
+- Hypothesis: if all reset candidates are blocked with a unique divisible largest speed, one of the central radius-one cells is not strictly covered.
+- Kill: `(1,2,3,5,6)` blocks all six reset candidates and strictly covers cells `2` and `3`; its uncovered cells are `1` and `4`.
+- Lesson: the symmetric gaps seen in the first sharp fixtures are real, but their location is not fixed by reset saturation alone.
+- Verdict: killed.
+- Verification: exact `strict_lrc_cell_cover_certificate` regression.
+
+### H55 — Unit grid points force a two-sided handoff skeleton
+
+- Mode: proved local event invariant for the full sliding-window sweep
+- Statement: suppose `w` is the unique `N`-divisible speed. At every unit grid point `k/N`, `w` is centered in its bad window; slower runners with `kv=1 mod N` are the boundary owners immediately to the left, and those with `kv=-1 mod N` are the boundary owners immediately to the right. No other slower runner is locally bad.
+- Consequence under H53 saturation: every unit residue occurs, so both sides exist at every unit grid point and the sweep pairs residues `r` and `-r` through `w`. Selected opposite runners satisfy `N|(v_r+v_{-r})`.
+- Limitation: the quotient `(v_r+v_{-r})/N` is height-dependent, so the divisibility alone is not yet a bounded relation or an induction step.
+- Verdict: proved.
+- Verification: `unit_grid_handoff_skeleton`, saturated sharp fixtures, and a missing-residue fixture with empty handoff sides.
+- Artifact: `artifacts/first-spectral-band-connectivity.md`.
+
 ## What the graph established
 
 1. The elementary measure branch recovers `1/(2n)` and dies by an exact factor-two deficit.
@@ -1260,6 +1287,8 @@ H0  selected nine-runner target is open
 52. The reset bad sets are now characterized for every gcd stratum: units block two indices and nonunits block multiplication kernels. Kernel overlap proves new mixed cases, while sharp fixtures fully cover the reset indices and saturate the unit residue classes.
 53. Allowing every phase boundary of the largest divisible runner still does not give a complete witness set: `(1,3,4,5,12)` kills that extension. The next sweep must include slower-runner window events and their ownership handoffs.
 54. A full reset block with a unique divisible largest speed needs every unit residue plus one proper kernel per prime divisor: exactly `phi(N)` blockers for prime `N`, or `phi(N)+omega(N)` for composite `N`. The runner count proves the subcase for prime `N` and `N=4`; `N=6` is tight.
+55. Reset saturation does not localize the escape to the central cells: `(1,2,3,5,6)` kills that shortcut. The gap location depends on the actual quotient data above the residues.
+56. At each unit grid point, however, the full sweep has a deterministic local skeleton: residue `k^{-1}` approaches from the left, residue `-k^{-1}` from the right, and the unique divisible runner lies between them. Full reset saturation forces every such two-sided handoff.
 
 ## Frontier
 
@@ -1278,6 +1307,7 @@ H0  selected nine-runner target is open
 - Primary: prove or kill H49. The fast divisible-runner case follows from induction and slack; in the moderate case, show that the `N` radius-one reset chains cannot coexist with primitive gcd one. Do not weaken this back to the endpoint-only modular cover.
 - Primary: extend H51 beyond fully blocked reset unions using the radius-one interval handoff chains between reset candidates. H52 shows that varying the backoff only across the divisible runner's own phase boundaries is insufficient; slower-runner entry and exit events are load-bearing.
 - Primary: in the equality and near-equality cases of H53, exploit the forced unit permutation and maximal-kernel residues to constrain those handoff events. Start with the tight `N=6` pattern rather than a prime-modulus branch.
+- Primary: turn H55's opposite-residue divisibilities into a height-independent quantity. Candidate: compare the quotients `(v_r+v_{-r})/N` around the unit-grid cycle and seek a telescoping difference, rather than bounding each quotient separately.
 - Primary: turn H39 plus the ambient margin into a uniform contradiction, using determinant bounds for coefficient-two nullspaces rather than enumerating patterns separately for every `n`.
 - Secondary: if stronger auditability is desired, make the published sieve proof-producing or independently reimplement its three levels.
 - Historical: the local H21 37-prime scan and p=47 branch certificates remain useful cross-checks, but no longer block the nine-runner theorem.

@@ -968,6 +968,35 @@ def test_prime_and_four_moduli_have_too_few_slower_runners_to_block_resets():
         assert lrc.minimum_unique_divisible_reset_blockers(modulus) > modulus - 2
 
 
+def test_full_reset_block_does_not_force_a_central_cell_escape():
+    speeds = (1, 2, 3, 5, 6)
+
+    assert lrc.largest_divisible_reset_blocked_indices(speeds) == tuple(range(6))
+    assert lrc.strict_lrc_cell_cover_certificate(speeds, grid_cell=2) is not None
+    assert lrc.strict_lrc_cell_cover_certificate(speeds, grid_cell=3) is not None
+    assert lrc.strict_lrc_cell_cover_certificate(speeds, grid_cell=1) is None
+
+
+def test_unit_grid_handoff_skeleton_records_both_forced_sides():
+    speeds = (1, 3, 4, 5, 18)
+
+    assert lrc.unit_grid_handoff_skeleton(speeds) == (
+        (1, (1,), (5,)),
+        (5, (5,), (1,)),
+    )
+
+
+def test_missing_unit_residue_leaves_a_handoff_side_empty():
+    speeds = (1, 2, 3, 5)
+
+    assert lrc.unit_grid_handoff_skeleton(speeds) == (
+        (1, (1,), ()),
+        (2, (3,), (2,)),
+        (3, (2,), (3,)),
+        (4, (), (1,)),
+    )
+
+
 def test_handoff_seeds_append_the_eight_speed_separator():
     speeds = (1, 4, 5, 6, 7, 11, 13, 16)
     seeds = lrc.handoff_seed_pair(speeds, delta=Fraction(1, 9))

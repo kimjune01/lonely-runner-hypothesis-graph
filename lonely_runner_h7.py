@@ -340,6 +340,44 @@ def minimum_unique_divisible_reset_blockers(modulus: int) -> int:
     return totient + proper_prime_divisors
 
 
+def unit_grid_handoff_skeleton(
+    speeds: tuple[int, ...],
+) -> tuple[tuple[int, tuple[int, ...], tuple[int, ...]], ...]:
+    """Return left/right boundary runners at every unit grid point.
+
+    The largest speed must be the unique ``N``-divisible speed.  At ``k/N``
+    for a unit ``k``, speeds satisfying ``kv=1 mod N`` are bad immediately to
+    the left, while those satisfying ``kv=-1 mod N`` are bad immediately to
+    the right.  All other slower runners stay outside the target window near
+    that grid point.
+    """
+    if not speeds or any(speed <= 0 for speed in speeds):
+        raise ValueError("speeds must be a nonempty tuple of positive integers")
+    if len(set(speeds)) != len(speeds):
+        raise ValueError("speeds must be distinct")
+    modulus = len(speeds) + 1
+    largest = max(speeds)
+    if largest % modulus or sum(speed % modulus == 0 for speed in speeds) != 1:
+        raise ValueError("largest speed must be uniquely divisible by n+1")
+
+    slower = tuple(speed for speed in speeds if speed != largest)
+    return tuple(
+        (
+            grid,
+            tuple(sorted(speed for speed in slower if grid * speed % modulus == 1)),
+            tuple(
+                sorted(
+                    speed
+                    for speed in slower
+                    if grid * speed % modulus == modulus - 1
+                )
+            ),
+        )
+        for grid in range(1, modulus)
+        if gcd(grid, modulus) == 1
+    )
+
+
 def largest_divisible_reset_witness(
     speeds: tuple[int, ...],
 ) -> Fraction | None:
