@@ -138,7 +138,9 @@ of the unmodified product after a relation is found.
 The first-band artifact also records two distinct two-seed certificates.
 Direct H42 generation is false on an eight-speed first-band tuple. The weaker
 H44 appendability ordering still implies H39 by triangular relations and
-passes all 49 completed first-band scan survivors through eight speeds.
+passes all 55 completed first-band scan survivors through nine speeds.
 The same artifact records H45 and H46: lower-runner induction proves that
 every runner owns a singleton-load window, making the cyclic handoff graph
-connected; some cyclic first-occurrence order eliminates all 49 survivors.
+connected; some cyclic first-occurrence order eliminates all 55 survivors.
+H47 localizes every elimination step to the preceding new owner and at most
+two earlier owners.

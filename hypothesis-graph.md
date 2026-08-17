@@ -166,8 +166,12 @@ H0  selected nine-runner target is open
                                                                                            |       SELECTED FOR TESTING
                                                                                            |
                                                                                            +--H46  every runner owns a
-                                                                                                   singleton-load window
-                                                                                                   PROVED BY INDUCTION
+                                                                                           |       singleton-load window
+                                                                                           |       PROVED BY INDUCTION
+                                                                                           |
+                                                                                           +--H47  local four-owner
+                                                                                                   handoff elimination
+                                                                                                   SELECTED FOR TESTING
 ```
 
 ## Nodes
@@ -910,7 +914,7 @@ H0  selected nine-runner target is open
 - Mode: bounded Freiman dimension / relative-subtorus reduction
 - Hypothesis: if `ML(v)<=2/(2n+1)`, the rational span of all relations `a dot v=0` with `a_i in {-2,-1,0,1,2}` has rank at least `n-2`.
 - Equivalent consequence: `v` lies in a rational linear subspace of dimension at most two defined by coefficient-two normals. For fixed `n` there are only finitely many such subspaces.
-- Trial: exact rational row reduction found rank at least `n-2` for all `49` first-band survivors across the six complete scan ranges through eight speeds. It includes both H32 counterexamples; for `(2,5,6,8,10,11)`, signed elimination gives `6=2*5-2*2`.
+- Trial: exact rational row reduction found rank at least `n-2` for all `55` first-band survivors across the seven complete scan ranges through nine speeds. It includes both H32 counterexamples; for `(2,5,6,8,10,11)`, signed elimination gives `6=2*5-2*2`.
 - Why it matters: every hypothetical counterexample lies below the first-band ceiling. Proving H33 would reduce it to a 1-dimensional subtorus inside one of finitely many 2-dimensional rational subtori, precisely the objects whose relative spectra Jain--Kravitz show are explicitly computable by finite calculation.
 - Verdict: survives complete bounded scans; not proved.
 - Kill condition: a first-band tuple whose bounded relation rank is at most `n-3`.
@@ -1054,7 +1058,7 @@ H0  selected nine-runner target is open
 - Hypothesis: every primitive minimal LRC counterexample has two seed speeds from which all remaining speeds can be appended successively.
 - Rank consequence: order one chosen relation per appended target. Restricted to target columns, the relation matrix is triangular with nonzero diagonal, so its `n-2` rows are independent. Hence H44 implies H39.
 - Strict weakening: the eight-term Fibonacci chain needs three direct H42 seeds but is H44-appendable from `(1,2)`. The first-band tuple `(1,4,5,6,7,11,13,16)` likewise kills broad H42 while appending from `(1,4)` via `5=1+4`, `6=1+5`, `7=1+6`, `11=4+7`, `13=6+7`, and `16=5+11`.
-- Evidence: all 49 primitive first-band survivors in the completed scans through `n=8` pass; a dissociated control `(5,7,11)` fails.
+- Evidence: all 55 primitive first-band survivors in the completed scans through `n=9` pass; a dissociated control `(5,7,11)` fails.
 - Stalled-core consequence: if closure from every seed pair stops, every coefficient-two relation crossing from the available set contains at least two unresolved coordinates. This gives an exact nondismountable core for the complementary branch.
 - Verdict: selected for testing, not proved.
 - Kill condition: a possible minimal counterexample, or a structured first-band family, with no two-seed appendability ordering.
@@ -1068,7 +1072,7 @@ H0  selected nine-runner target is open
 - Rule: compress the singleton-load cells into their cyclic owner sequence. For each cyclic rotation, order runners by first appearance.
 - Hypothesis: in every primitive minimal LRC counterexample, some rotation is a coefficient-two elimination order: its first two owners are seeds and every later first-time owner has a coefficient-two relation supported only on itself and earlier owners.
 - Consequence: the selected relations are triangular on the first-occurrence targets, giving `n-2` independent rows and proving H39 directly.
-- Evidence: the cyclic-order rule passes all 49 completed first-band survivors through eight speeds at the conjectured width and three tested slack full-cover widths. Every one of the 385 distinct handoff transition edges in those slack profiles lies in some coefficient-two relation.
+- Evidence: the cyclic-order rule passes all 55 completed first-band survivors through nine speeds at the conjectured width. The original 49 through eight speeds also pass at three tested slack full-cover widths. Every one of the 385 distinct transition edges in those slack profiles lies in some coefficient-two relation.
 - Reset-order control: `(2,3,5,6,8,11)` has `ML=3/19`, just outside the first band. Its reset order stalls from `(2,11)`, while rotating to `(11,8)` gives the full elimination order `(11,8,6,5,3,2)`. This kills the generic reset-anchored strengthening and makes cyclic rotation load-bearing.
 - Caveat: H46 makes the transition graph connected, and the scan links every transition edge to a short relation, but neither fact guarantees that the relation avoids owners appearing later in the order.
 - Verdict: selected for testing, not proved.
@@ -1084,6 +1088,19 @@ H0  selected nine-runner target is open
 - Consequence: every runner occurs in the cyclic singleton-owner sequence. The handoff transition edges form a closed walk visiting all runners, hence their graph is connected. H45 only needs a rotation whose new owners can be eliminated using earlier ones.
 - Verdict: proved conditionally under the standard minimal-counterexample induction.
 - Verification: `inductive_private_window_margin`, exact load-profile tests, and the proof above.
+- Artifact: `artifacts/first-spectral-band-connectivity.md`.
+
+### H47 — A local four-owner handoff order eliminates a minimal counterexample
+
+- Mode: local strengthening of H45 matched to one-dimensional overload blocks
+- Hypothesis: H45 has a successful cyclic rotation in which every new owner `j` has a relation supported on at most four runners, contains both `j` and the immediately preceding new owner, uses only owners already seen besides `j`, and has every coefficient in `{-2,-1,0,1,2}`.
+- Consequence: the rows remain triangular on their new-owner targets, so H47 proves H39. Compared with H45, it additionally localizes each step to a handoff edge plus at most two earlier owners.
+- Evidence: all 229 elimination steps in the 55 completed certificates through nine speeds satisfy the rule. Coefficient one fails on 36 tuples. Support three fails on `(1,3,4,5,7,11,18)`; its necessary four-term step is `-2*5+2*7-2*11+18=0`.
+- Why promising: a transition between singleton owners is separated by a one-dimensional overload block. A four-runner certificate is compatible with combining its two boundary events; an unbounded-support relation would not be a genuinely local consequence.
+- Caveat: endpoint overlap inequalities currently give approximate relations with potentially large integer labels, not coefficient-two exact equalities. This arithmetic upgrade is the missing lemma.
+- Verdict: selected for testing, not proved.
+- Kill condition: a possible minimal counterexample for which every cyclic handoff order needs coefficient above two, support above four, a future owner, or omission of the immediate predecessor.
+- Verification: `local_handoff_elimination_certificate`, its sharp support regression, and scan column `local_handoff_eliminates`.
 - Artifact: `artifacts/first-spectral-band-connectivity.md`.
 
 ## What the graph established
@@ -1120,7 +1137,7 @@ H0  selected nine-runner target is open
 30. Quantitative Kronecker plus induction proves a coarse height—and hence coarse connected-relation—bound throughout the first band.
 31. Every scanned first-band tuple admits a positive triangular coefficient-two relation tree, making the desired sign pattern operational.
 32. Positive generation from two earlier seeds is false at six speeds; `(2,5,6,8,10,11)` is the first exact obstruction.
-33. The invariant surviving that kill is relation rank: coefficient-two relations span rank at least `n-2` on all 49 scanned survivors, reducing the speed family to at most two parameters.
+33. The invariant surviving that kill is relation rank: coefficient-two relations span rank at least `n-2` on all 55 scanned survivors, reducing the speed family to at most two parameters.
 34. Full bounded-relation rank is false: `(3,4,7,11)` sharply requires a two-dimensional ambient subtorus.
 35. Exact rational cell optimization gives that sharp pattern ambient loneliness `1/4`, a strict `1/20` margin; flat-torus geodesic covering then reduces the pattern to finitely many parameter pairs.
 36. Giri--Kravitz Lemma 3.3 makes the strict ambient margin automatic under induction: every proper two-dimensional ambient torus has loneliness at least `1/n`.
@@ -1132,9 +1149,10 @@ H0  selected nine-runner target is open
 42. A dissociated Riesz product proves uniformly that every hypothetical counterexample with `n>=18` has a coefficient-one subset-sum relation. This sharply improves H28's first relation but does not yet provide rank `n-2`.
 43. A two-element inclusion-maximal coefficient-two dissociated seed would imply H39 by independent star relations. The first 42 scanned survivors pass, but an eight-speed first-band tuple kills the broad H42 form by requiring three direct seeds.
 44. Exact Riesz constant terms kill blind iteration: the circuit `(1,2,3)` lowers the normalized cover ratio from `1/3` to `1/4`, and the unmodified product excludes none of the 42 scanned survivors.
-45. Two-seed bounded appendability repairs H42's chain defect while retaining the rank implication. All 49 scanned survivors through eight speeds pass, including the exact H42 separator.
-46. Exact sliding-window sweeps form a cyclic first-occurrence order from singleton owners. Some rotation is a complete bounded elimination order for every one of the 49 scanned survivors and at three slack full-cover widths.
+45. Two-seed bounded appendability repairs H42's chain defect while retaining the rank implication. All 55 scanned survivors through nine speeds pass, including three direct-H42 failures at eight and nine speeds.
+46. Exact sliding-window sweeps form a cyclic first-occurrence order from singleton owners. Some rotation is a complete bounded elimination order for all 55 survivors; the original 49 also pass three slack full-cover widths.
 47. Lower-runner induction proves that every runner in a minimal counterexample owns an open singleton-load window; consequently the handoff transition graph is connected.
+48. Every one of 229 tested elimination steps localizes to the preceding new owner plus at most two earlier owners with coefficient bound two. Both coefficient two and support four are sharp in the scan.
 
 ## Frontier
 
@@ -1148,6 +1166,7 @@ H0  selected nine-runner target is open
 - Primary: formulate a relation-annihilating dual polynomial whose constant term ignores the known circuit lattice, and test it first on `(1,2,3)` and the 42 scan survivors.
 - Primary: prove or kill H44. Analyze the nondismountable core left when coefficient-two appendability stalls; every crossing relation then contains at least two unresolved speeds.
 - Primary: prove or kill H45. In a hypothetical full cover, analyze the overload blocks separating singleton-owner cells and derive either a zero-load escape or a bounded relation involving the successive owners.
+- Primary: prove or kill H47. Combine the two boundary events of an overload block and determine what first-band/minimality input can reduce their large endpoint labels to a coefficient-two relation on at most four seen owners.
 - Primary: turn H39 plus the ambient margin into a uniform contradiction, using determinant bounds for coefficient-two nullspaces rather than enumerating patterns separately for every `n`.
 - Secondary: if stronger auditability is desired, make the published sieve proof-producing or independently reimplement its three levels.
 - Historical: the local H21 37-prime scan and p=47 branch certificates remain useful cross-checks, but no longer block the nine-runner theorem.

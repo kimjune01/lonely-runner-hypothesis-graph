@@ -865,6 +865,68 @@ def handoff_elimination_certificate(
     return None
 
 
+def local_handoff_elimination_certificate(
+    speeds: tuple[int, ...],
+    *,
+    delta: Fraction,
+    max_coefficient: int,
+    max_support: int,
+) -> tuple[
+    tuple[int, ...], tuple[tuple[int, tuple[int, ...]], ...]
+] | None:
+    """Require each handoff row to contain its predecessor and small support."""
+    if max_support < 2:
+        raise ValueError("max_support must be at least two")
+    owners = singleton_handoff_owners(speeds, delta=delta)
+    if len(owners) < len(speeds):
+        return None
+    relations = tuple(
+        sorted(
+            bounded_relations(speeds, max_coefficient=max_coefficient),
+            key=lambda row: (
+                sum(coefficient != 0 for coefficient in row),
+                sum(abs(coefficient) for coefficient in row),
+                row,
+            ),
+        )
+    )
+    for rotation in range(len(owners)):
+        order: list[int] = []
+        for owner in owners[rotation:] + owners[:rotation]:
+            if owner not in order:
+                order.append(owner)
+        if len(order) != len(speeds):
+            continue
+        available = set(order[:2])
+        steps: list[tuple[int, tuple[int, ...]]] = []
+        for position, target in enumerate(order[2:], 2):
+            predecessor = order[position - 1]
+            relation = next(
+                (
+                    row
+                    for row in relations
+                    if row[target]
+                    and row[predecessor]
+                    and sum(coefficient != 0 for coefficient in row)
+                    <= max_support
+                    and all(
+                        not coefficient
+                        or index in available
+                        or index == target
+                        for index, coefficient in enumerate(row)
+                    )
+                ),
+                None,
+            )
+            if relation is None:
+                break
+            available.add(target)
+            steps.append((target, relation))
+        else:
+            return tuple(order), tuple(steps)
+    return None
+
+
 def bounded_relation_pattern(
     speeds: tuple[int, ...], *, max_coefficient: int
 ) -> tuple[tuple[int, ...], ...]:

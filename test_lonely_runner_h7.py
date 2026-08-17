@@ -704,6 +704,47 @@ def test_cyclic_handoff_order_supplies_the_elimination_order():
     assert [target for target, _ in steps] == list(order[2:])
 
 
+def test_local_handoff_elimination_needs_and_uses_four_term_relation():
+    speeds = (1, 3, 4, 5, 7, 11, 18)
+    certificate = lrc.local_handoff_elimination_certificate(
+        speeds,
+        delta=Fraction(1, 8),
+        max_coefficient=2,
+        max_support=4,
+    )
+
+    assert certificate is not None
+    order, steps = certificate
+    assert order == (4, 6, 5, 3, 2, 1, 0)
+    assert all(
+        relation[order[position - 1]] != 0
+        for position, (_, relation) in enumerate(steps, 2)
+    )
+    assert max(sum(coefficient != 0 for coefficient in row) for _, row in steps) == 4
+    assert (
+        lrc.local_handoff_elimination_certificate(
+            speeds,
+            delta=Fraction(1, 8),
+            max_coefficient=2,
+            max_support=3,
+        )
+        is None
+    )
+
+
+def test_local_handoff_elimination_reaches_nine_speed_survivor():
+    speeds = (2, 5, 6, 8, 9, 11, 13, 14, 17)
+    certificate = lrc.local_handoff_elimination_certificate(
+        speeds,
+        delta=Fraction(1, 10),
+        max_coefficient=2,
+        max_support=4,
+    )
+    assert certificate is not None
+    _, steps = certificate
+    assert len(steps) == 7
+
+
 def test_two_parameter_pattern_reconstructs_common_nullspace():
     speeds = (1, 2, 7)
     pattern = lrc.bounded_relation_pattern(speeds, max_coefficient=2)
@@ -848,6 +889,7 @@ def test_first_band_scan_cli_emits_replayable_receipt():
     assert "handoff_seed_appendable" in lines[0]
     assert "handoff_cycle_appendable" in lines[0]
     assert "handoff_order_eliminates" in lines[0]
+    assert "local_handoff_eliminates" in lines[0]
     assert "parameter_norm_squared_cutoff" in lines[0]
     assert any("1,2,6\t2/7" in line for line in lines[1:])
 

@@ -21,7 +21,7 @@ def main() -> None:
         "\tcomponents\tpositive_seeds\tsigned_dissociated_seeds"
         "\ttwo_seed_appendable\thandoff_seeds\thandoff_seed_appendable"
         "\thandoff_cycle_appendable\thandoff_order_eliminates"
-        "\tpositive_tree\tambient_maximum"
+        "\tlocal_handoff_eliminates\tpositive_tree\tambient_maximum"
         "\tambient_margin\tparameter_norm_squared_cutoff"
     )
     for speeds, loneliness in lrc.first_band_survivors(
@@ -65,6 +65,12 @@ def main() -> None:
             delta=Fraction(1, args.runners + 1),
             max_coefficient=args.coefficient,
         )
+        local_handoff = lrc.local_handoff_elimination_certificate(
+            speeds,
+            delta=Fraction(1, args.runners + 1),
+            max_coefficient=args.coefficient,
+            max_support=4,
+        )
         tree = lrc.positive_triangular_relation_tree(
             speeds, max_coefficient=args.coefficient
         )
@@ -94,6 +100,7 @@ def main() -> None:
             f"\t{'yes' if handoff_steps is not None else 'no'}"
             f"\t{'yes' if handoff_cycle is not None else 'no'}"
             f"\t{'yes' if handoff_order is not None else 'no'}"
+            f"\t{'yes' if local_handoff is not None else 'no'}"
             f"\t{'yes' if tree is not None else 'no'}"
             f"\t{ambient}\t{margin}"
             f"\t{cutoff}"

@@ -68,9 +68,10 @@ Complete primitive scans used the first-band cutoff `2/(2n+1)`:
 | 5 | 30 | 8 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
 | 6 | 22 | 10 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
 | 7 | 20 | 13 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
-| 8 | 18 | 7 | 0 | 0 | 1 | 0 | 0 | 0 | 0 |
+| 8 | 22 | 8 | 0 | 0 | 2 | 0 | 0 | 0 | 0 |
+| 9 | 18 | 5 | 0 | 0 | 2 | 0 | 0 | 0 | 0 |
 
-Thus all `49` survivors have coefficient-two relation rank at least `n-2`.
+Thus all `55` survivors have coefficient-two relation rank at least `n-2`.
 They also have a spanning tree of indecomposable relations that can each be
 oriented as
 
@@ -120,7 +121,7 @@ same tuple appends the remaining speeds through the coefficient-one chain
 ```
 
 Each relation uses one new target and only previously available speeds, so
-the six rows are triangular and independent. All 49 completed scan survivors
+the six rows are triangular and independent. All 55 completed scan survivors
 are two-seed appendable. An eight-term Fibonacci chain likewise fails direct
 two-seed generation but passes appendability from `(1,2)`.
 
@@ -156,10 +157,11 @@ all `n` owners occur, and their cyclic transition graph is connected. This is
 a theorem under induction; upgrading the cyclic first-occurrence order to
 bounded elimination remains the hypothesis.
 
-The cyclic-order rule passes all 49 completed first-band survivors at the
-conjectured width and at three tested slack full-cover widths between `ML(v)`
-and `1/n`. Every one of the 385 distinct transition edges in those slack
-profiles also lies in some exact coefficient-two relation. For the
+The cyclic-order rule passes all 55 completed first-band survivors through
+nine speeds at the conjectured width. The original 49 survivors through eight
+speeds also pass at three tested slack full-cover widths between `ML(v)` and
+`1/n`. Every one of the 385 distinct transition edges in those slack profiles
+lies in some exact coefficient-two relation. For the
 eight-speed H42 separator, a successful rotation begins with `(1,16)` and
 eliminates all six remaining speeds in handoff first-occurrence order.
 
@@ -171,6 +173,21 @@ elimination order `(11,8,6,5,3,2)`. Cycling repairs that failure.
 This is evidence that sliding-window geometry selects both seeds and row
 order, not yet a proof that overload blocks force the required bounded
 arithmetic relations without future owners.
+
+The sharper H47 audit requires every elimination row to contain the immediately
+preceding new owner and at most two additional earlier owners. All 229 rows in
+the 55 certificates pass with coefficient bound two and support at most four.
+Both constants are necessary in the audit: coefficient one fails on 36 tuples,
+while support three fails on `(1,3,4,5,7,11,18)`. Its load-bearing four-term
+step is
+
+```text
+-2*5 + 2*7 - 2*11 + 18 = 0.
+```
+
+This local form matches the overload-block geometry more closely than H45:
+each new owner is linked to its predecessor plus at most two already-seen
+owners. Proving that local four-runner relation is the remaining target.
 
 The scheduling analogy is pinwheel/windows scheduling, where recurring tasks
 must receive service in every sliding window. Here the direction is dual: the
@@ -197,7 +214,8 @@ Run a replay with:
 
 ```text
 uv run scan_first_band.py --runners 6 --height 22
-uv run scan_first_band.py --runners 8 --height 18
+uv run scan_first_band.py --runners 8 --height 22
+uv run scan_first_band.py --runners 9 --height 18
 ```
 
 The CLI emits exact TSV rows containing maximum loneliness, relation rank,

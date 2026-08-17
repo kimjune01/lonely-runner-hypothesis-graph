@@ -68,3 +68,5 @@ eight-speed scan separates the last two: direct H42-style generation fails,
 while the weaker H44 appendability ordering still proves the desired rank.
 An exact periodic-window sweep additionally tests cyclic rotations of the
 singleton-owner sequence as geometrically selected bounded elimination orders.
+The completed scan now reaches nine speeds; its sharper local certificate uses
+the preceding new owner and at most two earlier owners per relation.
