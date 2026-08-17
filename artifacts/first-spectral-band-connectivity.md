@@ -451,6 +451,35 @@ the maximum, or make the exact reset-block union equal all of `Z/NZ`. The next
 step is not another capacity estimate: it must either vary the backoff offset
 or use interval handoffs between these fully blocked reset candidates.
 
+There is also an exact lower bound on how many slower residue classes a full
+reset block requires when `w` is the unique `N`-divisible speed. Every
+nonzero unit reset `k` can only be blocked by a unit speed with
+`v=-k^{-1} mod N`, so all `phi(N)` unit classes are mandatory. If `N` is
+composite, each distinct prime `p|N` supplies the nonunit reset `k=p`.
+Blocking it requires `N/p` to divide the speed. No one proper residue can do
+this for two distinct primes, since
+
+```text
+lcm(N/p,N/q)=N.
+```
+
+Thus at least `omega(N)` further nonunit speeds are necessary. They also
+suffice at the residue level: the speeds `N/p` block all resets divisible by
+`p`, and every nonunit reset is divisible by some prime factor of `N`. The
+exact minimum is therefore
+
+```text
+phi(N)                         if N is prime,
+phi(N)+omega(N)                if N is composite.
+```
+
+Only `N-2` slower runners are available. This proves the largest, uniquely
+divisible subcase whenever the displayed minimum exceeds `N-2`; in
+particular, for every prime `N` and for `N=4`. This is an elementary
+consequence of the reset certificate, not a new prime-number problem. At
+`N=6` equality is possible and the sharp residue pattern `(1,3,4,5,18)`
+realizes it, so the composite adversarial branch remains genuinely tight.
+
 The first attempted extension also has an exact boundary. Searching every
 time at which the largest divisible runner is exactly `1/N` from an integer
 does rescue the sharp fixture `(1,3,4,5,18)`, at `t=47/108`. But these phase

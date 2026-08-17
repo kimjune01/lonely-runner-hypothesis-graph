@@ -192,6 +192,10 @@ H0  selected nine-runner target is open
                                                                                                                                        +--H52  largest-runner
                                                                                                                                                 phase boundaries
                                                                                                                                                 KILLED
+                                                                                                                                                |
+                                                                                                                                                +--H53  residue-class
+                                                                                                                                                         blocking minimum
+                                                                                                                                                         PROVED
 ```
 
 ## Nodes
@@ -1189,6 +1193,17 @@ H0  selected nine-runner target is open
 - Verification: `largest_divisible_boundary_witness` and exact boundary regressions.
 - Artifact: `artifacts/first-spectral-band-connectivity.md`.
 
+### H53 — Exact residue-class minimum for a full reset block
+
+- Mode: proved adversarial set-cover invariant refining H51
+- Statement: suppose the largest speed is the unique `N`-divisible speed. The minimum number of slower residue classes that can block all H51 reset candidates is `phi(N)` for prime `N`, and `phi(N)+omega(N)` for composite `N`, where `omega` counts distinct prime divisors.
+- Proof: every nonzero unit reset `k` forces its unique unit residue `v=-k^{-1}`, requiring all `phi(N)` unit classes. For composite `N`, blocking reset `p` requires `N/p|v` for each prime `p|N`; one proper residue cannot serve distinct primes because `lcm(N/p,N/q)=N`. Conversely, unit residues block the units and residues `N/p` block every nonunit reset divisible by `p`.
+- Consequence: only `N-2` slower runners exist, so the largest, uniquely divisible subcase follows whenever this minimum exceeds `N-2`. This includes every prime `N` and `N=4`. The prime conclusion is elementary here; no unresolved prime branch is invoked.
+- Sharpness: for `N=6` the minimum is four, exactly the number of slower runners, and `(1,3,4,5,18)` realizes the required residue pattern.
+- Verdict: proved.
+- Verification: `minimum_unique_divisible_reset_blockers` and exact values across prime, prime-power, and mixed composite moduli.
+- Artifact: `artifacts/first-spectral-band-connectivity.md`.
+
 ## What the graph established
 
 1. The elementary measure branch recovers `1/(2n)` and dies by an exact factor-two deficit.
@@ -1244,6 +1259,7 @@ H0  selected nine-runner target is open
 51. Exact reset counting proves LRC when the largest speed is an `n+1` multiple and every slower speed has gcd at most two with `n+1`. Any remaining divisible-speed obstruction is genuinely mixed: the divisible runner is not largest or a gcd-at-least-three stratum is present.
 52. The reset bad sets are now characterized for every gcd stratum: units block two indices and nonunits block multiplication kernels. Kernel overlap proves new mixed cases, while sharp fixtures fully cover the reset indices and saturate the unit residue classes.
 53. Allowing every phase boundary of the largest divisible runner still does not give a complete witness set: `(1,3,4,5,12)` kills that extension. The next sweep must include slower-runner window events and their ownership handoffs.
+54. A full reset block with a unique divisible largest speed needs every unit residue plus one proper kernel per prime divisor: exactly `phi(N)` blockers for prime `N`, or `phi(N)+omega(N)` for composite `N`. The runner count proves the subcase for prime `N` and `N=4`; `N=6` is tight.
 
 ## Frontier
 
@@ -1261,6 +1277,7 @@ H0  selected nine-runner target is open
 - Primary: prove or kill H48 in its exact cell-chain form. Convert the divisible overlap determinants of the radius-two chains into one more independent coefficient-two speed relation at each rank-deficient stage.
 - Primary: prove or kill H49. The fast divisible-runner case follows from induction and slack; in the moderate case, show that the `N` radius-one reset chains cannot coexist with primitive gcd one. Do not weaken this back to the endpoint-only modular cover.
 - Primary: extend H51 beyond fully blocked reset unions using the radius-one interval handoff chains between reset candidates. H52 shows that varying the backoff only across the divisible runner's own phase boundaries is insufficient; slower-runner entry and exit events are load-bearing.
+- Primary: in the equality and near-equality cases of H53, exploit the forced unit permutation and maximal-kernel residues to constrain those handoff events. Start with the tight `N=6` pattern rather than a prime-modulus branch.
 - Primary: turn H39 plus the ambient margin into a uniform contradiction, using determinant bounds for coefficient-two nullspaces rather than enumerating patterns separately for every `n`.
 - Secondary: if stronger auditability is desired, make the published sieve proof-producing or independently reimplement its three levels.
 - Historical: the local H21 37-prime scan and p=47 branch certificates remain useful cross-checks, but no longer block the nine-runner theorem.

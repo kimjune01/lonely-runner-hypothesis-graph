@@ -158,3 +158,6 @@ gcd cases by overlap and isolates the fully blocked sharp fixtures.
 H52 records the next failed extension: even every phase boundary of the
 largest divisible runner is not a complete witness set, so a full sweep must
 retain slower-runner handoff events.
+H53 computes the exact number of residue classes needed to block every reset
+when the largest speed is uniquely divisible, proving the prime-modulus and
+`N=4` subcases and showing why the composite `N=6` pattern is tight.

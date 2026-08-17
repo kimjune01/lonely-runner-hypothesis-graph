@@ -953,6 +953,21 @@ def test_largest_runner_boundaries_are_not_a_complete_candidate_set():
     assert lrc.largest_divisible_boundary_witness(speeds) is None
 
 
+@pytest.mark.parametrize(
+    ("modulus", "minimum"),
+    [(3, 2), (4, 3), (5, 4), (6, 4), (8, 5), (9, 7), (10, 6), (12, 6)],
+)
+def test_unique_divisible_reset_cover_has_exact_residue_lower_bound(
+    modulus, minimum
+):
+    assert lrc.minimum_unique_divisible_reset_blockers(modulus) == minimum
+
+
+def test_prime_and_four_moduli_have_too_few_slower_runners_to_block_resets():
+    for modulus in (3, 4, 5, 7, 11, 13):
+        assert lrc.minimum_unique_divisible_reset_blockers(modulus) > modulus - 2
+
+
 def test_handoff_seeds_append_the_eight_speed_separator():
     speeds = (1, 4, 5, 6, 7, 11, 13, 16)
     seeds = lrc.handoff_seed_pair(speeds, delta=Fraction(1, 9))

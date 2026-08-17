@@ -313,6 +313,33 @@ def largest_divisible_reset_blocked_indices(
     return tuple(sorted(blocked))
 
 
+def minimum_unique_divisible_reset_blockers(modulus: int) -> int:
+    """Return the exact number of slower residue classes needed to block resets.
+
+    Assume the largest runner is the only speed divisible by ``modulus``.
+    Every nonzero unit reset needs its own unit-speed blocker, contributing
+    ``phi(modulus)``.  For composite modulus, covering the nonzero nonunits
+    needs one proper kernel for each distinct prime divisor, and those maximal
+    kernels also suffice.  A prime modulus has no nonzero nonunit resets.
+    """
+    if modulus < 2:
+        raise ValueError("modulus must be at least two")
+    totient = sum(gcd(residue, modulus) == 1 for residue in range(modulus))
+    remaining = modulus
+    distinct_primes = 0
+    prime = 2
+    while prime * prime <= remaining:
+        if remaining % prime == 0:
+            distinct_primes += 1
+            while remaining % prime == 0:
+                remaining //= prime
+        prime += 1
+    if remaining > 1:
+        distinct_primes += 1
+    proper_prime_divisors = distinct_primes - (totient == modulus - 1)
+    return totient + proper_prime_divisors
+
+
 def largest_divisible_reset_witness(
     speeds: tuple[int, ...],
 ) -> Fraction | None:
