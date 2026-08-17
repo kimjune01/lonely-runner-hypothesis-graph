@@ -451,6 +451,15 @@ the maximum, or make the exact reset-block union equal all of `Z/NZ`. The next
 step is not another capacity estimate: it must either vary the backoff offset
 or use interval handoffs between these fully blocked reset candidates.
 
+The first attempted extension also has an exact boundary. Searching every
+time at which the largest divisible runner is exactly `1/N` from an integer
+does rescue the sharp fixture `(1,3,4,5,18)`, at `t=47/108`. But these phase
+boundaries are not a complete candidate set: `(1,3,4,5,12)` has
+`ML=2/9>1/6`, yet none of its largest-runner boundary times is a witness.
+Therefore variable backoff cannot be discretized using only the divisible
+runner's events. A successful sliding-window sweep must also include the
+entry and exit events of the other runners and reason about their handoffs.
+
 The scheduling analogy is pinwheel/windows scheduling, where recurring tasks
 must receive service in every sliding window. Here the direction is dual: the
 periodic bad-window streams are fixed and one seeks a zero-load instant. The

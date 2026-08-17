@@ -155,3 +155,6 @@ all remaining gcd strata modulo `n+1` have size at most two.
 H51 exactly characterizes every slower runner's blocked reset indices as a
 two-point unit set or a multiplication kernel. This proves additional mixed
 gcd cases by overlap and isolates the fully blocked sharp fixtures.
+H52 records the next failed extension: even every phase boundary of the
+largest divisible runner is not a complete witness set, so a full sweep must
+retain slower-runner handoff events.

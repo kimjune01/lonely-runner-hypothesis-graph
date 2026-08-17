@@ -188,6 +188,10 @@ H0  selected nine-runner target is open
                                                                                                                               +--H51  exact reset-kernel
                                                                                                                                        certificate
                                                                                                                                        PROVED
+                                                                                                                                       |
+                                                                                                                                       +--H52  largest-runner
+                                                                                                                                                phase boundaries
+                                                                                                                                                KILLED
 ```
 
 ## Nodes
@@ -1174,6 +1178,17 @@ H0  selected nine-runner target is open
 - Verification: `largest_divisible_reset_blocked_indices`, direct-arithmetic exhaustive regressions through six speeds, and exact witness tests.
 - Artifact: `artifacts/first-spectral-band-connectivity.md`.
 
+### H52 — All phase boundaries of the largest divisible runner suffice
+
+- Mode: attempted phase-shift extension of H51
+- Hypothesis: if the largest speed `w` is divisible by `N=n+1` and the LRC bound holds, some witness occurs at `t=(j+/-1/N)/w`, where the largest runner is exactly at the target boundary.
+- Positive fixture: the fixed H51 reset offset is fully blocked for `(1,3,4,5,18)`, but the larger boundary set finds `t=47/108`.
+- Kill: `(1,3,4,5,12)` has `ML=2/9>1/6`, while every largest-runner boundary candidate fails.
+- Lesson: a variable-backoff algorithm must include window events owned by the slower runners; the divisible runner's phase clock alone loses necessary handoffs.
+- Verdict: killed.
+- Verification: `largest_divisible_boundary_witness` and exact boundary regressions.
+- Artifact: `artifacts/first-spectral-band-connectivity.md`.
+
 ## What the graph established
 
 1. The elementary measure branch recovers `1/(2n)` and dies by an exact factor-two deficit.
@@ -1228,6 +1243,7 @@ H0  selected nine-runner target is open
 50. Every strict primitive survivor avoids multiples of `n+1`. The resulting H49 barrier would prove the full conjecture after gcd normalization; its unnormalized form is killed by `(4,8,12)`, while the primitive form survives 2,875,130 targeted tuples and is sharp on the band boundary.
 51. Exact reset counting proves LRC when the largest speed is an `n+1` multiple and every slower speed has gcd at most two with `n+1`. Any remaining divisible-speed obstruction is genuinely mixed: the divisible runner is not largest or a gcd-at-least-three stratum is present.
 52. The reset bad sets are now characterized for every gcd stratum: units block two indices and nonunits block multiplication kernels. Kernel overlap proves new mixed cases, while sharp fixtures fully cover the reset indices and saturate the unit residue classes.
+53. Allowing every phase boundary of the largest divisible runner still does not give a complete witness set: `(1,3,4,5,12)` kills that extension. The next sweep must include slower-runner window events and their ownership handoffs.
 
 ## Frontier
 
@@ -1244,7 +1260,7 @@ H0  selected nine-runner target is open
 - Primary: prove or kill H47. Analyze the entire handoff segment between successive first-time owners; select at most two old owners whose endpoint events reduce the segment's large labels to one coefficient-two relation.
 - Primary: prove or kill H48 in its exact cell-chain form. Convert the divisible overlap determinants of the radius-two chains into one more independent coefficient-two speed relation at each rank-deficient stage.
 - Primary: prove or kill H49. The fast divisible-runner case follows from induction and slack; in the moderate case, show that the `N` radius-one reset chains cannot coexist with primitive gcd one. Do not weaken this back to the endpoint-only modular cover.
-- Primary: extend H51 beyond fully blocked reset unions. Vary the backoff offset or use the radius-one interval handoff chains between reset candidates; sharp fixtures show that fixed-offset counting alone is exhausted.
+- Primary: extend H51 beyond fully blocked reset unions using the radius-one interval handoff chains between reset candidates. H52 shows that varying the backoff only across the divisible runner's own phase boundaries is insufficient; slower-runner entry and exit events are load-bearing.
 - Primary: turn H39 plus the ambient margin into a uniform contradiction, using determinant bounds for coefficient-two nullspaces rather than enumerating patterns separately for every `n`.
 - Secondary: if stronger auditability is desired, make the published sieve proof-producing or independently reimplement its three levels.
 - Historical: the local H21 37-prime scan and p=47 branch certificates remain useful cross-checks, but no longer block the nine-runner theorem.

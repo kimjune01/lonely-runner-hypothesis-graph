@@ -334,6 +334,34 @@ def largest_divisible_reset_witness(
     return None
 
 
+def largest_divisible_boundary_witness(
+    speeds: tuple[int, ...],
+) -> Fraction | None:
+    """Search every target-width boundary of a largest divisible runner.
+
+    This finite candidate set is useful for falsifying boundary-only
+    arguments, but it is not complete for the Lonely Runner bound.
+    """
+    blocked = largest_divisible_reset_blocked_indices(speeds)
+    if blocked is None:
+        return None
+
+    modulus = len(speeds) + 1
+    largest = max(speeds)
+    delta = Fraction(1, modulus)
+    for phase in range(largest + 1):
+        for direction in (-1, 1):
+            time = (Fraction(phase) + direction * delta) / largest
+            if not 0 <= time <= 1:
+                continue
+            if all(
+                fractional_distance(speed * time) >= delta
+                for speed in speeds
+            ):
+                return time
+    return None
+
+
 def _critical_times(speeds: tuple[int, ...]):
     """Yield every possible lower-envelope maximum time in [0,1].
 

@@ -934,6 +934,25 @@ def test_largest_divisible_reset_block_sets_match_direct_arithmetic():
             assert blocked == direct
 
 
+def test_all_largest_runner_boundaries_can_work_after_fixed_reset_is_blocked():
+    speeds = (1, 3, 4, 5, 18)
+
+    assert lrc.largest_divisible_reset_witness(speeds) is None
+    witness = lrc.largest_divisible_boundary_witness(speeds)
+    assert witness == Fraction(47, 108)
+    assert all(
+        lrc.fractional_distance(speed * witness) >= Fraction(1, 6)
+        for speed in speeds
+    )
+
+
+def test_largest_runner_boundaries_are_not_a_complete_candidate_set():
+    speeds = (1, 3, 4, 5, 12)
+
+    assert lrc.maximum_loneliness(speeds) == Fraction(2, 9) > Fraction(1, 6)
+    assert lrc.largest_divisible_boundary_witness(speeds) is None
+
+
 def test_handoff_seeds_append_the_eight_speed_separator():
     speeds = (1, 4, 5, 6, 7, 11, 13, 16)
     seeds = lrc.handoff_seed_pair(speeds, delta=Fraction(1, 9))
