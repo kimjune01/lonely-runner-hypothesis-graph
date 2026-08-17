@@ -1464,6 +1464,23 @@ def test_circuit_quotient_identity_replays_on_three_speed_first_band():
         )
 
 
+@pytest.mark.parametrize(
+    ("runner_count", "multiple"),
+    [(3, 2), (3, 7), (4, 3), (5, 7), (6, 2), (8, 3)],
+)
+def test_canonical_factor_extension_has_exact_accumulating_value(
+    runner_count, multiple
+):
+    speeds = tuple(range(1, runner_count)) + (runner_count * multiple,)
+
+    assert lrc.maximum_loneliness(speeds) == Fraction(
+        multiple, runner_count * multiple + 1
+    )
+    assert lrc.bounded_relation_rank(
+        speeds, max_coefficient=2
+    ) >= runner_count - 2
+
+
 def test_local_handoff_elimination_reaches_nine_speed_survivor():
     speeds = (2, 5, 6, 8, 9, 11, 13, 14, 17)
     certificate = lrc.local_handoff_elimination_certificate(

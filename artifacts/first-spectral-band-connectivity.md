@@ -333,6 +333,68 @@ family through `r=15` likewise had core size at most one. This motivates H67,
 but a three-coordinate quotient still needs one global circuit before H39
 follows.
 
+Long-tail adversarial extensions gave the same result. With both added speeds
+allowed through `300`, bases `(1,2,3)` and `(1,3,4)` produced respectively 61
+and 64 subcritical covers. Through `250`, bases `(1,2,3,4)` and `(1,3,4,5)`
+produced 41 and 43. None had a two-owner core.
+
+### The canonical factor extension is harmless
+
+The one-owner cores in the wider scans are dominated by the classical family
+
+```text
+(1,2,...,n-1,nr),       r>=2.
+```
+
+Its value follows from a short packing lemma. Suppose
+`delta>1/(n+1)` and every `||kt||`, `1<=k<=n-1`, is at least `delta`.
+The half-open clockwise arcs of length `delta` beginning at
+
+```text
+0,t,2t,...,(n-1)t
+```
+
+are pairwise disjoint. Remove the arc beginning at zero. Both the removed arc
+and the arc beginning at `nt` can be inserted beside the same `n-1` common
+arcs. Their complement has total length
+
+```text
+delta + E,       E=1-n delta<delta.
+```
+
+At most one complement component can contain an interval of length `delta`,
+so both replacement arcs lie in that component and their starting points have
+distance at most `E`:
+
+```text
+||nt|| <= 1-n delta.
+```
+
+Set `delta=r/(nr+1)`. Then `E=1/(nr+1)`, and therefore
+
+```text
+||nrt|| <= r ||nt|| <= r/(nr+1)=delta.
+```
+
+This proves the upper bound. Equality occurs at `t=r/(nr+1)`: the first
+`n-1` speeds have distance at least `r/(nr+1)`, and `nr=-1 mod (nr+1)` gives
+the same distance for the final speed. Hence
+
+```text
+ML(1,2,...,n-1,nr)=r/(nr+1).
+```
+
+These examples approach `1/n` from below, but they are algebraically harmless.
+The rows
+
+```text
+2*1-2=0,       1+(k-1)-k=0  for 3<=k<=n-1
+```
+
+are `n-2` independent coefficient-two relations. Thus the dominant
+factor-chain accumulation family already satisfies H39; a multi-owner H67
+obstruction would need at least two noncanonical escaping directions.
+
 The sharper H47 audit requires every elimination row to contain the immediately
 preceding new owner and at most two additional owners drawn from the intervening
 handoff segment or the two initial seeds. All 229 rows in the 55 certificates

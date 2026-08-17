@@ -256,6 +256,11 @@ H0  selected nine-runner target is open
                                                                                                                                                                                                                                                                                        has size at
                                                                                                                                                                                                                                                                                        most one
                                                                                                                                                                                                                                                                                        SELECTED
+                                                                                                                                                                                                                                                                                       |
+                                                                                                                                                                                                                                                                                       +--H68  canonical factor
+                                                                                                                                                                                                                                                                                                extension family
+                                                                                                                                                                                                                                                                                                is harmless
+                                                                                                                                                                                                                                                                                                PROVED
 ```
 
 ## Nodes
@@ -1423,9 +1428,27 @@ H0  selected nine-runner target is open
 - Mode: weakened, operational successor to H47
 - Hypothesis: under lower-runner induction, every strict primitive first-band cover has `|C|<=1` for the H64 best cyclic rotation.
 - Why useful: H64 then gives coefficient-two rank at least `n-3`, and H66 reduces every missing repair to a three-coordinate quotient. This does not itself prove H39, but replaces an unbounded adversarial core by one scalar circuit obligation.
-- Exact evidence: all 55 completed first-band survivors have `C=empty`. At widths just below the lower-dimensional threshold, a complete five-speed height-`30` scan found 24 strict covers with core histogram `{0:16,1:8}`; a six-speed height-`22` scan found 22 covers, all with empty core. Three structured two-outlier scans found 17, 11, and 9 eligible covers through seven speeds, again with no core larger than one. The dilation family in H65 has core size at most one for `2<=r<=15`.
+- Exact evidence: all 55 completed first-band survivors have `C=empty`. At widths just below the lower-dimensional threshold, a complete five-speed height-`30` scan found 24 strict covers with core histogram `{0:16,1:8}`; a six-speed height-`22` scan found 22 covers, all with empty core. Three structured two-outlier scans found 17, 11, and 9 eligible covers through seven speeds, again with no core larger than one. Extended tail searches through height `300` found 61 eligible extensions of `(1,2,3)` and 64 of `(1,3,4)`; height-`250` searches found 41 extensions of `(1,2,3,4)` and 43 of `(1,3,4,5)`. Every core still had size at most one. The dilation family in H65 has core size at most one for `2<=r<=15`.
 - Kill condition: a subcritical cover with two unresolved owners in every cyclic rotation. A strict first-band example kills the stated hypothesis; a wider example only kills the exploratory broad form.
 - Verdict: selected for testing; no proof yet.
+- Artifact: `artifacts/first-spectral-band-connectivity.md`.
+
+### H68 — The canonical factor-extension family has an exact safe value
+
+- Mode: direct near-packing argument, answering the factor-chain branch
+- Statement: for `n>=3` and `r>=2`,
+
+  ```text
+  ML(1,2,...,n-1,nr) = r/(nr+1).
+  ```
+
+- Lower bound: at `t=r/(nr+1)`, every `k=1,...,n-1` has distance at least `r/(nr+1)`, while `nr` has exactly that distance because `nr=-1 mod nr+1`.
+- Replacement-arc lemma: if `delta>1/(n+1)` and `||kt||>=delta` for `k=1,...,n-1`, the `n` half-open arcs of length `delta` beginning at `0,t,...,(n-1)t` are disjoint. Delete the first arc. Both it and its translate beginning at `nt` fit into the complement of the remaining `n-1` common arcs, whose total length is `delta+E` with `E=1-n delta<delta`. Only one complement component can hold an interval of length `delta`, so both replacement arcs lie there and `||nt||<=E`.
+- Upper bound: set `delta=r/(nr+1)`, for which `E=1/(nr+1)`. The lemma gives `||nrt||<=r||nt||<=rE=delta`; hence either a canonical speed or the factor extension is bad at every time.
+- Rank consequence: the relations `2*1-2=0` and `1+(k-1)-k=0` for `3<=k<=n-1` are `n-2` independent coefficient-two rows. Thus the family already satisfies H39 even as its values accumulate upward at `1/n`.
+- Consequence: the principal adversarial “factor chain plus one reset runner” is completely safe and explains the one-owner cores dominating the subcritical scans. Any H67 counterexample needs at least two genuinely noncanonical escaping directions.
+- Verdict: proved.
+- Verification: exact critical-time and relation-rank regressions for `3<=n<=8` and several `r`.
 - Artifact: `artifacts/first-spectral-band-connectivity.md`.
 
 ## What the graph established
@@ -1498,6 +1521,7 @@ H0  selected nine-runner target is open
 66. Promoting a residual owner to a new handoff pivot repairs small stalls but fails at eight speeds. The family `(1,4,5,6,7,11,13,8r)` separates three levels above the sharp first-band edge: local peeling, handoff-selected appendability, and full coefficient-two rank. The first two eventually fail; the rank target survives.
 67. Back-substitution removes the algorithm from the remaining question. Modulo the independent local rows, every bounded circuit is supported on the two seeds plus the residual core, and H39 is exactly the inequality `dim Q>=|C|` for that quotient circuit space.
 68. No exact subcritical scan has produced two residual owners. The weakened H67 target `|C|<=1` would reduce any remaining repair to a three-coordinate quotient, but it does not by itself supply the last circuit.
+69. A replacement-arc argument exactly disposes of the canonical factor-extension family: `ML(1,2,...,n-1,nr)=r/(nr+1)`, and the canonical chain already supplies rank `n-2`. These one-scale accumulation examples cannot obstruct the general conjecture.
 
 ## Frontier
 
@@ -1507,6 +1531,7 @@ H0  selected nine-runner target is open
 - Primary: H65 shows that more elaborate rerooting rules are not the invariant. For the strict first band, compare the span of all coefficient-two circuits with the triangular handoff rows and prove that any residual core contributes an independent global circuit, regardless of whether a handoff order discovers it.
 - Primary: prove or kill H67. Two failed owners must lie in disjoint first-occurrence segments of every best rotation; retain their band-edge endpoint labels and test whether subtracting the two failures yields either one H47 row or a nonzero quotient circuit in H66.
 - Primary: lower-bound `dim Q` directly. For `|C|=1`, back-substitution leaves three integer speeds; seek a band-edge inequality that bounds their primitive determinant strongly enough to force one original coefficient-two circuit outside the local span.
+- Primary: use H68 as the equality model for H67. If a one-core tuple approaches `1/n`, compare its `n` near-packed arcs with the canonical translate and quantify how any second unresolved direction consumes more than the total packing slack.
 - Primary: replace H23 by a height-sensitive gap theorem, or formulate a lift-tree invariant that distinguishes fixed ordinary integers from spurious profinite survivor branches.
 - Primary: combine H27's upper-gap constraints with finite-checking/volume bounds; seek a complementary lemma controlling cuts with at least half the runners above them.
 - Primary: for the finite H28 normal vectors, formulate and test a concrete relative-subtorus descent; do not use the phrase “compatible sign pattern” without the transformation and preserved invariant.
