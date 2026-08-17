@@ -4,6 +4,7 @@ import itertools
 import math
 import shutil
 import subprocess
+import sys
 from fractions import Fraction
 from pathlib import Path
 
@@ -404,3 +405,231 @@ def test_connected_relation_hypothesis_needs_first_band_cutoff():
     speeds = (1, 2, 18)
     assert lrc.maximum_loneliness(speeds) == Fraction(6, 19) < Fraction(1, 3)
     assert len(lrc.bounded_relation_components(speeds, max_coefficient=5)) > 1
+
+
+def test_decomposable_sum_does_not_connect_independent_relation_blocks():
+    speeds = (1, 2, 100, 200)
+    assert lrc.bounded_relation_components(speeds, max_coefficient=2) == (
+        (0, 1),
+        (2, 3),
+    )
+
+
+@pytest.mark.parametrize("speeds", [(1, 2, 6), (1, 2, 3, 8), (1, 3, 4, 5, 18)])
+def test_first_band_connectivity_certificate_is_an_exact_relation_tree(speeds):
+    certificate = lrc.bounded_relation_connectivity_certificate(
+        speeds, max_coefficient=2
+    )
+    assert certificate is not None
+    assert len(certificate) <= len(speeds) - 1
+    assert all(
+        sum(coefficient * speed for coefficient, speed in zip(relation, speeds)) == 0
+        for relation in certificate
+    )
+    assert all(max(map(abs, relation)) <= 2 for relation in certificate)
+
+
+@pytest.mark.parametrize("speeds", [(1, 2, 18), (1, 2, 100, 200)])
+def test_disconnected_tuple_has_no_bounded_relation_tree(speeds):
+    assert (
+        lrc.bounded_relation_connectivity_certificate(speeds, max_coefficient=2)
+        is None
+    )
+
+
+@pytest.mark.parametrize(
+    "speeds",
+    [
+        (1, 2, 6),
+        (1, 2, 3, 8),
+        (1, 3, 4, 5, 18),
+        (1, 5, 6, 11, 16, 17),
+        (1, 3, 4, 5, 7, 13, 18),
+    ],
+)
+def test_first_band_fixtures_have_positive_triangular_relation_tree(speeds):
+    certificate = lrc.positive_triangular_relation_tree(
+        speeds, max_coefficient=2
+    )
+    assert certificate is not None
+    for relation in certificate:
+        support = [index for index, coefficient in enumerate(relation) if coefficient]
+        largest = max(support, key=lambda index: speeds[index])
+        assert relation[largest] == -1
+        assert all(
+            coefficient > 0
+            for index, coefficient in enumerate(relation)
+            if index != largest and coefficient
+        )
+        assert sum(
+            coefficient * speed for coefficient, speed in zip(relation, speeds)
+        ) == 0
+
+
+@pytest.mark.parametrize(
+    "speeds",
+    [
+        (1, 2, 6),
+        (1, 3, 4, 5, 18),
+        (1, 5, 6, 11, 16, 17),
+        (1, 3, 4, 5, 7, 13, 18),
+    ],
+)
+def test_first_band_fixtures_are_generated_by_at_most_two_seeds(speeds):
+    seeds, relations = lrc.positive_generation_certificate(
+        speeds, max_coefficient=2
+    )
+    assert len(seeds) <= 2
+    assert len(seeds) + len(relations) == len(speeds)
+    for target, coefficients in relations:
+        assert speeds[target] == sum(
+            coefficient * speeds[index]
+            for index, coefficient in enumerate(coefficients)
+        )
+
+
+def test_generic_three_speed_tuple_needs_three_positive_seeds():
+    seeds, _ = lrc.positive_generation_certificate(
+        (5, 7, 11), max_coefficient=2
+    )
+    assert seeds == (0, 1, 2)
+
+
+@pytest.mark.parametrize(
+    "speeds",
+    [
+        (1, 2, 6),
+        (1, 3, 4, 5, 18),
+        (2, 5, 6, 8, 10, 11),
+        (2, 6, 7, 8, 10, 13, 14),
+        (1, 3, 4, 5, 7, 13, 18),
+    ],
+)
+def test_first_band_relations_leave_at_most_two_parameters(speeds):
+    assert lrc.bounded_relation_rank(speeds, max_coefficient=2) >= len(speeds) - 2
+
+
+@pytest.mark.parametrize(
+    "speeds",
+    [
+        (1, 2, 6),
+        (1, 3, 4, 5, 18),
+        (2, 5, 6, 8, 10, 11),
+        (2, 6, 7, 8, 10, 13, 14),
+        (1, 3, 4, 5, 7, 13, 18),
+    ],
+)
+def test_scanned_first_band_fixtures_have_full_short_relation_rank(speeds):
+    assert lrc.bounded_relation_rank(speeds, max_coefficient=2) == len(speeds) - 1
+
+
+def test_generic_tuple_can_have_more_than_two_relation_parameters():
+    speeds = (5, 7, 11)
+    assert lrc.bounded_relation_rank(speeds, max_coefficient=2) < len(speeds) - 2
+
+
+def test_two_parameter_pattern_reconstructs_common_nullspace():
+    speeds = (1, 2, 7)
+    pattern = lrc.bounded_relation_pattern(speeds, max_coefficient=2)
+
+    assert pattern == ((1, 2, 0), (0, 0, 1))
+    assert all(
+        sum(coordinate * entry for coordinate, entry in zip(relation, column)) == 0
+        for relation in lrc.bounded_relations(speeds, max_coefficient=2)
+        for column in pattern
+    )
+
+
+def test_first_band_rank_bound_is_sharp_and_gives_two_torus_pattern():
+    speeds = (3, 4, 7, 11)
+    pattern = lrc.bounded_relation_pattern(speeds, max_coefficient=2)
+
+    assert lrc.maximum_loneliness(speeds) == Fraction(2, 9)
+    assert lrc.bounded_relation_rank(speeds, max_coefficient=2) == 2
+    assert pattern == ((2, -1, 1, 0), (1, -1, 0, -1))
+
+
+def test_two_torus_pattern_has_exact_safe_margin():
+    pattern = ((2, -1, 1, 0), (1, -1, 0, -1))
+    value, witness = lrc.pattern_maximum_loneliness(pattern)
+
+    assert value == Fraction(1, 4)
+    assert all(
+        lrc.fractional_distance(
+            sum(column[index] * coordinate for column, coordinate in zip(pattern, witness))
+        )
+        >= value
+        for index in range(4)
+    )
+
+
+def test_safe_margin_gives_finite_parameter_norm_cutoff():
+    pattern = ((2, -1, 1, 0), (1, -1, 0, -1))
+
+    assert lrc.pattern_parameter_norm_squared_cutoff(
+        pattern, threshold=Fraction(1, 5)
+    ) == 500
+
+
+def test_parameter_cutoff_requires_strict_ambient_margin():
+    pattern = ((2, -1, 1, 0), (1, -1, 0, -1))
+
+    with pytest.raises(ValueError, match="strictly exceed"):
+        lrc.pattern_parameter_norm_squared_cutoff(
+            pattern, threshold=Fraction(1, 4)
+        )
+
+
+def test_full_bounded_relation_rank_recovers_the_primitive_speed_ray():
+    speeds = (2, 5, 6, 8, 10, 11)
+    pattern = lrc.bounded_relation_pattern(speeds, max_coefficient=2)
+
+    assert pattern == (speeds,)
+    assert math.gcd(*pattern[0]) == 1
+
+
+def test_first_band_enumerator_replays_three_speed_survivors():
+    survivors = list(lrc.first_band_survivors(runner_count=3, height=30))
+    assert [speeds for speeds, _ in survivors] == [
+        (1, 2, 3),
+        (1, 2, 6),
+        (1, 3, 4),
+        (1, 5, 6),
+        (2, 3, 5),
+    ]
+    assert all(value <= Fraction(2, 7) for _, value in survivors)
+
+
+def test_first_band_scan_cli_emits_replayable_receipt():
+    result = subprocess.run(
+        [
+            sys.executable,
+            str(Path(__file__).with_name("scan_first_band.py")),
+            "--runners",
+            "3",
+            "--height",
+            "6",
+        ],
+        check=True,
+        capture_output=True,
+        text=True,
+    )
+    lines = result.stdout.splitlines()
+    assert lines[0].startswith("runners\theight\tspeeds\tmaximum_loneliness")
+    assert "ambient_maximum" in lines[0]
+    assert "parameter_norm_squared_cutoff" in lines[0]
+    assert any("1,2,6\t2/7" in line for line in lines[1:])
+
+
+def test_coarse_inductive_first_band_height_bound():
+    assert lrc.inductive_first_band_height_bound(3) == 1764
+    assert lrc.inductive_first_band_height_bound(4) == 1_259_712
+
+
+def test_early_first_band_predicate_matches_exact_maximum():
+    for runner_count, height in [(3, 14), (4, 10)]:
+        threshold = Fraction(2, 2 * runner_count + 1)
+        for speeds in itertools.combinations(range(1, height + 1), runner_count):
+            assert lrc.loneliness_at_most(speeds, threshold=threshold) == (
+                lrc.maximum_loneliness(speeds) <= threshold
+            )

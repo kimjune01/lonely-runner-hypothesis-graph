@@ -44,5 +44,5 @@ lift-tree hypotheses are recorded in
 
 The current general-case branch proves height-sensitive grid recovery, a
 multi-fast-runner gap lemma, and an explicit bounded Fourier relation theorem.
-The surviving first-spectral-band connectivity hypothesis is summarized in
+The surviving first-spectral-band bounded-rank hypothesis is summarized in
 [`artifacts/first-spectral-band-connectivity.md`](artifacts/first-spectral-band-connectivity.md).

@@ -9,8 +9,8 @@ from __future__ import annotations
 
 from fractions import Fraction
 from functools import lru_cache
-from itertools import product
-from math import gcd
+from itertools import combinations, product
+from math import gcd, lcm
 
 
 def covers(*, v: int, j: int, k: int, p: int, denominator: int) -> bool:
@@ -28,31 +28,40 @@ def fractional_distance(value: Fraction | int) -> Fraction:
     return min(residue, 1 - residue)
 
 
-def maximum_loneliness(speeds: tuple[int, ...]) -> Fraction:
-    """Compute max_t min_i ||v_i t|| exactly from its critical times.
+def _critical_times(speeds: tuple[int, ...]):
+    """Yield every possible lower-envelope maximum time in [0,1].
 
-    A maximum of the lower envelope occurs at a cusp of one triangular wave
-    or where two affine pieces agree. Those times have denominators 2*v_i,
-    v_i+v_j, or |v_i-v_j|.
+    At a maximum, active affine pieces have opposing slopes; their equality
+    has denominator ``v_i+v_j``. Taking ``i=j`` includes triangular-wave
+    cusps with denominator ``2*v_i``.
     """
+    yield Fraction(0)
+    yield Fraction(1)
+    for index, first in enumerate(speeds):
+        for second in speeds[index:]:
+            denominator = first + second
+            for numerator in range(denominator + 1):
+                yield Fraction(numerator, denominator)
+
+
+def maximum_loneliness(speeds: tuple[int, ...]) -> Fraction:
+    """Compute max_t min_i ||v_i t|| exactly from its critical times."""
     if not speeds or any(speed <= 0 for speed in speeds):
         raise ValueError("speeds must be a nonempty tuple of positive integers")
-
-    candidates = {Fraction(0), Fraction(1)}
-    for speed in speeds:
-        denominator = 2 * speed
-        candidates.update(Fraction(numerator, denominator) for numerator in range(denominator + 1))
-    for index, first in enumerate(speeds):
-        for second in speeds[index + 1 :]:
-            for denominator in {first + second, abs(first - second)} - {0}:
-                candidates.update(
-                    Fraction(numerator, denominator)
-                    for numerator in range(denominator + 1)
-                )
-
     return max(
         min(fractional_distance(speed * time) for speed in speeds)
-        for time in candidates
+        for time in set(_critical_times(speeds))
+    )
+
+
+def loneliness_at_most(speeds: tuple[int, ...], *, threshold: Fraction) -> bool:
+    """Decide an upper bound exactly, returning early at a violating time."""
+    if not speeds or any(speed <= 0 for speed in speeds):
+        raise ValueError("speeds must be a nonempty tuple of positive integers")
+    threshold = Fraction(threshold)
+    return all(
+        min(fractional_distance(speed * time) for speed in speeds) <= threshold
+        for time in _critical_times(speeds)
     )
 
 
@@ -172,15 +181,58 @@ def find_bounded_relation(
     return None
 
 
-def bounded_relation_components(
+def _indecomposable_bounded_relations(
     speeds: tuple[int, ...], *, max_coefficient: int
-) -> tuple[tuple[int, ...], ...]:
-    """Components joined by relations with uniformly bounded coefficients."""
+) -> dict[int, tuple[int, ...]]:
+    """Map each indecomposable support mask to one primitive relation."""
     if not speeds or any(speed <= 0 for speed in speeds):
         raise ValueError("speeds must be a nonempty tuple of positive integers")
     if max_coefficient < 1:
         raise ValueError("max_coefficient must be positive")
 
+    relations_by_mask: dict[int, tuple[int, ...]] = {}
+    coefficients = range(-max_coefficient, max_coefficient + 1)
+    for relation in product(coefficients, repeat=len(speeds)):
+        support = [index for index, coefficient in enumerate(relation) if coefficient]
+        if len(support) < 2:
+            continue
+        if sum(coefficient * speed for coefficient, speed in zip(relation, speeds)):
+            continue
+        mask = sum(1 << index for index in support)
+        if mask not in relations_by_mask:
+            divisor = gcd(*(abs(coefficient) for coefficient in relation))
+            primitive = tuple(coefficient // divisor for coefficient in relation)
+            if next(coefficient for coefficient in primitive if coefficient) < 0:
+                primitive = tuple(-coefficient for coefficient in primitive)
+            relations_by_mask[mask] = primitive
+
+    indecomposable: dict[int, tuple[int, ...]] = {}
+    for mask, relation in relations_by_mask.items():
+        decomposable = False
+        submask = (mask - 1) & mask
+        while submask:
+            complement = mask ^ submask
+            if submask in relations_by_mask and complement in relations_by_mask:
+                decomposable = True
+                break
+            submask = (submask - 1) & mask
+        if not decomposable:
+            indecomposable[mask] = relation
+    return indecomposable
+
+
+def bounded_relation_components(
+    speeds: tuple[int, ...], *, max_coefficient: int
+) -> tuple[tuple[int, ...], ...]:
+    """Components joined by indecomposable bounded relation supports.
+
+    A support is decomposable when it splits into two disjoint nonempty
+    supports that each carry a bounded relation. Such a relation may be only
+    the sum of two unrelated certificates and must not connect their blocks.
+    """
+    relations = _indecomposable_bounded_relations(
+        speeds, max_coefficient=max_coefficient
+    )
     parent = list(range(len(speeds)))
 
     def find(index: int) -> int:
@@ -195,13 +247,8 @@ def bounded_relation_components(
         if first_root != second_root:
             parent[second_root] = first_root
 
-    coefficients = range(-max_coefficient, max_coefficient + 1)
-    for relation in product(coefficients, repeat=len(speeds)):
-        support = [index for index, coefficient in enumerate(relation) if coefficient]
-        if len(support) < 2:
-            continue
-        if sum(coefficient * speed for coefficient, speed in zip(relation, speeds)):
-            continue
+    for mask in relations:
+        support = [index for index in range(len(speeds)) if mask & (1 << index)]
         for index in support[1:]:
             union(support[0], index)
 
@@ -209,6 +256,355 @@ def bounded_relation_components(
     for index in range(len(speeds)):
         components.setdefault(find(index), []).append(index)
     return tuple(sorted((tuple(component) for component in components.values())))
+
+
+def bounded_relation_connectivity_certificate(
+    speeds: tuple[int, ...], *, max_coefficient: int
+) -> tuple[tuple[int, ...], ...] | None:
+    """Return an exact spanning relation tree, or ``None`` if disconnected."""
+    relations = _indecomposable_bounded_relations(
+        speeds, max_coefficient=max_coefficient
+    )
+    parent = list(range(len(speeds)))
+
+    def find(index: int) -> int:
+        while parent[index] != index:
+            parent[index] = parent[parent[index]]
+            index = parent[index]
+        return index
+
+    certificate: list[tuple[int, ...]] = []
+    for mask, relation in sorted(
+        relations.items(), key=lambda item: (item[0].bit_count(), item[0])
+    ):
+        support = [index for index in range(len(speeds)) if mask & (1 << index)]
+        roots = {find(index) for index in support}
+        if len(roots) < 2:
+            continue
+        root = support[0]
+        for index in support[1:]:
+            first_root = find(root)
+            second_root = find(index)
+            if first_root != second_root:
+                parent[second_root] = first_root
+        certificate.append(relation)
+        if len({find(index) for index in range(len(speeds))}) == 1:
+            return tuple(certificate)
+    return None
+
+
+def positive_triangular_relation_tree(
+    speeds: tuple[int, ...], *, max_coefficient: int
+) -> tuple[tuple[int, ...], ...] | None:
+    """Span all runners by indecomposable relations solving for their maximum.
+
+    Each returned relation is oriented with coefficient ``-1`` on the largest
+    speed in its support and positive bounded coefficients on smaller speeds.
+    """
+    indecomposable_masks = set(
+        _indecomposable_bounded_relations(
+            speeds, max_coefficient=max_coefficient
+        )
+    )
+    positive_by_mask: dict[int, tuple[int, ...]] = {}
+    coefficients = range(-max_coefficient, max_coefficient + 1)
+    for relation in product(coefficients, repeat=len(speeds)):
+        support = [index for index, coefficient in enumerate(relation) if coefficient]
+        if len(support) < 2:
+            continue
+        mask = sum(1 << index for index in support)
+        if mask not in indecomposable_masks or mask in positive_by_mask:
+            continue
+        if sum(coefficient * speed for coefficient, speed in zip(relation, speeds)):
+            continue
+        largest = max(support, key=lambda index: speeds[index])
+        oriented = relation
+        if oriented[largest] == 1:
+            oriented = tuple(-coefficient for coefficient in oriented)
+        if oriented[largest] != -1:
+            continue
+        if any(
+            coefficient < 0
+            for index, coefficient in enumerate(oriented)
+            if index != largest
+        ):
+            continue
+        positive_by_mask[mask] = oriented
+
+    parent = list(range(len(speeds)))
+
+    def find(index: int) -> int:
+        while parent[index] != index:
+            parent[index] = parent[parent[index]]
+            index = parent[index]
+        return index
+
+    certificate: list[tuple[int, ...]] = []
+    for mask, relation in sorted(
+        positive_by_mask.items(), key=lambda item: (item[0].bit_count(), item[0])
+    ):
+        support = [index for index in range(len(speeds)) if mask & (1 << index)]
+        roots = {find(index) for index in support}
+        if len(roots) < 2:
+            continue
+        root = support[0]
+        for index in support[1:]:
+            first_root = find(root)
+            second_root = find(index)
+            if first_root != second_root:
+                parent[second_root] = first_root
+        certificate.append(relation)
+        if len({find(index) for index in range(len(speeds))}) == 1:
+            return tuple(certificate)
+    return None
+
+
+def positive_generation_certificate(
+    speeds: tuple[int, ...], *, max_coefficient: int
+) -> tuple[tuple[int, ...], tuple[tuple[int, tuple[int, ...]], ...]]:
+    """Generate each possible speed from earlier ones, leaving minimal seeds.
+
+    Since the speeds are strictly increasing, whether a target has a positive
+    bounded representation depends only on earlier speeds. Every target that
+    lacks one is necessarily a seed; choosing a representation whenever one
+    exists therefore minimizes the seed count.
+    """
+    if not speeds or any(speed <= 0 for speed in speeds):
+        raise ValueError("speeds must be a nonempty tuple of positive integers")
+    if tuple(sorted(set(speeds))) != speeds:
+        raise ValueError("speeds must be strictly increasing")
+    if max_coefficient < 1:
+        raise ValueError("max_coefficient must be positive")
+
+    seeds: list[int] = []
+    relations: list[tuple[int, tuple[int, ...]]] = []
+    for target, speed in enumerate(speeds):
+        representation = None
+        for prefix in product(range(max_coefficient + 1), repeat=target):
+            if sum(
+                coefficient * speeds[index]
+                for index, coefficient in enumerate(prefix)
+            ) == speed:
+                representation = prefix + (0,) * (len(speeds) - target)
+                break
+        if representation is None:
+            seeds.append(target)
+        else:
+            relations.append((target, representation))
+    return tuple(seeds), tuple(relations)
+
+
+def bounded_relations(
+    speeds: tuple[int, ...], *, max_coefficient: int
+) -> tuple[tuple[int, ...], ...]:
+    """All nonzero speed relations within a symmetric coefficient box."""
+    if not speeds or any(speed <= 0 for speed in speeds):
+        raise ValueError("speeds must be a nonempty tuple of positive integers")
+    if max_coefficient < 1:
+        raise ValueError("max_coefficient must be positive")
+
+    coefficients = range(-max_coefficient, max_coefficient + 1)
+    return tuple(
+        relation
+        for relation in product(coefficients, repeat=len(speeds))
+        if any(relation)
+        and not sum(
+            coefficient * speed for coefficient, speed in zip(relation, speeds)
+        )
+    )
+
+
+def _rational_row_basis(
+    rows: tuple[tuple[int, ...], ...], *, width: int
+) -> dict[int, list[Fraction]]:
+    basis: dict[int, list[Fraction]] = {}
+    for relation in rows:
+        row = [Fraction(coefficient) for coefficient in relation]
+        for pivot in sorted(basis):
+            if row[pivot]:
+                factor = row[pivot]
+                row = [
+                    entry - factor * basis_entry
+                    for entry, basis_entry in zip(row, basis[pivot])
+                ]
+        pivot = next((index for index, entry in enumerate(row) if entry), None)
+        if pivot is None:
+            continue
+        scale = row[pivot]
+        basis[pivot] = [entry / scale for entry in row]
+        if len(basis) == width:
+            break
+    return basis
+
+
+def bounded_relation_rank(speeds: tuple[int, ...], *, max_coefficient: int) -> int:
+    """Rank over Q of all speed relations within a coefficient box."""
+    relations = bounded_relations(speeds, max_coefficient=max_coefficient)
+    basis = _rational_row_basis(relations, width=len(speeds))
+    return len(basis)
+
+
+def bounded_relation_pattern(
+    speeds: tuple[int, ...], *, max_coefficient: int
+) -> tuple[tuple[int, ...], ...]:
+    """Primitive integer basis for the subspace cut out by bounded relations.
+
+    Each returned column is a coordinate pattern.  Their rational span is the
+    common nullspace of every bounded relation and therefore contains the
+    supplied speed vector.  Under H33 there are at most two columns.
+    """
+    relations = bounded_relations(speeds, max_coefficient=max_coefficient)
+    row_basis = _rational_row_basis(relations, width=len(speeds))
+    free = [index for index in range(len(speeds)) if index not in row_basis]
+    columns: list[tuple[int, ...]] = []
+    for free_index in free:
+        column = [Fraction(0) for _ in speeds]
+        column[free_index] = 1
+        for pivot in sorted(row_basis, reverse=True):
+            row = row_basis[pivot]
+            column[pivot] = -sum(
+                coefficient * entry
+                for coefficient, entry in zip(row[pivot + 1 :], column[pivot + 1 :])
+            )
+        denominator = lcm(*(entry.denominator for entry in column))
+        integer_column = [int(entry * denominator) for entry in column]
+        divisor = gcd(*integer_column)
+        integer_column = [entry // divisor for entry in integer_column]
+        first = next(entry for entry in integer_column if entry)
+        if first < 0:
+            integer_column = [-entry for entry in integer_column]
+        columns.append(tuple(integer_column))
+    return tuple(columns)
+
+
+def _solve_three_equations(
+    equations: tuple[tuple[tuple[Fraction, Fraction, Fraction], Fraction], ...]
+) -> tuple[Fraction, Fraction, Fraction] | None:
+    matrix = [[*coefficients, bound] for coefficients, bound in equations]
+    for column in range(3):
+        pivot = next(
+            (row for row in range(column, 3) if matrix[row][column]), None
+        )
+        if pivot is None:
+            return None
+        matrix[column], matrix[pivot] = matrix[pivot], matrix[column]
+        scale = matrix[column][column]
+        matrix[column] = [entry / scale for entry in matrix[column]]
+        for row in range(3):
+            if row == column or not matrix[row][column]:
+                continue
+            scale = matrix[row][column]
+            matrix[row] = [
+                entry - scale * pivot_entry
+                for entry, pivot_entry in zip(matrix[row], matrix[column])
+            ]
+    return tuple(matrix[row][3] for row in range(3))
+
+
+def pattern_maximum_loneliness(
+    pattern: tuple[tuple[int, ...], tuple[int, ...]],
+) -> tuple[Fraction, tuple[Fraction, Fraction]]:
+    """Exactly maximize loneliness on a two-dimensional rational subtorus.
+
+    ``pattern`` consists of two integer coordinate columns.  The routine
+    partitions the unit square by the integer parts of every coordinate form
+    and solves the resulting three-variable rational linear programs by
+    enumerating their vertices.
+    """
+    if len(pattern) != 2 or not pattern[0] or len(pattern[0]) != len(pattern[1]):
+        raise ValueError("pattern must contain two equal nonempty columns")
+    forms = tuple(zip(*pattern))
+    floor_ranges = []
+    for first, second in forms:
+        lower = min(0, first) + min(0, second)
+        upper = max(0, first) + max(0, second)
+        floor_ranges.append(range(lower - 1, upper + 1))
+
+    best = Fraction(-1)
+    witness = (Fraction(0), Fraction(0))
+    base_constraints = (
+        ((Fraction(-1), Fraction(0), Fraction(0)), Fraction(0)),
+        ((Fraction(1), Fraction(0), Fraction(0)), Fraction(1)),
+        ((Fraction(0), Fraction(-1), Fraction(0)), Fraction(0)),
+        ((Fraction(0), Fraction(1), Fraction(0)), Fraction(1)),
+        ((Fraction(0), Fraction(0), Fraction(-1)), Fraction(0)),
+        ((Fraction(0), Fraction(0), Fraction(1)), Fraction(1, 2)),
+    )
+    for floors in product(*floor_ranges):
+        constraints = list(base_constraints)
+        for (first, second), floor in zip(forms, floors):
+            constraints.extend(
+                (
+                    ((Fraction(-first), Fraction(-second), Fraction(1)), Fraction(-floor)),
+                    ((Fraction(first), Fraction(second), Fraction(1)), Fraction(floor + 1)),
+                )
+            )
+        for active in combinations(constraints, 3):
+            point = _solve_three_equations(active)
+            if point is None:
+                continue
+            if any(
+                sum(coefficient * value for coefficient, value in zip(coefficients, point))
+                > bound
+                for coefficients, bound in constraints
+            ):
+                continue
+            if point[2] > best:
+                best = point[2]
+                witness = point[:2]
+    if best < 0:
+        raise RuntimeError("two-torus linear programs had no feasible cell")
+    return best, witness
+
+
+def pattern_parameter_norm_squared_cutoff(
+    pattern: tuple[tuple[int, ...], tuple[int, ...]], *, threshold: Fraction
+) -> Fraction:
+    """Sufficient squared parameter norm above which the pattern is safe.
+
+    A primitive geodesic with parameter vector ``(A,B)`` has covering radius
+    ``1/(2*sqrt(A^2+B^2))`` in the flat two-torus.  Each coordinate form is
+    Lipschitz with constant at most the largest Euclidean row norm.  Therefore
+    an ambient margin ``rho`` is inherited whenever
+    ``A^2+B^2 > L^2/(4*rho^2)``.
+    """
+    value, _ = pattern_maximum_loneliness(pattern)
+    threshold = Fraction(threshold)
+    margin = value - threshold
+    if margin <= 0:
+        raise ValueError("ambient pattern maximum must strictly exceed threshold")
+    row_norm_squared = max(
+        first * first + second * second for first, second in zip(*pattern)
+    )
+    return Fraction(row_norm_squared, 4) / (margin * margin)
+
+
+def first_band_survivors(*, runner_count: int, height: int):
+    """Yield primitive tuples at or below the first spectral-band ceiling."""
+    if runner_count < 1:
+        raise ValueError("runner_count must be positive")
+    if height < runner_count:
+        raise ValueError("height must accommodate distinct positive speeds")
+    threshold = Fraction(2, 2 * runner_count + 1)
+    for speeds in combinations(range(1, height + 1), runner_count):
+        if gcd(*speeds) != 1:
+            continue
+        if loneliness_at_most(speeds, threshold=threshold):
+            yield speeds, maximum_loneliness(speeds)
+
+
+def inductive_first_band_height_bound(runner_count: int) -> int:
+    """Coarse norm bound from quantitative Kronecker and `(n-1)`-LRC.
+
+    This is a theorem only under the induction hypothesis that LRC holds for
+    fewer runners. The integer expression uses a cube lower bound for the
+    Euclidean unit-ball volume, avoiding floating-point constants.
+    """
+    if runner_count < 2:
+        raise ValueError("runner_count must be at least two")
+    return (
+        runner_count * (runner_count - 1) * (2 * runner_count + 1)
+    ) ** (runner_count - 1)
 
 
 def universal_grid_counterexample(*, r: int) -> tuple[int, tuple[int, int], Fraction]:

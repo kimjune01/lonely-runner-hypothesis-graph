@@ -96,7 +96,32 @@ H0  selected nine-runner target is open
                                                                                 +--H29  first spectral
                                                                                         band has connected
                                                                                         coefficient-2 relations
-                                                                                        SURVIVES FIXTURES
+                                                                                        SURVIVES CORRECTED SCANS
+                                                                                           |
+                                                                                           +--H30  first-band height
+                                                                                           |       is bounded under
+                                                                                           |       induction
+                                                                                           |       PROVED (coarse)
+                                                                                           |
+                                                                                           +--H31  positive triangular
+                                                                                           |       relation tree
+                                                                                           |       SURVIVES SCANS
+                                                                                           |
+                                                                                           +--H32  two positive seeds
+                                                                                           |       generate the tuple
+                                                                                           |       KILLED at n=6
+                                                                                           |
+                                                                                           +--H33  coefficient-2
+                                                                                           |       relation rank >=n-2
+                                                                                           |       SURVIVES SCANS
+                                                                                           |
+                                                                                           +--H34  full short-relation
+                                                                                           |       rank n-1
+                                                                                           |       KILLED at n=4
+                                                                                           |
+                                                                                           +--H35  strict ambient
+                                                                                                   two-torus margin
+                                                                                                   SURVIVES EXACT TESTS
 ```
 
 ## Nodes
@@ -777,18 +802,102 @@ H0  selected nine-runner target is open
 ### H29 — First-band tuples have a connected coefficient-two relation graph
 
 - Mode: exact near-tight spectrum structure
-- Hypothesis: if `ML(v_1,...,v_n) <= 2/(2n+1)`, form a hypergraph on the runners by adding the support of every integer relation `sum_i a_i v_i=0` with `|a_i|<=2`. This hypergraph is connected.
+- Hypothesis: if `ML(v_1,...,v_n) <= 2/(2n+1)`, form a hypergraph from the indecomposable supports of integer relations `sum_i a_i v_i=0` with `|a_i|<=2`. This hypergraph is connected.
+- Certificate correction: an arbitrary relation support is invalid as an edge when it splits into two disjoint supports that each carry their own bounded relation. Adding those unrelated relations creates a spurious cross-block support. The regression `(1,2,100,200)` must have components `{1,2}` and `{100,200}`, not one component.
 - Why this is the needed strengthening: H28 can return a relation confined to a proper subset. Connectivity couples every speed, bounds all ratios through a finite chain, and gives a concrete target for relative-subtorus descent.
 - Broad version killed: merely assuming `ML(v)<1/n` is insufficient. The family `(1,2,3s)` has `ML=s/(3s+1)<1/3`, while the coefficient needed to connect `3s` grows with `s`. These values accumulate at the lower-dimensional threshold `1/3`.
 - First-band trials:
 
-  - Exact enumeration through height `30` for `n=3`, height `22` for `n=4`, and height `13` for `n=5` found respectively `5`, `6`, and `7` primitive tuples below the midpoint between `1/(n+1)` and `1/n`; all lie at or below `2/(2n+1)` and have connected coefficient-two relation graphs.
-  - All but `(1,2,6)` and `(1,2,3,8)` are already connected with coefficients in `{-1,0,1}`; those two require coefficient `2`.
+  - Complete primitive scans through `(n,height)=(3,100),(4,35),(5,30),(6,22),(7,20)` found respectively `5,6,8,10,13` first-band tuples.
+  - Every survivor was revalidated after the decomposable-support bug was fixed; all have connected coefficient-two relation hypergraphs.
+  - New coefficient-two fixtures beyond the earlier range include `(1,3,4,5,18)` with `ML=2/11`.
   - The published amended-spectrum exception `(1,3,4,5,7,13,18)`, with `ML=3/23<2/15`, is connected using coefficient-one relations.
   - The cutoff regression `(1,2,18)` has `ML=6/19<1/3` but remains disconnected even at coefficient bound `5`.
 - Verdict: survives current exact fixtures; not proved.
 - Kill condition: a tuple at or below `2/(2n+1)` whose coefficient-two relation hypergraph is disconnected.
 - Next proof target: a connected-cluster Fourier expansion. Proper components have a uniform loneliness gap because the cutoff lies strictly below their lower-dimensional threshold; use that positive component mass to force a bounded cross-component frequency.
+- Artifact: `artifacts/first-spectral-band-connectivity.md`.
+
+### H30 — Induction gives a coarse first-band height bound
+
+- Mode: quantitative Kronecker theorem plus lower-runner induction
+- Statement: assume LRC for `n-1` speeds. If `ML(v)<=2/(2n+1)` and `v` is primitive, then
+
+  ```text
+  ||v||_2 <= [n(n-1)(2n+1)]^(n-1).
+  ```
+
+- Proof: the gap from the lower-dimensional guarantee `1/n` to the first-band ceiling is `g=1/[n(2n+1)]`. Use density radius `epsilon=g/2`. Giri--Kravitz's tube argument says a 1-dimensional subtorus of volume `V` is `epsilon`-dense in a higher-dimensional subtorus once `V*omega_(n-1)*epsilon^(n-1)>1`. Induction bounds the latter subtorus by `D<=1/2-1/n`, so density would give `ML(v)>=1/n-epsilon>2/(2n+1)`, a contradiction. Finally use the cube lower bound `omega_d >= (2/d)^d` with `d=n-1`.
+- Consequence: a connected relation certificate exists with a very large coefficient depending only on `n`; pair relations already span the full kernel. This proves coarse finite structure but not the sharp coefficient `2`.
+- Verdict: proved, conditional only on the standard induction hypothesis for fewer runners.
+- Artifact: `artifacts/first-spectral-band-connectivity.md`.
+
+### H31 — First-band tuples have a positive triangular relation tree
+
+- Mode: operational refinement of H29
+- Hypothesis: H29's components can be spanned by indecomposable coefficient-two relations, each oriented as
+
+  ```text
+  v_max = sum_{i in S} c_i v_i,     c_i in {1,2}, v_i < v_max.
+  ```
+
+- Trial: exact certificates were extracted for every survivor in the five complete scan ranges. The form survives, including `(1,5,6,11,16,17)` and the seven-speed amended-spectrum exception.
+- Why it matters: this specifies the sign pattern and transformation shape that H25 left hidden; it is a candidate input to a relative-subtorus elimination lemma.
+- Verdict: survives current exact scans; not proved.
+- Artifact: `artifacts/first-spectral-band-connectivity.md`.
+
+### H32 — Two positive seeds generate every first-band tuple
+
+- Mode: strengthen H31 to an acyclic positive recurrence
+- Hypothesis: after sorting, all but at most two speeds are positive `{0,1,2}`-combinations of earlier speeds.
+- Kill condition: a first-band tuple with at least three speeds lacking such an earlier representation.
+- Counterexamples:
+
+  - `(2,5,6,8,10,11)` has `ML=2/13`; the speeds `2,5,6` are all positive seeds under coefficient two.
+  - `(2,6,7,8,10,13,14)` has `ML=2/15` and likewise needs three positive seeds.
+
+- Verdict: killed. Signed elimination still leaves only two parameters in both examples, generating H33.
+- Artifact: `artifacts/first-spectral-band-connectivity.md`.
+
+### H33 — First-band coefficient-two relations have rank at least `n-2`
+
+- Mode: bounded Freiman dimension / relative-subtorus reduction
+- Hypothesis: if `ML(v)<=2/(2n+1)`, the rational span of all relations `a dot v=0` with `a_i in {-2,-1,0,1,2}` has rank at least `n-2`.
+- Equivalent consequence: `v` lies in a rational linear subspace of dimension at most two defined by coefficient-two normals. For fixed `n` there are only finitely many such subspaces.
+- Trial: exact rational row reduction found rank at least `n-2` for all `42` first-band survivors across the five complete scan ranges. It includes both H32 counterexamples; for `(2,5,6,8,10,11)`, signed elimination gives `6=2*5-2*2`.
+- Why it matters: every hypothetical counterexample lies below the first-band ceiling. Proving H33 would reduce it to a 1-dimensional subtorus inside one of finitely many 2-dimensional rational subtori, precisely the objects whose relative spectra Jain--Kravitz show are explicitly computable by finite calculation.
+- Verdict: survives complete bounded scans; not proved.
+- Kill condition: a first-band tuple whose bounded relation rank is at most `n-3`.
+- Artifact: `artifacts/first-spectral-band-connectivity.md`.
+
+### H34 — First-band coefficient-two relations have full rank `n-1`
+
+- Mode: strengthen H33 from two parameters to a finite list of rays
+- Hypothesis: every first-band tuple has coefficient-two relation rank `n-1`.
+- Kill condition: a first-band tuple with rank at most `n-2`.
+- Counterexample: `(3,4,7,11)` has `ML=2/9` and coefficient-two relation rank exactly `2=n-2`. Its bounded-relation nullspace has the primitive integer basis
+
+  ```text
+  (2,-1,1,0), (1,-1,0,-1).
+  ```
+
+- Verdict: killed. H33's two-dimensional conclusion is sharp even in the smallest completed four-speed scan.
+- Artifact: `artifacts/first-spectral-band-connectivity.md`.
+
+### H35 — H33 patterns have a strict ambient two-torus margin
+
+- Mode: explicit relative-subtorus descent
+- Hypothesis: every irreducible two-column coefficient pattern arising under H33 has ambient maximum loneliness strictly greater than `1/(n+1)`.
+- Exact test: partition the parameter square by the integer parts of its coordinate forms and maximize the lower envelope by rational linear programming.
+- Trial: the only genuine rank-`n-2` patterns in the completed scans occur for `(1,5,6)`, `(2,3,5)`, and `(3,4,7,11)`. Their ambient maxima are respectively `1/3`, `1/3`, and `1/4`, with margins `1/12`, `1/12`, and `1/20` above the LRC threshold.
+- Consequence: if the largest squared row norm is `L^2` and the margin is `rho>0`, a primitive parameter pair `(A,B)` is automatically safe once
+
+  ```text
+  A^2+B^2 > L^2/(4 rho^2).
+  ```
+
+  This follows because its geodesic has flat-torus covering radius `1/(2 sqrt(A^2+B^2))`. Only finitely many smaller pairs remain.
+- Verdict: the descent lemma is proved for every positive-margin pattern; the universal strict-margin hypothesis survives the current exact tests. Boundary patterns with zero margin are now the precise obstruction.
 - Artifact: `artifacts/first-spectral-band-connectivity.md`.
 
 ## What the graph established
@@ -822,6 +931,12 @@ H0  selected nine-runner target is open
 27. A direct interval-measure argument proves a multi-fast-runner lemma: fewer than half the runners cannot lie above a sufficiently large multiplicative speed gap in a counterexample.
 28. A triangular-bump Fourier argument proves the weak bounded-relation theorem explicitly: every bad or tight `n`-tuple lies on one of finitely many bounded-normal rational hyperplanes. The remaining burden is relative-subtorus descent, not relation existence.
 29. Uniform connectedness fails across the whole near-tight interval by `(1,2,3s)`, but coefficient-two connectivity survives every tested tuple in the first spectral band `ML<=2/(2n+1)`. This is now the sharp non-prime hypothesis to attack.
+30. Quantitative Kronecker plus induction proves a coarse height—and hence coarse connected-relation—bound throughout the first band.
+31. Every scanned first-band tuple admits a positive triangular coefficient-two relation tree, making the desired sign pattern operational.
+32. Positive generation from two earlier seeds is false at six speeds; `(2,5,6,8,10,11)` is the first exact obstruction.
+33. The invariant surviving that kill is relation rank: coefficient-two relations span rank at least `n-2` on all 42 scanned survivors, reducing the speed family to at most two parameters.
+34. Full bounded-relation rank is false: `(3,4,7,11)` sharply requires a two-dimensional ambient subtorus.
+35. Exact rational cell optimization gives that sharp pattern ambient loneliness `1/4`, a strict `1/20` margin; flat-torus geodesic covering then reduces the pattern to finitely many parameter pairs.
 
 ## Frontier
 
@@ -829,7 +944,9 @@ H0  selected nine-runner target is open
 - Primary: replace H23 by a height-sensitive gap theorem, or formulate a lift-tree invariant that distinguishes fixed ordinary integers from spurious profinite survivor branches.
 - Primary: combine H27's upper-gap constraints with finite-checking/volume bounds; seek a complementary lemma controlling cuts with at least half the runners above them.
 - Primary: for the finite H28 normal vectors, formulate and test a concrete relative-subtorus descent; do not use the phrase “compatible sign pattern” without the transformation and preserved invariant.
-- Primary: prove or kill H29 via a connected-cluster Fourier argument; a proof would turn isolated relations into a global bound on every speed ratio.
+- Primary: prove or kill H33. Combine a connected-cluster Fourier argument with the strict first-band gap to force bounded-relation codimension at least `n-2`.
+- Primary: for each H33 coefficient pattern, use the finite relative-spectrum calculation of Jain--Kravitz to test the needed `1/(n+1)` bound and seek a uniform exclusion.
+- Primary: prove or kill H35. If the ambient maximum equals exactly `1/(n+1)`, test whether the active boundary equations force a rank jump, a repeated/proportional runner, or a known contraction.
 - Secondary: if stronger auditability is desired, make the published sieve proof-producing or independently reimplement its three levels.
 - Historical: the local H21 37-prime scan and p=47 branch certificates remain useful cross-checks, but no longer block the nine-runner theorem.
 - Secondary: retain H19's one-gap exchange fixtures as boundary tests for any proposed H20 lemma.
