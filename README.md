@@ -12,7 +12,13 @@ This repository publishes one extended case study: an inquiry into the Lonely Ru
 2. **[How to read and replay the case](LONELY_RUNNER.md)** — scope, mathematical status, commands, and claim boundaries.
 3. **[Artifact index](artifacts/README.md)** — what every certificate establishes and how to check it.
 
-The general method is developed in [The Hypothesis Graph](https://june.kim/the-hypothesis-graph-semantic-memory-methodeutics) and the companion [Proof Manual](https://june.kim/the-proof-manual).
+## Method paper
+
+This case study applies the method introduced in:
+
+> June Kim, “[The Hypothesis Graph: A Verifiable Semantic Memory for Coding Agents](https://june.kim/the-hypothesis-graph-semantic-memory-methodeutics)” (2026). [PDF](https://june.kim/assets/the-hypothesis-graph-semantic-memory-methodeutics.pdf) · [doi:10.5281/zenodo.21939861](https://doi.org/10.5281/zenodo.21939861)
+
+The companion [Proof Manual](https://june.kim/the-proof-manual) gives the working procedure used here.
 
 ## The data structure
 
