@@ -648,6 +648,32 @@ def unit_reset_cover_excess_profile(
     return tuple(degree - 1 for degree in degrees)
 
 
+def one_excess_unit_cover_state(
+    *, speeds: tuple[int, ...], modulus: int, phase: Fraction
+) -> tuple[int, tuple[tuple[int, ...], ...]] | None:
+    """Return the unique degree-two vertex of a one-excess unit cover.
+
+    When ``2r=N+1``, a covered graph of ``r`` two-slot packets has one vertex
+    of degree two and every other vertex of degree one.  The packet edges away
+    from that vertex form a matching.
+    """
+    if 2 * len(speeds) != modulus + 1:
+        raise ValueError("one-excess capacity requires 2r=modulus+1")
+    masks = tuple(
+        reset_blocker_mask(speed=speed, modulus=modulus, phase=phase)
+        for speed in speeds
+    )
+    profile = unit_reset_cover_excess_profile(
+        speeds=speeds, modulus=modulus, phase=phase
+    )
+    if profile is None:
+        return None
+    tokens = tuple(index for index, excess in enumerate(profile) if excess)
+    if len(tokens) != 1 or profile[tokens[0]] != 1:
+        raise AssertionError("a one-excess cover must have one token vertex")
+    return tokens[0], masks
+
+
 def simultaneous_unit_event_arcs(
     *, speeds: tuple[int, ...], modulus: int, event: Fraction
 ) -> tuple[int, tuple[tuple[int, int, int], ...]]:
@@ -710,6 +736,38 @@ def simultaneous_unit_event_excess_lower_bound(
     incoming = {target for _, _, target in arcs}
     batch_size = len(arcs)
     return 2 * batch_size - 1 - len(outgoing & incoming)
+
+
+def simultaneous_unit_event_minimal_pairing(
+    arcs: tuple[tuple[int, int, int], ...],
+) -> tuple[tuple[int, int], ...] | None:
+    """Pair packet labels when a batch attains its minimum excess cost.
+
+    Equality in the ``m-1`` lower bound requires distinct outgoing slots and
+    the same incoming support.  The common-event arcs then occur in reversed
+    pairs, so the two packet labels exchange their nonretained endpoints.
+    """
+    if not arcs:
+        raise ValueError("arcs must be nonempty")
+    if simultaneous_unit_event_excess_lower_bound(arcs) != len(arcs) - 1:
+        return None
+    if len({source for _, source, _ in arcs}) != len(arcs):
+        return None
+
+    by_arc = {
+        (source, target): speed for speed, source, target in arcs
+    }
+    if len(by_arc) != len(arcs):
+        return None
+    pairs = set()
+    for speed, source, target in arcs:
+        partner = by_arc.get((target, source))
+        if partner is None or partner == speed:
+            return None
+        pairs.add(tuple(sorted((speed, partner))))
+    if 2 * len(pairs) != len(arcs):
+        return None
+    return tuple(sorted(pairs))
 
 
 def singleton_quotient_event_grid_avoids_safe_region(

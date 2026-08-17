@@ -1050,6 +1050,7 @@ def test_zero_excess_opposite_residues_form_a_two_cycle():
         incoming for _, _, incoming in arcs
     }
     assert lrc.simultaneous_unit_event_excess_lower_bound(arcs) == 1
+    assert lrc.simultaneous_unit_event_minimal_pairing(arcs) == ((6, 9),)
 
 
 def test_asymmetric_simultaneous_batch_costs_more_excess():
@@ -1058,6 +1059,40 @@ def test_asymmetric_simultaneous_batch_costs_more_excess():
     )
 
     assert lrc.simultaneous_unit_event_excess_lower_bound(arcs) == 3
+    assert lrc.simultaneous_unit_event_minimal_pairing(arcs) is None
+
+
+def test_minimal_pairing_can_swap_labels_without_moving_excess():
+    before_phase = Fraction(1, 2) - Fraction(1, 1000)
+    after_phase = Fraction(1, 2) + Fraction(1, 1000)
+    before = tuple(
+        lrc.reset_blocker_mask(speed=speed, modulus=5, phase=before_phase)
+        for speed in (1, 4, 16)
+    )
+    after = tuple(
+        lrc.reset_blocker_mask(speed=speed, modulus=5, phase=after_phase)
+        for speed in (1, 4, 16)
+    )
+
+    assert before == ((0, 4), (1, 2), (2, 3))
+    assert after == ((0, 4), (2, 3), (1, 2))
+    assert lrc.unit_reset_cover_excess_profile(
+        speeds=(1, 4, 16), modulus=5, phase=before_phase
+    ) == lrc.unit_reset_cover_excess_profile(
+        speeds=(1, 4, 16), modulus=5, phase=after_phase
+    )
+
+
+def test_one_excess_cover_is_a_matching_with_one_token_vertex():
+    before = lrc.one_excess_unit_cover_state(
+        speeds=(1, 2, 3), modulus=5, phase=Fraction(499, 1000)
+    )
+    after = lrc.one_excess_unit_cover_state(
+        speeds=(1, 2, 3), modulus=5, phase=Fraction(501, 1000)
+    )
+
+    assert before == (0, ((0, 4), (0, 2), (1, 3)))
+    assert after == (4, ((0, 4), (2, 4), (1, 3)))
 
 
 def test_simultaneous_pair_cannot_cover_at_zero_excess():

@@ -1613,6 +1613,54 @@ problem is to show that its finite token stock cannot circulate through all
 quotient-safe components without either opening a slot or creating a usable
 integer relation.
 
+Equality in H83 has a clean classification. Cost `m-1` forces `O=I` with
+`m` distinct slots. Hence the inverse residues pair as `w,-w`, and every pair
+of packet labels exchanges its nonretained endpoints across the common retained
+slot. This is H84. In the one-excess stratum, the only persistent events are
+isolated token transports and opposite-residue two-label swaps.
+
+Neither operation supplies a global potential. At `N=5`, the rank-zero tuple
+
+```text
+(1,4,16,55)
+```
+
+has a quotient-maximizing component through `x=1/2`; packets `4` and `16`
+swap edges there while the unique excess token stays at reset slot `2`. Thus
+the load profile does not change. Tracking labels also fails. The blockers
+`(121,126,146)` repeat their entire labeled packet state during one connected
+covered run despite having coefficient-two rank zero. The full primitive tuple
+
+```text
+(35,141,146,166)
+```
+
+is sharper: its quotient speed is `7`, its coefficient-two rank is zero, and a
+maximizing quotient-safe component contains the recurrence interval
+`[53/166,59/166]`. The component router nevertheless escapes elsewhere.
+
+These H85 fixtures kill a finite-state monotonicity proof. Abstract directed
+cover graphs already have cycles, and arithmetic schedules can realize them.
+Adding exact fractional event clocks would prevent literal recurrence, but it
+would simply restore the original torus orbit. H79--H84 remain useful local
+capacity filters; a global proof must now obtain a scale-free inequality from
+component endpoints or induction rather than further packet bookkeeping.
+
+The one-excess stratum nevertheless has a rigid graph form. When
+`r=(N+1)/2`, the `r` packet edges have total degree `N+1`. Under coverage,
+exactly one reset slot has degree two and every other slot has degree one. The
+graph is therefore a matching plus a two-edge path centered at the unique
+token vertex. This is H86.
+
+An isolated persistent event pivots its packet edge around the retained
+endpoint and moves the path center from the dropped endpoint to the acquired
+endpoint. A simultaneous persistent event must be the H84 minimum-cost pair;
+it merely swaps the labels of the two edges incident to the path center. Thus
+the positive-excess frontier begins with a labeled near-perfect-matching
+reconfiguration problem. The H85 recurrences rule out state acyclicity, but an
+alternating-path winding between the two quotient-component boundaries remains
+a genuinely smaller target than the original arbitrary packet cover.
+
 ## Complete three-speed base case
 
 The 2025 finite-checking theorem of Malikiosis--Santos--Schymura gives a much

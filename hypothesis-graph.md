@@ -1985,6 +1985,106 @@ H0  selected nine-runner target is open
   cost `1` and asymmetric two-packet cost `3`.
 - Artifact: `artifacts/first-spectral-band-connectivity.md`.
 
+### H84 — Minimum-cost batches are opposite-pair label swaps
+
+- Mode: proved equality classification for H83
+- Statement: a batch of size `m` attains H83's minimum possible cost `m-1`
+  exactly when its outgoing slots are distinct and its outgoing and incoming
+  supports coincide. For `N>=3`, the packet labels then split into pairs
+
+  ```text
+  v_i == -v_j mod N,
+  ```
+
+  and each pair exchanges its two nonretained edge endpoints across the common
+  retained slot.
+- Proof: equality `2m-1-|O intersect I|=m-1` forces
+  `|O intersect I|=m`. Both supports have size at most `m`, so they are equal
+  and have no repetitions. Writing the arcs as `b+w_i -> b-w_i`, equality of
+  supports makes the inverse-residue multiset invariant under negation. A unit
+  inverse cannot equal its own negative for `N>=3`, so the labels pair off and
+  the two reversed arcs exchange endpoints.
+- One-excess corollary: when `E=1`, every persistent event is either one
+  isolated token transport or one opposite-residue two-packet label swap. No
+  larger batch and no asymmetric pair can persist.
+- Verdict: proved.
+- Verification: `simultaneous_unit_event_minimal_pairing`, the `(6,9) mod 5`
+  pair, and the asymmetric `(2,4) mod 5` rejection.
+- Artifact: `artifacts/first-spectral-band-connectivity.md`.
+
+### H85 — Load or labeled-state recurrence is not the missing potential
+
+- Mode: killed two finite-state monotonicity proposals
+- Load-profile kill: the primitive full tuple
+
+  ```text
+  (1,4,16,55),  N=5,
+  ```
+
+  has coefficient-two rank zero. Around the quotient-maximizing phase `x=1/2`,
+  packets `4` and `16` execute the H84 label swap while the unique excess token
+  remains at reset slot `2`. Thus the complete load profile is unchanged across
+  a nontrivial persistent event.
+- Labeled-state kill: the unit blockers `(121,126,146)` repeat their entire
+  labeled packet state across a continuously covered run. They have no
+  coefficient-two relation. More decisively, the primitive reset tuple
+
+  ```text
+  (35,141,146,166),  N=5,
+  ```
+
+  also has coefficient-two rank zero; quotient speed `7` has a maximizing safe
+  component containing the blocker recurrence interval
+  `[53/166,59/166]`. The H77 router still succeeds elsewhere, so recurrence is
+  compatible with both rank deficiency and eventual escape.
+- Abstract calibration: directed packet-cover graphs themselves contain cycles
+  already for three identical inverse-residue edge types on `Z/5`. Therefore
+  no potential depending only on the static cover state can be strictly
+  monotone.
+- Evidence for a stronger clocked state: no complete labeled-state repeat was
+  found in `9,976` exhaustive covered runs through unit speeds `<=30`, nor in
+  more than `31,000` random covered runs at moduli `5,7,8`; the explicit killers
+  appeared only after targeted comparable-speed searches. But retaining exact
+  fractional clocks makes recurrence essentially equivalent to the original
+  torus flow, so this is not selected as a proof route.
+- Lesson: H79--H84 are useful local pruning rules, not a global terminating
+  algorithm. A successor must use component endpoints, analytic load, or
+  induction; adding more finite packet state merely postpones recurrence.
+- Verdict: killed as a global potential route.
+- Verification: exact masks and unchanged excess for `(1,4,16)`; targeted
+  recurrence searches and rank checks for the two killers.
+- Artifact: `artifacts/first-spectral-band-connectivity.md`.
+
+### H86 — One excess is a near-perfect matching reconfiguration
+
+- Mode: proved structural reduction after the H85 kill
+- Statement: suppose `N` is odd and `r=(N+1)/2` unit packets cover all reset
+  slots. Their total degree is `N+1`. Therefore exactly one slot has degree two,
+  every other slot has degree one, and the packet graph is a matching plus one
+  two-edge path centered at the unique excess-token slot.
+- Event dynamics:
+
+  - at an isolated persistent event, H79 forces the dropped endpoint to be the
+    degree-two vertex; the moving edge pivots around its retained endpoint and
+    the acquired endpoint becomes the new degree-two vertex;
+  - at a simultaneous persistent event, H83 forces a minimum-cost two-packet
+    batch; H84 says the two edges incident to the degree-two vertex exchange
+    labels while the unlabeled near-perfect matching and token vertex remain
+    unchanged.
+
+- Proof: the degree classification follows from nonnegative degrees, coverage,
+  and `sum deg=N+1`. The event claims combine the unique location of the one
+  excess token with H79 and the one-excess corollary of H84.
+- New formulation: the `E=1` H77 branch is exactly a labeled near-perfect
+  matching moving by edge pivots and incident-label transpositions. H85 shows
+  its state can recur, so the next invariant must use an alternating-path
+  boundary or winding quantity, not state acyclicity.
+- Verdict: proved.
+- Verification: `one_excess_unit_cover_state`; the `(1,2,3) mod 5` isolated
+  event moves the token vertex from `0` to `4`, while `(1,4,16)` performs the
+  label-swap case with token vertex fixed at `2`.
+- Artifact: `artifacts/first-spectral-band-connectivity.md`.
+
 ## What the graph established
 
 1. The elementary measure branch recovers `1/(2n)` and dies by an exact factor-two deficit.
@@ -2071,6 +2171,9 @@ H0  selected nine-runner target is open
 82. H81 solves that grid avoidance for a singleton quotient: below reserve `1/3`, an entire event grid can miss the safe set only when the packet speed divides the quotient speed. Combined with H80, this proves the exact-capacity singleton unit-router branch and turns its residue into the already motivated factor structure.
 83. H82 extends grid avoidance to an arbitrary quotient block by induction and rounding. Any packet speed above an explicit multiple of the largest quotient speed has a safe event and therefore opens a tight cover; the remaining exact-capacity obstruction has bounded relative height.
 84. H83 extends the timestamped analysis to positive excess. A common batch of size `m` with outgoing/incoming support overlap `s` needs at least `2m-1-s` excess tokens. Hence only small, strongly opposite-paired batches can survive when the reset cover is near capacity.
+85. H84 classifies equality: minimum-cost batches are disjoint opposite-residue pairs that swap packet labels. With one excess token, these swaps and isolated transports are the only persistent events.
+86. H85 kills finite-state termination. `(1,4,16,55)` swaps labels without changing load, while `(35,141,146,166)` repeats the entire labeled blocker state inside a quotient-maximizing component despite coefficient-two rank zero. Packet-state recurrence is therefore not itself the missing relation certificate.
+87. H86 identifies the surviving one-excess object: every cover is a matching plus one two-edge path. Isolated events pivot an edge and move the path center; simultaneous events only transpose the two incident labels. The remaining question is an alternating-path winding inequality, not arbitrary load balancing.
 
 ## Frontier
 
@@ -2096,6 +2199,8 @@ H0  selected nine-runner target is open
 - Proved singleton grid lemma: H81 completes the exact-capacity singleton unit branch. Extend its uniform-grid argument to several quotient speeds by studying the intersection of their safe sets on the event grid; the desired output is either one safe event or a common factor block suitable for induction.
 - Proved multi-quotient height reduction: H82 bounds every event-grid-avoiding packet relative to the quotient height. Combine this with H27's multiplicative gap restriction and H76's cofactor bound; the remaining missing step is a scale-free descent, not control of arbitrarily fast packets.
 - Proved batch capacity: use H83 to stratify H77 by excess `E=2r-N`. For fixed small `E`, enumerate only batches of size at most `E+1` and retain their opposite-pair defects; seek a global token-potential decrease between successive batches rather than another union bound.
+- Pruned finite-state potential: H85 shows that neither excess profiles nor complete labeled packet states terminate the sweep or force bounded rank. Do not add state variables unless they admit a scale-free inequality; exact clock state simply reconstructs the original torus orbit.
+- Proved one-excess reduction: attack H86 with matching tools. Track the alternating path swept by the unique degree-two vertex between quotient-component endpoints; a useful invariant must survive incident label swaps and change under pivots, preferably as an integer winding tied to packet residues.
 - Primary: replace H23 by a height-sensitive gap theorem, or formulate a lift-tree invariant that distinguishes fixed ordinary integers from spurious profinite survivor branches.
 - Primary: combine H27's upper-gap constraints with finite-checking/volume bounds; seek a complementary lemma controlling cuts with at least half the runners above them.
 - Primary: for the finite H28 normal vectors, formulate and test a concrete relative-subtorus descent; do not use the phrase “compatible sign pattern” without the transformation and preserved invariant.
