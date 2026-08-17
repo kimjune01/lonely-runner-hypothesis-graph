@@ -767,6 +767,36 @@ def test_strict_first_band_fixtures_have_cell_chains_and_full_relation_rank(spee
     assert lrc.bounded_relation_rank(speeds, max_coefficient=2) == runner_count - 1
 
 
+@pytest.mark.parametrize(
+    "speeds",
+    [
+        (1, 2, 3),
+        (1, 3, 4, 7),
+        (1, 3, 4, 5, 9),
+        (1, 5, 6, 11, 16, 17),
+    ],
+)
+def test_strict_first_band_fixtures_avoid_n_plus_one_multiples(speeds):
+    modulus = len(speeds) + 1
+
+    assert all(speed % modulus for speed in speeds)
+
+
+def test_divisible_speed_barrier_is_sharp_on_a_band_edge_tuple():
+    speeds = (1, 3, 4, 5, 18)
+
+    assert 18 % 6 == 0
+    assert lrc.maximum_loneliness(speeds) == Fraction(2, 11)
+
+
+def test_divisible_speed_barrier_survives_small_three_speed_search():
+    edge = Fraction(2, 7)
+    for speeds in itertools.combinations(range(1, 21), 3):
+        if math.gcd(*speeds) != 1 or not any(speed % 4 == 0 for speed in speeds):
+            continue
+        assert lrc.maximum_loneliness(speeds) >= edge
+
+
 def test_handoff_seeds_append_the_eight_speed_separator():
     speeds = (1, 4, 5, 6, 7, 11, 13, 16)
     seeds = lrc.handoff_seed_pair(speeds, delta=Fraction(1, 9))

@@ -294,6 +294,45 @@ two. On `(1,3,9)`, grid cell `k=3` has normalized intervals `[0,1/3)` and
 The remaining H48 lemma is now finite and explicit: show that radius-two
 chains for every `k mod q` force `n-1` independent coefficient-two relations.
 
+## A direct divisible-speed barrier
+
+The strict scan suggests an even shorter route:
+
+> If one of `n` speeds is divisible by `n+1`, then
+> `ML(v) >= 2/(2n+1)`.
+
+This single lemma would prove the general Lonely Runner Conjecture. If no
+speed is divisible by `n+1`, use
+
+```text
+t = 1/(n+1).
+```
+
+Every speed then has a nonzero residue modulo `n+1`, so every runner is at
+distance at least `1/(n+1)`. If a divisible speed exists, the proposed lemma
+gives the stronger bound `2/(2n+1)>1/(n+1)`.
+
+All 14 strict first-band survivors through nine speeds avoid multiples of
+`n+1`; in fact they all contain speeds `1` and `n`. A separate targeted scan
+checked every primitive tuple containing an `n+1` multiple in these ranges:
+
+| `n` | height | targeted tuples | at or below first-band edge | strictly below |
+|---:|---:|---:|---:|---:|
+| 3 | 300 | 1,997,293 | 1 | 0 |
+| 4 | 60 | 272,873 | 2 | 0 |
+| 5 | 40 | 364,955 | 2 | 0 |
+| 6 | 28 | 240,009 | 4 | 0 |
+
+The total is 2,875,130 targeted tuples with no counterexample to the barrier.
+The constant is sharp: `(1,3,4,5,18)` contains `18`, a multiple of `6`, and
+has `ML=2/11` exactly.
+
+This is a non-prime hypothesis. The known induction argument proves it when a
+divisible runner is at least `2n` times faster than every other runner: remove
+it, use the lower-runner `1/n` time, and spend the first-band slack to move the
+fast runner. The unresolved case has only a moderate speed ratio, where the
+radius-two cell chains offer a finite local representation.
+
 The scheduling analogy is pinwheel/windows scheduling, where recurring tasks
 must receive service in every sliding window. Here the direction is dual: the
 periodic bad-window streams are fixed and one seeks a zero-load instant. The

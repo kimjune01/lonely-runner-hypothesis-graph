@@ -176,6 +176,10 @@ H0  selected nine-runner target is open
                                                                                                    +--H48  strict first-band
                                                                                                             full relation rank
                                                                                                             SELECTED FOR TESTING
+                                                                                                            |
+                                                                                                            +--H49  divisible-speed
+                                                                                                                     first-band barrier
+                                                                                                                     SELECTED; SUFFICIENT
 ```
 
 ## Nodes
@@ -1123,6 +1127,20 @@ H0  selected nine-runner target is open
 - Verification: `strict_band_edge_grid_cover_certificate`, `band_edge_grid_cell_intervals`, `strict_band_edge_cover_certificate`, exact endpoint-event tests, the scan's `band_edge_local_handoff_eliminates` column, and bounded-relation rank.
 - Artifact: `artifacts/first-spectral-band-connectivity.md`.
 
+### H49 — An `n+1`-divisible speed forces the first-band bound
+
+- Mode: direct non-prime barrier suggested by the strict/interior split
+- Hypothesis: for `n` distinct positive integer speeds, if `(n+1)` divides some `v_i`, then `ML(v)>=2/(2n+1)`.
+- Consequence: H49 proves the general Lonely Runner Conjecture immediately. If no speed is divisible by `n+1`, then `t=1/(n+1)` makes every residue nonzero and gives distance at least `1/(n+1)`. If a divisible speed exists, H49 gives the stronger first-band bound.
+- Evidence: all 14 strict first-band scan survivors through nine speeds avoid `n+1` multiples and contain speeds `1` and `n`. A targeted scan of 2,875,130 primitive tuples containing a divisible speed found no strict first-band tuple: `n=3` height 300, `n=4` height 60, `n=5` height 40, and `n=6` height 28.
+- Sharpness: `(1,3,4,5,18)` contains a multiple of `6` and has `ML=2/11` exactly, so the claimed constant cannot be increased uniformly.
+- Partial proof: lower-runner induction plus the first-band slack proves the barrier when the divisible runner is at least `2n` times faster than every other speed. The moderate-ratio case remains.
+- Why promising: it converts the adversarial mixed-speed problem into exactly the user's reset/backoff dichotomy and avoids prime-modulus analysis. At the band edge, the moderate-ratio case has the proved radius-two interval-chain representation.
+- Verdict: selected for testing; sufficient for the general case; not proved.
+- Kill condition: any tuple containing an `n+1` multiple with `ML<2/(2n+1)`.
+- Verification: targeted exact scans, the strict-divisibility regressions, and `maximum_loneliness`.
+- Artifact: `artifacts/first-spectral-band-connectivity.md`.
+
 ## What the graph established
 
 1. The elementary measure branch recovers `1/(2n)` and dies by an exact factor-two deficit.
@@ -1174,6 +1192,7 @@ H0  selected nine-runner target is open
 47. Lower-runner induction proves that every runner in a minimal counterexample owns an open singleton-load window; consequently the handoff transition graph is connected.
 48. Every one of 229 tested elimination steps localizes to the preceding new owner plus at most two earlier owners with coefficient bound two. Both coefficient two and support four are sharp in the scan.
 49. Moving the sweep to the exact band edge labels every endpoint by `q m+/-2`. All 55 retain segment-local elimination there, while all 14 strict survivors have full relation rank `n-1`; the rank-`n-2` obstructions live exactly on the boundary.
+50. Every strict survivor avoids multiples of `n+1`. The resulting H49 barrier would prove the full conjecture by the single reset time `1/(n+1)` in the complementary case; it survives 2,875,130 targeted divisible-speed tuples and is sharp on the band boundary.
 
 ## Frontier
 
@@ -1189,6 +1208,7 @@ H0  selected nine-runner target is open
 - Primary: prove or kill H45. In a hypothetical full cover, analyze the overload blocks separating singleton-owner cells and derive either a zero-load escape or a bounded relation involving the successive owners.
 - Primary: prove or kill H47. Analyze the entire handoff segment between successive first-time owners; select at most two old owners whose endpoint events reduce the segment's large labels to one coefficient-two relation.
 - Primary: prove or kill H48 in its exact cell-chain form. Convert the divisible overlap determinants of the radius-two chains into one more independent coefficient-two speed relation at each rank-deficient stage.
+- Primary: prove or kill H49. The fast divisible-runner case follows from induction and slack; use the radius-two chains to handle the remaining bounded-ratio case without entering the prime branch.
 - Primary: turn H39 plus the ambient margin into a uniform contradiction, using determinant bounds for coefficient-two nullspaces rather than enumerating patterns separately for every `n`.
 - Secondary: if stronger auditability is desired, make the published sieve proof-producing or independently reimplement its three levels.
 - Historical: the local H21 37-prime scan and p=47 branch certificates remain useful cross-checks, but no longer block the nine-runner theorem.
