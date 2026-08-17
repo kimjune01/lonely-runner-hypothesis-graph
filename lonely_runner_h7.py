@@ -27,6 +27,46 @@ def fractional_distance(value: Fraction | int) -> Fraction:
     return min(residue, 1 - residue)
 
 
+def maximum_loneliness(speeds: tuple[int, ...]) -> Fraction:
+    """Compute max_t min_i ||v_i t|| exactly from its critical times.
+
+    A maximum of the lower envelope occurs at a cusp of one triangular wave
+    or where two affine pieces agree. Those times have denominators 2*v_i,
+    v_i+v_j, or |v_i-v_j|.
+    """
+    if not speeds or any(speed <= 0 for speed in speeds):
+        raise ValueError("speeds must be a nonempty tuple of positive integers")
+
+    candidates = {Fraction(0), Fraction(1)}
+    for speed in speeds:
+        denominator = 2 * speed
+        candidates.update(Fraction(numerator, denominator) for numerator in range(denominator + 1))
+    for index, first in enumerate(speeds):
+        for second in speeds[index + 1 :]:
+            for denominator in {first + second, abs(first - second)} - {0}:
+                candidates.update(
+                    Fraction(numerator, denominator)
+                    for numerator in range(denominator + 1)
+                )
+
+    return max(
+        min(fractional_distance(speed * time) for speed in speeds)
+        for time in candidates
+    )
+
+
+def height_sensitive_grid_bound(speeds: tuple[int, ...]) -> int:
+    """First denominator guaranteed to preserve any strict LRC witness.
+
+    If M=max(speeds), exact critical-time geometry makes a positive gap over
+    1/(k+1) at least 1/(2*M*(k+1)). Rounding a witness to the nearest point of
+    a d-grid loses at most M/(2*d), so every d >= (k+1)*M**2+1 works.
+    """
+    if not speeds or any(speed <= 0 for speed in speeds):
+        raise ValueError("speeds must be a nonempty tuple of positive integers")
+    return (len(speeds) + 1) * max(speeds) ** 2 + 1
+
+
 def universal_grid_counterexample(*, r: int) -> tuple[int, tuple[int, int], Fraction]:
     """Give the r-th counterexample to the universal grid-witness conjecture.
 

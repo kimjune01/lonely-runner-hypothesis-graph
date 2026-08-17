@@ -293,3 +293,32 @@ def test_counterexample_family_to_universal_grid_witness_conjecture():
             < Fraction(1, 3)
             for j in range(denominator)
         )
+
+
+@pytest.mark.parametrize(
+    ("speeds", "expected"),
+    [
+        ((1, 2), Fraction(1, 3)),
+        ((1, 3), Fraction(1, 2)),
+        ((1, 4), Fraction(2, 5)),
+        ((1, 2, 3), Fraction(1, 4)),
+    ],
+)
+def test_exact_maximum_loneliness_at_critical_times(speeds, expected):
+    assert lrc.maximum_loneliness(speeds) == expected
+
+
+def test_height_sensitive_grid_bound_for_small_non_tight_tuples():
+    for speeds in [(1, second) for second in range(2, 9)]:
+        threshold = Fraction(1, len(speeds) + 1)
+        if lrc.maximum_loneliness(speeds) <= threshold:
+            continue
+        first_denominator = lrc.height_sensitive_grid_bound(speeds)
+        for denominator in range(first_denominator, first_denominator + 4):
+            assert max(
+                min(
+                    lrc.fractional_distance(Fraction(j * speed, denominator))
+                    for speed in speeds
+                )
+                for j in range(denominator)
+            ) > threshold
