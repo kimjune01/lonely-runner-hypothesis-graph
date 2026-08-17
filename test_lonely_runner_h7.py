@@ -338,3 +338,42 @@ def test_multi_fast_union_condition_certifies_small_tuples():
     for speeds in [(1, 2, 100, 101), (1, 2, 3, 120, 121)]:
         assert lrc.multi_fast_union_condition(speeds, fast_count=2)
         assert lrc.maximum_loneliness(speeds) >= Fraction(1, len(speeds) + 1)
+
+
+@pytest.mark.parametrize(
+    ("speeds", "delta", "expected"),
+    [
+        ((1,), Fraction(1, 3), Fraction(1, 3)),
+        ((1, 2), Fraction(1, 5), Fraction(2, 5)),
+        ((1, 3, 4), Fraction(1, 5), Fraction(1, 10)),
+    ],
+)
+def test_exact_valid_time_measure(speeds, delta, expected):
+    assert lrc.valid_time_measure(speeds, delta=delta) == expected
+
+
+@pytest.mark.parametrize(
+    ("speeds", "delta"),
+    [
+        ((1, 2), Fraction(2, 5)),
+        ((1, 2, 3), Fraction(3, 10)),
+    ],
+)
+def test_failed_threshold_has_relation_within_fourier_bound(speeds, delta):
+    assert lrc.maximum_loneliness(speeds) < delta
+    bound = lrc.fourier_relation_bound(len(speeds), delta=delta)
+    relation = lrc.find_bounded_relation(speeds, max_coefficient=3)
+    assert relation is not None
+    assert max(map(abs, relation)) <= bound
+    assert sum(coefficient * speed for coefficient, speed in zip(relation, speeds)) == 0
+
+
+@pytest.mark.parametrize("speeds", [(1, 2), (1, 2, 3), (1, 2, 3, 4)])
+def test_tight_tuple_relation_is_within_fourier_bound(speeds):
+    delta = Fraction(1, len(speeds) + 1)
+    assert lrc.maximum_loneliness(speeds) == delta
+    relation = lrc.find_bounded_relation(speeds, max_coefficient=3)
+    assert relation is not None
+    assert max(map(abs, relation)) <= lrc.fourier_relation_bound(
+        len(speeds), delta=delta
+    )

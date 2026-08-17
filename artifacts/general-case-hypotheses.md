@@ -38,7 +38,7 @@ This proves the quantifier-swapped, height-sensitive repair of Conjecture 7.1:
 each fixed non-tight tuple eventually appears on every sufficiently fine grid.
 It does not prove that a tuple is non-tight.
 
-## Downgraded hypothesis: bounded dual relation
+## Split result: bounded dual relation proved, descent open
 
 The next target is:
 
@@ -46,12 +46,19 @@ The next target is:
 > nonzero relation `a dot v=0` with `||a||_1<=C(k)` and a sign pattern that
 > permits runner contraction, polynomial degeneracy, or descent.
 
-The audit found that this is not operational as stated. Its antecedent is an
-actual counterexample to LRC, so a negative finite fixture would already
-disprove the main conjecture. Its weak conclusion is also cheap: every integer
-vector has two-coordinate relations, and known finite-checking bounds already
-bound their coefficients under induction. The phrase “permits descent” hides
-the entire missing transformation and preservation proof.
+The original finite test was not operational: its antecedent is an actual
+counterexample to LRC, so a negative fixture would already disprove the main
+conjecture. But the weak relation statement can be proved directly. A
+triangular bump supported on the central good interval has an absolutely
+summable Fourier series. If the product of its pullbacks along the speeds
+vanishes, its positive constant Fourier term must be cancelled by a nonzero
+frequency relation. Tail bounds force one whose coefficients depend only on
+`k`. The complete proof and explicit constants are in
+`artifacts/fourier-short-relation.md`.
+
+The phrase “permits descent” still hides the missing transformation and
+preservation proof. The result therefore splits cleanly: bounded relation is a
+theorem; relative-subtorus descent remains a hypothesis.
 
 The suggested single-critical-time mechanism also fails. Active edge
 equations are differences of vertex potentials, so summing any cycle gives

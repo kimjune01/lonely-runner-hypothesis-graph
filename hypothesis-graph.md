@@ -76,8 +76,8 @@ H0  selected nine-runner target is open
                                                           +--H25  missing central cube
                                                                   forces a bounded
                                                                   integer relation
-                                                                  DOWNGRADED: descent
-                                                                  content unspecified
+                                                                  SPLIT: relation proved,
+                                                                  descent unspecified
                                                                      |
                                                                      +--H26  one critical-time
                                                                      |       graph yields a
@@ -85,8 +85,13 @@ H0  selected nine-runner target is open
                                                                      |       KILLED: telescopes
                                                                      |
                                                                      +--H27  fewer than half
-                                                                             are very fast
-                                                                             PROVED by union bound
+                                                                     |       are very fast
+                                                                     |       PROVED by union bound
+                                                                     |
+                                                                     +--H28  triangular Fourier
+                                                                             bump forces a bounded
+                                                                             speed relation
+                                                                             PROVED explicitly
 ```
 
 ## Nodes
@@ -700,9 +705,9 @@ H0  selected nine-runner target is open
 - Mode: Archimedean duality, proposed by the Claude clean-room audit
 - Hypothesis: for each `k`, if `L(v)=max_t min_i ||v_i t|| < 1/(k+1)`, then the actual integer vector `v` has a nonzero relation `a dot v=0` with `||a||_1 <= C(k)` and a sign pattern supporting contraction, polynomial degeneracy, or descent.
 - Why it survives H23: the relation is imposed on one fixed ordinary integer vector. The spurious compatible residues `(q^a-1)/2` change their centered integer representative at every level.
-- Audit result: the antecedent `L(v)<1/(k+1)` is itself an unknown counterexample, so the proposed finite test cannot obtain negative examples without first disproving LRC. The weak conclusion is also non-discriminating: every integer vector has two-coordinate relations, and known finite-checking bounds already bound their coefficients under induction.
+- Audit result: the original finite test was non-operational because the antecedent `L(v)<1/(k+1)` is itself an unknown counterexample. The weak conclusion is nevertheless provable directly, and even holds at equality; see H28.
 - Missing content: “a sign pattern supporting descent” carries the entire burden but has no specified transformation or preservation lemma.
-- Verdict: downgraded as non-operational. Retain Archimedean fixed-vector realizability, but do not spend computation on the relation statement until descent is defined independently.
+- Verdict: split. The bounded-relation half is proved with an explicit coefficient bound; the descent half remains open and must be stated as a concrete transformation before testing.
 - Prime boundary: prime-modular lifting may help test this hypothesis, but no prime-distribution statement is built into it. Prime-only obstacles belong to that proof route and remain deliberately open.
 - Artifact: `artifacts/general-case-hypotheses.md`.
 
@@ -742,6 +747,28 @@ H0  selected nine-runner target is open
 - Limitation: the union bound becomes silent at `2r>=N+1`; the lower half of the speed vector remains uncontrolled.
 - Artifact: `artifacts/multi-fast-runner-lemma.md`.
 
+### H28 — A bad or tight tuple has a uniformly bounded Fourier relation
+
+- Mode: exact Fourier expansion of a supported triangular bump
+- Statement: fix `n` and `0 <= delta < 1/2`. Put `a=1/2-delta`, `S=a+1/(3a)`, and
+
+  ```text
+  K = floor(2n S^(n-1) / (9 a^(n+1))) + 1.
+  ```
+
+  If `ML(v_1,...,v_n) <= delta`, then some nonzero integer vector `m` satisfies `sum_i m_i v_i=0` and `max_i |m_i| <= K`.
+- Proof:
+
+  - Let `f` be the height-one triangular bump centered at `1/2`, supported on `[delta,1-delta]`. If `ML(v)<=delta`, then `product_i f(v_i t)` vanishes identically, including at tight witnesses because some factor is on the support boundary.
+  - Its mean is `a`; its Fourier coefficients are absolutely summable, with total `l1` norm at most `S` and tail past `K` less than `2/(9aK)`.
+  - Integrating the product retains exactly frequency tuples satisfying `sum_i m_i v_i=0`. If every nonzero relation had some coefficient larger than `K`, the nonconstant terms would have absolute sum less than `n * 2/(9aK) * S^(n-1) < a^n`.
+  - The positive constant term is `a^n`, so the integral could not be zero. Contradiction.
+- LRC specialization: at `delta=1/(n+1)`, the bounds `K` for `n=2,...,13` are `209, 428, 1028, 2561, 6439, 16214, 40753, 102112, 254978, 634500, 1573723, 3891190`.
+- Verdict: proved.
+- Verification: exact code evaluates the rational bound and finds relations for failed-threshold fixtures and the tight tuples `(1,2)`, `(1,2,3)`, and `(1,2,3,4)`.
+- Consequence: a hypothetical counterexample lies in one of finitely many rational hyperplanes whose normal vector depends only on `n`. The unresolved step is to prove LRC, or a descent, on each resulting relative subtorus.
+- Artifact: `artifacts/fourier-short-relation.md`.
+
 ## What the graph established
 
 1. The elementary measure branch recovers `1/(2n)` and dies by an exact factor-two deficit.
@@ -771,12 +798,14 @@ H0  selected nine-runner target is open
 25. The bounded-relation proposal is not operational as stated: its weak conclusion is automatic after finite checking, while the undefined “descent-compatible” qualifier hides the missing theorem.
 26. A single critical-time active graph cannot supply that theorem because its edge equations are vertex differences and every cycle telescopes; known tight tuples also lack the proposed connected graph.
 27. A direct interval-measure argument proves a multi-fast-runner lemma: fewer than half the runners cannot lie above a sufficiently large multiplicative speed gap in a counterexample.
+28. A triangular-bump Fourier argument proves the weak bounded-relation theorem explicitly: every bad or tight `n`-tuple lies on one of finitely many bounded-normal rational hyperplanes. The remaining burden is relative-subtorus descent, not relation existence.
 
 ## Frontier
 
 - Primary: for the general conjecture, study whether the published lifting and polynomial sieves admit a uniform argument; do not present this as part of the completed nine-runner result.
 - Primary: replace H23 by a height-sensitive gap theorem, or formulate a lift-tree invariant that distinguishes fixed ordinary integers from spurious profinite survivor branches.
 - Primary: combine H27's upper-gap constraints with finite-checking/volume bounds; seek a complementary lemma controlling cuts with at least half the runners above them.
+- Primary: for the finite H28 normal vectors, formulate and test a concrete relative-subtorus descent; do not use the phrase “compatible sign pattern” without the transformation and preserved invariant.
 - Secondary: if stronger auditability is desired, make the published sieve proof-producing or independently reimplement its three levels.
 - Historical: the local H21 37-prime scan and p=47 branch certificates remain useful cross-checks, but no longer block the nine-runner theorem.
 - Secondary: retain H19's one-gap exchange fixtures as boundary tests for any proposed H20 lemma.

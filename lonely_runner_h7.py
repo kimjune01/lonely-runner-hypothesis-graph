@@ -9,6 +9,7 @@ from __future__ import annotations
 
 from fractions import Fraction
 from functools import lru_cache
+from itertools import product
 from math import gcd
 
 
@@ -97,6 +98,78 @@ def multi_fast_union_condition(speeds: tuple[int, ...], *, fast_count: int) -> b
         (Fraction(1, speed) for speed in fast),
         start=Fraction(0),
     )
+
+
+def valid_time_measure(speeds: tuple[int, ...], *, delta: Fraction) -> Fraction:
+    """Exact measure of times where every speed is at least ``delta`` lonely."""
+    if not speeds or any(speed <= 0 for speed in speeds):
+        raise ValueError("speeds must be a nonempty tuple of positive integers")
+    delta = Fraction(delta)
+    if not 0 <= delta <= Fraction(1, 2):
+        raise ValueError("delta must lie between 0 and 1/2")
+
+    endpoints = {Fraction(0), Fraction(1)}
+    for speed in speeds:
+        for integer in range(speed + 1):
+            zero = Fraction(integer, speed)
+            for boundary in (zero - delta / speed, zero + delta / speed):
+                if 0 <= boundary <= 1:
+                    endpoints.add(boundary)
+
+    ordered = sorted(endpoints)
+    measure = Fraction(0)
+    for left, right in zip(ordered, ordered[1:]):
+        midpoint = (left + right) / 2
+        if all(fractional_distance(speed * midpoint) >= delta for speed in speeds):
+            measure += right - left
+    return measure
+
+
+def fourier_relation_bound(runner_count: int, *, delta: Fraction) -> int:
+    """Explicit coefficient bound forced by failure at threshold ``delta``.
+
+    The proof uses a triangular bump of half-width ``a=1/2-delta``. Its
+    Fourier l1 norm is at most ``S=a+1/(3a)``, while the coefficient tail past
+    K is less than ``2/(9aK)``. Choosing K so that the product-expansion tail
+    is smaller than the positive constant term forces a nonzero frequency
+    relation among the speeds.
+    """
+    if runner_count < 1:
+        raise ValueError("runner_count must be positive")
+    delta = Fraction(delta)
+    if not 0 <= delta < Fraction(1, 2):
+        raise ValueError("delta must lie between 0 and 1/2")
+    half_width = Fraction(1, 2) - delta
+    fourier_l1_bound = half_width + Fraction(1, 3) / half_width
+    cutoff = (
+        Fraction(2 * runner_count, 9)
+        * fourier_l1_bound ** (runner_count - 1)
+        / half_width ** (runner_count + 1)
+    )
+    return int(cutoff) + 1
+
+
+def find_bounded_relation(
+    speeds: tuple[int, ...], *, max_coefficient: int
+) -> tuple[int, ...] | None:
+    """Find a small integer relation by exhaustive search for diagnostics."""
+    if not speeds or any(speed <= 0 for speed in speeds):
+        raise ValueError("speeds must be a nonempty tuple of positive integers")
+    if max_coefficient < 1:
+        raise ValueError("max_coefficient must be positive")
+    coefficients = range(-max_coefficient, max_coefficient + 1)
+    for relation in product(coefficients, repeat=len(speeds)):
+        if not any(relation):
+            continue
+        if sum(coefficient * speed for coefficient, speed in zip(relation, speeds)):
+            continue
+        divisor = gcd(*(abs(coefficient) for coefficient in relation))
+        primitive = tuple(coefficient // divisor for coefficient in relation)
+        first = next(coefficient for coefficient in primitive if coefficient)
+        if first < 0:
+            primitive = tuple(-coefficient for coefficient in primitive)
+        return primitive
+    return None
 
 
 def universal_grid_counterexample(*, r: int) -> tuple[int, tuple[int, int], Fraction]:
