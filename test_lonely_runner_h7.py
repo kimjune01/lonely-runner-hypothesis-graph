@@ -1531,6 +1531,34 @@ def test_dense_dependency_block_kills_reciprocal_riesz_load_floor():
     assert Fraction(2363, 7285) < Fraction(1, 3)
 
 
+@pytest.mark.parametrize(
+    ("block_size", "block_count", "scale"),
+    [(2, 2, 4), (3, 3, 5), (7, 4, 12), (17, 3, 1009)],
+)
+def test_geometric_canonical_blocks_share_an_lrc_fixed_point(
+    block_size, block_count, scale
+):
+    speeds, time = lrc.geometric_canonical_block_witness(
+        block_size=block_size,
+        block_count=block_count,
+        scale=scale,
+    )
+
+    assert len(speeds) == len(set(speeds)) == block_size * block_count
+    assert all((scale**power * time - time).denominator == 1
+               for power in range(block_count))
+    assert min(
+        lrc.fractional_distance(speed * time) for speed in speeds
+    ) >= Fraction(1, len(speeds) + 1)
+
+
+def test_geometric_canonical_block_witness_requires_separated_blocks():
+    with pytest.raises(ValueError, match="scale must be at least block_size plus two"):
+        lrc.geometric_canonical_block_witness(
+            block_size=4, block_count=3, scale=5
+        )
+
+
 def test_local_handoff_elimination_reaches_nine_speed_survivor():
     speeds = (2, 5, 6, 8, 9, 11, 13, 14, 17)
     certificate = lrc.local_handoff_elimination_certificate(
@@ -1764,6 +1792,29 @@ def test_first_band_scan_cli_emits_replayable_receipt():
     assert "normalized_riesz_ratio" in lines[0]
     assert "parameter_norm_squared_cutoff" in lines[0]
     assert any("1,2,6\t2/7" in line for line in lines[1:])
+
+
+def test_geometric_block_scan_cli_replays_grid_false_positives():
+    result = subprocess.run(
+        [
+            sys.executable,
+            str(Path(__file__).with_name("scan_geometric_blocks.py")),
+            "--max-block-size",
+            "5",
+            "--scale-multiple",
+            "5",
+        ],
+        check=True,
+        capture_output=True,
+        text=True,
+    )
+
+    assert result.stdout.splitlines() == [
+        "block_size\tscale_start\tscale_end\tgrid_survivors\texact_survivors",
+        "3\t7\t31\t1\t0",
+        "4\t11\t51\t8\t0",
+        "5\t16\t76\t2\t0",
+    ]
 
 
 def test_coarse_inductive_first_band_height_bound():

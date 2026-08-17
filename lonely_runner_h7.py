@@ -736,6 +736,35 @@ def maximum_loneliness(speeds: tuple[int, ...]) -> Fraction:
     )
 
 
+def geometric_canonical_block_witness(
+    *, block_size: int, block_count: int, scale: int
+) -> tuple[tuple[int, ...], Fraction]:
+    """Witness LRC for repeated canonical blocks on a geometric scale.
+
+    The speeds are ``k * scale**j`` for ``1 <= k <= block_size`` and
+    ``0 <= j < block_count``.  At ``t=a/(scale-1)``, multiplication by the
+    scale fixes the phase.  Taking ``a=floor((scale-1)/(block_size+1))``
+    puts every block at the same canonical phase and gives distance at least
+    ``1/(block_size*block_count+1)``.
+    """
+    if block_size < 2:
+        raise ValueError("block_size must be at least two")
+    if block_count < 2:
+        raise ValueError("block_count must be at least two")
+    if scale < block_size + 2:
+        raise ValueError("scale must be at least block_size plus two")
+
+    denominator = scale - 1
+    numerator = denominator // (block_size + 1)
+    time = Fraction(numerator, denominator)
+    speeds = tuple(
+        multiplier * scale**power
+        for power in range(block_count)
+        for multiplier in range(1, block_size + 1)
+    )
+    return speeds, time
+
+
 def loneliness_at_most(speeds: tuple[int, ...], *, threshold: Fraction) -> bool:
     """Decide an upper bound exactly, returning early at a violating time."""
     if not speeds or any(speed <= 0 for speed in speeds):

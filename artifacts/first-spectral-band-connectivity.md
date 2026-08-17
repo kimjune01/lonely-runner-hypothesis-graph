@@ -482,6 +482,56 @@ The lesson is sharp: relation rank alone is not the relevant networking-style
 dependency budget. A successor must retain the strict first-band geometry that
 couples otherwise independent dense loads.
 
+### Fixed-point synchronization proves every geometric canonical block family
+
+The H70 killer suggested testing the more general low-rank family
+
+```text
+B_m union M B_m union ... union M^(r-1) B_m,
+B_m=(1,2,...,m).
+```
+
+This family is completely safe. Assume `m,r>=2` and `M>=m+2`, put `q=M-1`,
+and write
+
+```text
+q=(m+1)a+s,       a=floor(q/(m+1)),       0<=s<=m.
+```
+
+At `t=a/q`, multiplication by `M` fixes the phase modulo one:
+
+```text
+M^j t-t = a(M^j-1)/(M-1) in Z.
+```
+
+All `r` blocks therefore reduce to the same canonical block. Since
+`0<t<=1/(m+1)`, every `k=1,...,m` satisfies `||kt||>=t`: below the midpoint
+the distance is at least `t`, and above it the distance is at least
+`1-mt>=t`. Finally,
+
+```text
+a(rm+1)-q = a(r-1)m-s >= m-s >= 0,
+```
+
+so `t>=1/(rm+1)`. This proves the full LRC bound for all `n=rm` speeds.
+
+Before the fixed point was noticed, the exact falsification scan tested all
+three-block tuples with `3<=m<=28` and
+`sum(B_m)<M<=5 sum(B_m)+1`. The necessary first-band grid retained many
+scales, but continuous critical-time replay retained none. The theorem both
+closes the unbounded scale tail and explains why those modular survivors were
+spurious.
+
+Replay the bounded audit with
+`uv run scan_geometric_blocks.py --max-block-size 28 --scale-multiple 5`.
+
+For `m>=5`, the coefficient-one relations internal to `B_m` span its full
+`m-1` dimensional kernel. At sufficiently separated scales, relations split
+blockwise, so `r=3` gives rank exactly `n-3`. Thus H71 handles the direct
+adversarial family exposed by the failure of H70: several internally dense,
+externally independent load blocks can be synchronized at a fixed phase even
+though a rank-only spectral inequality cannot control them.
+
 The sharper H47 audit requires every elimination row to contain the immediately
 preceding new owner and at most two additional owners drawn from the intervening
 handoff segment or the two initial seeds. All 229 rows in the 55 certificates

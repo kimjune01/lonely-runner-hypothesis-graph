@@ -271,6 +271,11 @@ H0  selected nine-runner target is open
                                                                                                                                                                                                                                                                                                                   a reciprocal Riesz
                                                                                                                                                                                                                                                                                                                   load floor
                                                                                                                                                                                                                                                                                                                   KILLED
+                                                                                                                                                                                                                                                                                                                  |
+                                                                                                                                                                                                                                                                                                                  +--H71  geometric canonical
+                                                                                                                                                                                                                                                                                                                           blocks share a
+                                                                                                                                                                                                                                                                                                                           fixed phase
+                                                                                                                                                                                                                                                                                                                           PROVED
 ```
 
 ## Nodes
@@ -1496,6 +1501,30 @@ H0  selected nine-runner target is open
 - Verification: exact Riesz ratio regressions and scan receipt columns `riesz_cover_ratio` and `normalized_riesz_ratio`.
 - Artifact: `artifacts/first-spectral-band-connectivity.md`.
 
+### H71 — Geometrically scaled canonical blocks share an LRC fixed point
+
+- Mode: proved non-prime mixed-factor family, extracted from the H70 killer audit
+- Statement: let `m,r>=2` and `M>=m+2`, and concatenate the `r` disjoint blocks
+
+  ```text
+  B_m, M B_m, ..., M^(r-1) B_m,       B_m=(1,2,...,m).
+  ```
+
+  This `n=rm` speed tuple satisfies the full LRC bound.
+- Explicit witness: put `q=M-1`, `a=floor(q/(m+1))`, and `t=a/q`. Since `(M^j-1)/(M-1)` is integral, `M^j t=t mod 1` for every block. Also `0<t<=1/(m+1)`, so among `k=1,...,m` the minimum of `||kt||` is exactly `t`.
+- Bound: write `q=(m+1)a+s` with `0<=s<=m`. Because `a>=1` and `r>=2`,
+
+  ```text
+  a(rm+1)-q = a(r-1)m-s >= m-s >= 0.
+  ```
+
+  Hence `t=a/q>=1/(rm+1)=1/(n+1)`.
+- Adversarial relevance: for `m>=5` and sufficiently separated scales, the coefficient-one relations split blockwise and have rank `r(m-1)=n-r`. In particular, three blocks realize the exact `n-3` rank deficiency targeted by H69/H70, yet phase synchronization proves them safe. This removes an infinite mixed factor/nonfactor family rather than weakening the rank conjecture.
+- Exact falsification audit before the proof: for `3<=m<=28` and `sum(B_m)<M<=5 sum(B_m)+1`, the first-band grid admitted many false positives but exact critical-time replay admitted none. The fixed-point proof closes every remaining scale at once and explains those rejections.
+- Verdict: proved.
+- Verification: `geometric_canonical_block_witness`, exact phase/distinctness/LRC-distance regressions, and `scan_geometric_blocks.py` for the pre-proof falsification receipt.
+- Artifact: `artifacts/first-spectral-band-connectivity.md`.
+
 ## What the graph established
 
 1. The elementary measure branch recovers `1/(2n)` and dies by an exact factor-two deficit.
@@ -1568,6 +1597,7 @@ H0  selected nine-runner target is open
 68. No exact subcritical scan has produced two residual owners. The weakened H67 target `|C|<=1` would reduce any remaining repair to a three-coordinate quotient, but it does not by itself supply the last circuit.
 69. A replacement-arc argument exactly disposes of the canonical factor-extension family: `ML(1,2,...,n-1,nr)=r/(nr+1)`, and the canonical chain already supplies rank `n-2`. These one-scale accumulation examples cannot obstruct the general conjecture.
 70. Coefficient-one rank exhibits an even sharper boundary jump. Every strict survivor through nine speeds has rank at least `n-2`; the only three deficiencies have rank `n-3` and lie exactly at `ML=2/(2n+1)`. This upgrades the preferred invariant from coefficient-two handoff rank to a strict-interior unit-circuit hypothesis.
+71. The rank-only Riesz load floor H70 is false, but its separated-block killer is itself harmless for a stronger reason. H71 synchronizes every geometric canonical block at the fixed phase `t=floor((M-1)/(m+1))/(M-1)` and proves the full LRC bound for any number of blocks.
 
 ## Frontier
 
@@ -1580,6 +1610,7 @@ H0  selected nine-runner target is open
 - Primary: use H68 as the equality model for H67. If a one-core tuple approaches `1/n`, compare its `n` near-packed arcs with the canonical translate and quantify how any second unresolved direction consumes more than the total packing slack.
 - Primary: prove or kill H69. Revisit H41 with the coefficient-one relation space quotiented out: the target is a lower bound on its rank, and the three exact boundary deficiencies are mandatory calibration cases for any strict-margin inequality.
 - Killed route: H70 shows that coefficient-one codimension three alone does not force a reciprocal Riesz load floor; three separated consecutive blocks violate it. A successor must use the strict first-band cover to forbid or couple such dense relation blocks.
+- Proved family: use H71 as the equality model for mixed factor groups. Any counterexample built from several geometric copies of a canonical block must break the common-scale fixed point—for example through unequal block shapes or non-geometric transitions—rather than merely separating the blocks.
 - Primary: replace H23 by a height-sensitive gap theorem, or formulate a lift-tree invariant that distinguishes fixed ordinary integers from spurious profinite survivor branches.
 - Primary: combine H27's upper-gap constraints with finite-checking/volume bounds; seek a complementary lemma controlling cuts with at least half the runners above them.
 - Primary: for the finite H28 normal vectors, formulate and test a concrete relative-subtorus descent; do not use the phrase “compatible sign pattern” without the transformation and preserved invariant.
