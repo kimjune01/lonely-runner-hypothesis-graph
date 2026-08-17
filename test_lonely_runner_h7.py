@@ -377,3 +377,30 @@ def test_tight_tuple_relation_is_within_fourier_bound(speeds):
     assert max(map(abs, relation)) <= lrc.fourier_relation_bound(
         len(speeds), delta=delta
     )
+
+
+@pytest.mark.parametrize(
+    "speeds",
+    [
+        (1, 2, 3),
+        (1, 2, 6),
+        (1, 3, 4),
+        (1, 5, 6),
+        (2, 3, 5),
+        (1, 2, 3, 4),
+        (1, 2, 3, 8),
+        (1, 3, 4, 7),
+        (3, 4, 7, 11),
+        (1, 3, 4, 5, 7, 13, 18),
+    ],
+)
+def test_first_spectral_band_fixtures_have_connected_two_relations(speeds):
+    runner_count = len(speeds)
+    assert lrc.maximum_loneliness(speeds) <= Fraction(2, 2 * runner_count + 1)
+    assert lrc.bounded_relation_components(speeds, max_coefficient=2) == (tuple(range(runner_count)),)
+
+
+def test_connected_relation_hypothesis_needs_first_band_cutoff():
+    speeds = (1, 2, 18)
+    assert lrc.maximum_loneliness(speeds) == Fraction(6, 19) < Fraction(1, 3)
+    assert len(lrc.bounded_relation_components(speeds, max_coefficient=5)) > 1

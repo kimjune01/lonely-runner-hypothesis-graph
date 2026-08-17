@@ -92,6 +92,11 @@ H0  selected nine-runner target is open
                                                                              bump forces a bounded
                                                                              speed relation
                                                                              PROVED explicitly
+                                                                                |
+                                                                                +--H29  first spectral
+                                                                                        band has connected
+                                                                                        coefficient-2 relations
+                                                                                        SURVIVES FIXTURES
 ```
 
 ## Nodes
@@ -769,6 +774,23 @@ H0  selected nine-runner target is open
 - Consequence: a hypothetical counterexample lies in one of finitely many rational hyperplanes whose normal vector depends only on `n`. The unresolved step is to prove LRC, or a descent, on each resulting relative subtorus.
 - Artifact: `artifacts/fourier-short-relation.md`.
 
+### H29 — First-band tuples have a connected coefficient-two relation graph
+
+- Mode: exact near-tight spectrum structure
+- Hypothesis: if `ML(v_1,...,v_n) <= 2/(2n+1)`, form a hypergraph on the runners by adding the support of every integer relation `sum_i a_i v_i=0` with `|a_i|<=2`. This hypergraph is connected.
+- Why this is the needed strengthening: H28 can return a relation confined to a proper subset. Connectivity couples every speed, bounds all ratios through a finite chain, and gives a concrete target for relative-subtorus descent.
+- Broad version killed: merely assuming `ML(v)<1/n` is insufficient. The family `(1,2,3s)` has `ML=s/(3s+1)<1/3`, while the coefficient needed to connect `3s` grows with `s`. These values accumulate at the lower-dimensional threshold `1/3`.
+- First-band trials:
+
+  - Exact enumeration through height `30` for `n=3`, height `22` for `n=4`, and height `13` for `n=5` found respectively `5`, `6`, and `7` primitive tuples below the midpoint between `1/(n+1)` and `1/n`; all lie at or below `2/(2n+1)` and have connected coefficient-two relation graphs.
+  - All but `(1,2,6)` and `(1,2,3,8)` are already connected with coefficients in `{-1,0,1}`; those two require coefficient `2`.
+  - The published amended-spectrum exception `(1,3,4,5,7,13,18)`, with `ML=3/23<2/15`, is connected using coefficient-one relations.
+  - The cutoff regression `(1,2,18)` has `ML=6/19<1/3` but remains disconnected even at coefficient bound `5`.
+- Verdict: survives current exact fixtures; not proved.
+- Kill condition: a tuple at or below `2/(2n+1)` whose coefficient-two relation hypergraph is disconnected.
+- Next proof target: a connected-cluster Fourier expansion. Proper components have a uniform loneliness gap because the cutoff lies strictly below their lower-dimensional threshold; use that positive component mass to force a bounded cross-component frequency.
+- Artifact: `artifacts/first-spectral-band-connectivity.md`.
+
 ## What the graph established
 
 1. The elementary measure branch recovers `1/(2n)` and dies by an exact factor-two deficit.
@@ -799,6 +821,7 @@ H0  selected nine-runner target is open
 26. A single critical-time active graph cannot supply that theorem because its edge equations are vertex differences and every cycle telescopes; known tight tuples also lack the proposed connected graph.
 27. A direct interval-measure argument proves a multi-fast-runner lemma: fewer than half the runners cannot lie above a sufficiently large multiplicative speed gap in a counterexample.
 28. A triangular-bump Fourier argument proves the weak bounded-relation theorem explicitly: every bad or tight `n`-tuple lies on one of finitely many bounded-normal rational hyperplanes. The remaining burden is relative-subtorus descent, not relation existence.
+29. Uniform connectedness fails across the whole near-tight interval by `(1,2,3s)`, but coefficient-two connectivity survives every tested tuple in the first spectral band `ML<=2/(2n+1)`. This is now the sharp non-prime hypothesis to attack.
 
 ## Frontier
 
@@ -806,6 +829,7 @@ H0  selected nine-runner target is open
 - Primary: replace H23 by a height-sensitive gap theorem, or formulate a lift-tree invariant that distinguishes fixed ordinary integers from spurious profinite survivor branches.
 - Primary: combine H27's upper-gap constraints with finite-checking/volume bounds; seek a complementary lemma controlling cuts with at least half the runners above them.
 - Primary: for the finite H28 normal vectors, formulate and test a concrete relative-subtorus descent; do not use the phrase “compatible sign pattern” without the transformation and preserved invariant.
+- Primary: prove or kill H29 via a connected-cluster Fourier argument; a proof would turn isolated relations into a global bound on every speed ratio.
 - Secondary: if stronger auditability is desired, make the published sieve proof-producing or independently reimplement its three levels.
 - Historical: the local H21 37-prime scan and p=47 branch certificates remain useful cross-checks, but no longer block the nine-runner theorem.
 - Secondary: retain H19's one-gap exchange fixtures as boundary tests for any proposed H20 lemma.

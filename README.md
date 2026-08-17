@@ -41,3 +41,8 @@ to Conjecture 7.1 of Sungkawichai--Trakulthongchai as written. The exact proof,
 its stronger coprimality property, and the resulting restriction on profinite
 lift-tree hypotheses are recorded in
 [`artifacts/conjecture-7-1-counterexample.md`](artifacts/conjecture-7-1-counterexample.md).
+
+The current general-case branch proves height-sensitive grid recovery, a
+multi-fast-runner gap lemma, and an explicit bounded Fourier relation theorem.
+The surviving first-spectral-band connectivity hypothesis is summarized in
+[`artifacts/first-spectral-band-connectivity.md`](artifacts/first-spectral-band-connectivity.md).

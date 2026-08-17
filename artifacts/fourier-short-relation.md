@@ -111,3 +111,14 @@ bad cover while reducing runner count or speed height.
 `fourier_relation_bound` evaluates `K` exactly with rational arithmetic.
 `find_bounded_relation` is a small diagnostic search used on fixtures; it is
 not intended to enumerate the full analytic bound.
+
+## Relation to prior work
+
+Tao's finite-checking proof also uses smooth Fourier approximants and bounded
+additive structure among the speeds. The triangular-tent argument above is an
+explicit reconstruction tailored to the single conclusion “a bad or tight
+tuple has one bounded relation”; it is not presented as a literature-novel
+Fourier method.
+
+- Terence Tao, [*Some remarks on the lonely runner
+  conjecture*](https://arxiv.org/abs/1701.02048), especially Sections 3–4.

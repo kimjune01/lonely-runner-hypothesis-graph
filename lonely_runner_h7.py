@@ -172,6 +172,45 @@ def find_bounded_relation(
     return None
 
 
+def bounded_relation_components(
+    speeds: tuple[int, ...], *, max_coefficient: int
+) -> tuple[tuple[int, ...], ...]:
+    """Components joined by relations with uniformly bounded coefficients."""
+    if not speeds or any(speed <= 0 for speed in speeds):
+        raise ValueError("speeds must be a nonempty tuple of positive integers")
+    if max_coefficient < 1:
+        raise ValueError("max_coefficient must be positive")
+
+    parent = list(range(len(speeds)))
+
+    def find(index: int) -> int:
+        while parent[index] != index:
+            parent[index] = parent[parent[index]]
+            index = parent[index]
+        return index
+
+    def union(first: int, second: int) -> None:
+        first_root = find(first)
+        second_root = find(second)
+        if first_root != second_root:
+            parent[second_root] = first_root
+
+    coefficients = range(-max_coefficient, max_coefficient + 1)
+    for relation in product(coefficients, repeat=len(speeds)):
+        support = [index for index, coefficient in enumerate(relation) if coefficient]
+        if len(support) < 2:
+            continue
+        if sum(coefficient * speed for coefficient, speed in zip(relation, speeds)):
+            continue
+        for index in support[1:]:
+            union(support[0], index)
+
+    components: dict[int, list[int]] = {}
+    for index in range(len(speeds)):
+        components.setdefault(find(index), []).append(index)
+    return tuple(sorted((tuple(component) for component in components.values())))
+
+
 def universal_grid_counterexample(*, r: int) -> tuple[int, tuple[int, int], Fraction]:
     """Give the r-th counterexample to the universal grid-witness conjecture.
 
