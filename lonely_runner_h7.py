@@ -617,6 +617,37 @@ def reset_blocker_mask(
     )
 
 
+def unit_reset_cover_excess_profile(
+    *, speeds: tuple[int, ...], modulus: int, phase: Fraction
+) -> tuple[int, ...] | None:
+    """Excess tokens in a covered reset-slot graph of unit packets.
+
+    Each unit speed supplies one two-slot edge away from its event phases.
+    When those edges cover every reset slot, subtracting the mandatory one
+    unit of load at each vertex leaves a nonnegative profile of total mass
+    ``2*len(speeds)-modulus``.  Return ``None`` when a slot is uncovered.
+    """
+    if not speeds or any(speed <= 0 for speed in speeds):
+        raise ValueError("speeds must be a nonempty tuple of positive integers")
+    if modulus < 2:
+        raise ValueError("modulus must be at least two")
+    if any(gcd(speed, modulus) != 1 for speed in speeds):
+        raise ValueError("every speed must be a unit modulo the modulus")
+
+    masks = tuple(
+        reset_blocker_mask(speed=speed, modulus=modulus, phase=phase)
+        for speed in speeds
+    )
+    if any(len(mask) != 2 for mask in masks):
+        raise ValueError("phase must avoid every unit packet event")
+    degrees = tuple(
+        sum(reset in mask for mask in masks) for reset in range(modulus)
+    )
+    if any(degree == 0 for degree in degrees):
+        return None
+    return tuple(degree - 1 for degree in degrees)
+
+
 def divisible_block_phase_sweep_witness(
     speeds: tuple[int, ...],
 ) -> Fraction | None:
@@ -695,24 +726,23 @@ def first_band_component_routing_witness(
 
     reserve = Fraction(2, 2 * runner_count + 1)
     target = Fraction(1, modulus)
-    quotient_maximum = maximum_loneliness(quotients)
-    maximizing_phases = tuple(
-        phase
-        for phase in set(_critical_times(quotients))
-        if min(
-            fractional_distance(quotient * phase) for quotient in quotients
-        )
-        == quotient_maximum
-    )
+    _, maximizing_phases = _maximum_loneliness_with_witnesses(quotients)
+    safe_components = _safe_phase_components(quotients, threshold=reserve)
+    active_component_indices: set[int] = set()
+    component_index = 0
+    for phase in maximizing_phases:
+        while (
+            component_index < len(safe_components)
+            and safe_components[component_index][1] < phase
+        ):
+            component_index += 1
+        if component_index == len(safe_components):
+            break
+        left, right = safe_components[component_index]
+        if left <= phase <= right:
+            active_component_indices.add(component_index)
     components = tuple(
-        component
-        for component in _safe_phase_components(
-            quotients, threshold=reserve
-        )
-        if any(
-            component[0] <= phase <= component[1]
-            for phase in maximizing_phases
-        )
+        safe_components[index] for index in sorted(active_component_indices)
     )
 
     for left, right in components:
@@ -939,6 +969,24 @@ def maximum_loneliness(speeds: tuple[int, ...]) -> Fraction:
         min(fractional_distance(speed * time) for speed in speeds)
         for time in set(_critical_times(speeds))
     )
+
+
+def _maximum_loneliness_with_witnesses(
+    speeds: tuple[int, ...],
+) -> tuple[Fraction, tuple[Fraction, ...]]:
+    """Return the exact maximum and all critical phases attaining it."""
+    best = Fraction(-1)
+    witnesses: set[Fraction] = set()
+    for time in _critical_times(speeds):
+        value = min(
+            fractional_distance(speed * time) for speed in speeds
+        )
+        if value > best:
+            best = value
+            witnesses = {time}
+        elif value == best:
+            witnesses.add(time)
+    return best, tuple(sorted(witnesses))
 
 
 def geometric_canonical_block_witness(

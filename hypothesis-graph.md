@@ -1767,6 +1767,60 @@ H0  selected nine-runner target is open
   coset/empty fixtures.
 - Artifact: `artifacts/first-spectral-band-connectivity.md`.
 
+### H79 — Excess-token conservation in the unit reset sweep
+
+- Mode: proved load-balancing invariant; sharpens H77
+- Setup: at a non-event phase let `r` nondivisible unit speeds supply the H78
+  two-slot edges on `Z/N`. If their union covers every reset slot, write
+
+  ```text
+  deg(k)=number of packet edges containing k,
+  e(k)=deg(k)-1.
+  ```
+
+- Statement: `e(k)>=0` and the total excess-token mass is exactly
+
+  ```text
+  E=sum_k e(k)=2r-N.
+  ```
+
+  At an isolated event of speed `v`, its edge changes from
+
+  ```text
+  {p, p-v^{-1}} to {p-v^{-1}, p-2v^{-1}}  (mod N).
+  ```
+
+  If coverage persists across the event, the outgoing slot `p` has an excess
+  token and the new profile is obtained by transporting that token from `p`
+  to `p-2v^{-1}`.
+- Proof: the mass identity is the handshake lemma: the `r` edges have total
+  degree `2r`, while the mandatory baseline cover has degree `N`. At an
+  isolated event all other degrees are unchanged; the outgoing degree drops
+  by one and the incoming degree rises by one. Nonnegativity after the event
+  forces the outgoing degree to have been at least two.
+- Tight-capacity corollary: if `2r=N`, then `E=0`, so no isolated event can
+  preserve coverage. A persistent cover can change only at a simultaneous
+  event batch, and the batch's outgoing-to-incoming arcs must decompose into
+  directed cycles.
+- Limitation discovered: forgetting event times leaves only the modular cycle
+  condition `sum v_i^{-1}=0 mod N` (with the appropriate factor two). That does
+  not imply an integer coefficient-two relation among the full speeds. Thus a
+  pure rotor-router or static edge-cover theorem cannot finish H77; synchronized
+  event times are load-bearing.
+- Counterexample search: after optimizing the exact component router, random
+  rank-deficient all-unit-reset tuples produced zero H77 failures in `1000`
+  samples at `(n,H)=(3,5000)`, `1000` at `(4,2500)`, and `500` at `(5,1000)`.
+  Complete all-rank all-unit-reset scans also found zero failures in `50,622`,
+  `21,672`, and `105` tuples at `(3,120)`, `(4,35)`, and `(5,20)` respectively.
+  These are falsification results, not proof.
+- Next target: at a simultaneous batch, retain both the token-cycle labels and
+  the common rational event time. Either derive one bounded speed relation or
+  show that every such batch lies outside a quotient-maximizing safe component.
+- Verdict: token invariant proved; cycle-to-relation successor open.
+- Verification: `unit_reset_cover_excess_profile`, exact mass fixtures, and an
+  isolated event transporting one token.
+- Artifact: `artifacts/first-spectral-band-connectivity.md`.
+
 ## What the graph established
 
 1. The elementary measure branch recovers `1/(2n)` and dies by an exact factor-two deficit.
@@ -1848,6 +1902,7 @@ H0  selected nine-runner target is open
 77. H76 converts that full rank into height: cofactors and Hadamard give `max v_i<=ceil((4(n-1))^((n-1)/2))`. Thus H75 would make the exhaustive residual far smaller, though not eliminate it uniformly.
 78. Freezing the divisible quotient block at its exact inductive optimum is too rigid even for `(1,3,4)`. H77 replaces the frozen phase by an augmenting sweep inside its first-band-safe component; every rank-deficient divisible tuple in three completed height boxes routes successfully, leaving a precise alternating-event-cycle theorem to prove.
 79. H78 proves the exact packet dynamics needed by that sweep. A unit speed carries a moving two-slot edge that drops and acquires one reset class per event; a gcd-`g` nonunit carries one `g`-coset or nothing. The networking model is therefore an arithmetic identity, not merely an analogy.
+80. H79 finds the conserved load-balancing quantity: after reserving one packet per reset slot, a persistent unit cover has exactly `2r-N` movable excess tokens. Isolated events transport one token; zero-excess covers can change only through simultaneous directed cycles. Static cycles remember modular inverses but forget the event times needed for bounded integer relations.
 
 ## Frontier
 
@@ -1868,6 +1923,7 @@ H0  selected nine-runner target is open
 - Proved consequence: if H75 holds, use H76's cofactor height bound before any general finite-checking bound. Do not mistake the smaller finite domain for a proof across arbitrary `n`.
 - Primary component router: prove or kill H77. Sweep the quotient-safe component in exact endpoint order and interpret a persistent full reset cover as an alternating blocker cycle. The desired output is one new coefficient-two relation, not a generic circular-arc LP claim; arbitrary circular-arc matrices have integrality gaps.
 - Proved packet dynamics: use H78 to encode the H77 sweep as moving unit edges and flashing gcd cosets. First attack the all-unit case, where every event has exactly one retained, one dropped, and one acquired slot; postpone nonunit coset insertions until the alternating-cycle invariant is explicit.
+- Proved token invariant: H79 reduces persistent all-unit coverage to a finite token-routing process of mass `2r-N`. In the tight case, classify simultaneous cycle batches using their common event denominator. Do not discard the timestamp: the unlabelled rotor cycle yields only a modular-inverse congruence, not a coefficient-two relation among speeds.
 - Primary: replace H23 by a height-sensitive gap theorem, or formulate a lift-tree invariant that distinguishes fixed ordinary integers from spurious profinite survivor branches.
 - Primary: combine H27's upper-gap constraints with finite-checking/volume bounds; seek a complementary lemma controlling cuts with at least half the runners above them.
 - Primary: for the finite H28 normal vectors, formulate and test a concrete relative-subtorus descent; do not use the phrase “compatible sign pattern” without the transformation and preserved invariant.

@@ -1003,6 +1003,33 @@ def test_nonunit_reset_blocker_is_one_gcd_coset_or_empty():
     ) == ()
 
 
+def test_unit_reset_cover_excess_is_the_capacity_surplus():
+    profile = lrc.unit_reset_cover_excess_profile(
+        speeds=(1, 2, 3), modulus=5, phase=Fraction(2, 5)
+    )
+
+    assert profile == (1, 0, 0, 0, 0)
+    assert sum(profile) == 2 * 3 - 5
+
+
+def test_unit_reset_cover_excess_rejects_an_uncovered_phase():
+    assert lrc.unit_reset_cover_excess_profile(
+        speeds=(1, 2), modulus=5, phase=Fraction(2, 5)
+    ) is None
+
+
+def test_isolated_unit_event_transports_one_excess_token():
+    before = lrc.unit_reset_cover_excess_profile(
+        speeds=(1, 2, 3), modulus=5, phase=Fraction(499, 1000)
+    )
+    after = lrc.unit_reset_cover_excess_profile(
+        speeds=(1, 2, 3), modulus=5, phase=Fraction(501, 1000)
+    )
+
+    assert before == (1, 0, 0, 0, 0)
+    assert after == (0, 0, 0, 0, 1)
+
+
 def test_half_divisible_gcd_two_corollary_is_exactly_in_capacity_range():
     speeds = (1, 2, 3, 8, 16, 24, 32)
     modulus = len(speeds) + 1

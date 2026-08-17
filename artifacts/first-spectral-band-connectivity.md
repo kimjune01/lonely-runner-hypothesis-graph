@@ -1499,6 +1499,34 @@ show that a persistent full cover in this process either opens a reset slot or
 contains an alternating cycle whose synchronized labels yield a new
 coefficient-two speed relation.
 
+There is a conserved load behind this process. If `r` unit packets cover all
+`N` reset slots, put `e(k)=deg(k)-1`. Then
+
+```text
+e(k)>=0,              sum_k e(k)=2r-N.
+```
+
+At an isolated event, the moving packet retains one endpoint, drops one, and
+acquires one. Persistence forces the dropped endpoint to have positive excess,
+and the update transports exactly one excess token from the dropped endpoint
+to the acquired endpoint. This is H79. In the tight case `2r=N`, the token
+budget is zero, so no isolated event can preserve coverage; every changing
+persistent cover must use a simultaneous event batch whose transfer arcs form
+directed cycles.
+
+This also identifies the limit of the static networking analogy. Erasing the
+timestamps from such a cycle retains only a congruence among modular inverses
+of the packet speeds. It does not force a coefficient-two integer relation
+among the speeds themselves. A proof of H77 must pair the token cycle with the
+common rational event time of its batch.
+
+The optimized router permits high-height falsification. Random rank-deficient
+all-unit-reset samples had no failures in `1000` tuples at height `5000` for
+three speeds, `1000` at height `2500` for four, and `500` at height `1000` for
+five. Complete all-rank scans likewise had zero failures among `50,622`,
+`21,672`, and `105` tuples at `(n,H)=(3,120),(4,35),(5,20)`. These data select
+the timestamped simultaneous-cycle lemma; they do not prove it.
+
 ## Complete three-speed base case
 
 The 2025 finite-checking theorem of Malikiosis--Santos--Schymura gives a much
