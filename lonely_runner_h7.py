@@ -81,6 +81,131 @@ def bad_window_boundary_events(
     )
 
 
+def lrc_boundary_event_witness(speeds: tuple[int, ...]) -> Fraction | None:
+    """Return a target-width witness from the complete boundary event set.
+
+    If the closed feasible set is nonempty, one of its boundary points is an
+    entry or exit event of some runner.  Thus this height-dependent finite
+    search is complete for the given integer tuple.
+    """
+    if not speeds or any(speed <= 0 for speed in speeds):
+        raise ValueError("speeds must be a nonempty tuple of positive integers")
+    if len(set(speeds)) != len(speeds):
+        raise ValueError("speeds must be distinct")
+    modulus = len(speeds) + 1
+    delta = Fraction(1, modulus)
+    events = {
+        ((Fraction(center) + side * delta) / speed) % 1
+        for speed in speeds
+        for center in range(speed)
+        for side in (-1, 1)
+    }
+    for time in sorted(events):
+        if all(fractional_distance(speed * time) >= delta for speed in speeds):
+            return time
+    return None
+
+
+def boundary_event_block_count(
+    *, blocker: int, boundary_speed: int, modulus: int
+) -> int:
+    """Count one side of ``boundary_speed`` events blocked by ``blocker``.
+
+    With ``g=gcd(u,v)``, ``U=u/g``, and ``V=v/g``, the count is ``g`` times
+    the number of integers ``z`` in ``(-V,V)`` congruent to ``U`` modulo the
+    target modulus.
+    """
+    if blocker <= 0 or boundary_speed <= 0:
+        raise ValueError("speeds must be positive")
+    if modulus < 3:
+        raise ValueError("modulus must be at least three")
+    common = gcd(blocker, boundary_speed)
+    reduced_blocker = blocker // common
+    reduced_boundary = boundary_speed // common
+    return common * sum(
+        (integer - reduced_blocker) % modulus == 0
+        for integer in range(-reduced_boundary + 1, reduced_boundary)
+    )
+
+
+def boundary_capacity_witness_runner(speeds: tuple[int, ...]) -> int | None:
+    """Find a runner whose boundary events cannot all be blocked by capacity."""
+    if not speeds or any(speed <= 0 for speed in speeds):
+        raise ValueError("speeds must be a nonempty tuple of positive integers")
+    if len(set(speeds)) != len(speeds):
+        raise ValueError("speeds must be distinct")
+    modulus = len(speeds) + 1
+    for boundary_speed in speeds:
+        capacity = sum(
+            boundary_event_block_count(
+                blocker=blocker,
+                boundary_speed=boundary_speed,
+                modulus=modulus,
+            )
+            for blocker in speeds
+            if blocker != boundary_speed
+        )
+        if capacity < boundary_speed:
+            return boundary_speed
+    return None
+
+
+def boundary_event_blocked_centers(
+    *, blocker: int, boundary_speed: int, modulus: int
+) -> frozenset[int]:
+    """Return plus-side event centers of ``boundary_speed`` blocked by a runner."""
+    if blocker <= 0 or boundary_speed <= 0:
+        raise ValueError("speeds must be positive")
+    if modulus < 3:
+        raise ValueError("modulus must be at least three")
+    event_modulus = modulus * boundary_speed
+    return frozenset(
+        center
+        for center in range(boundary_speed)
+        if min(
+            blocker * (modulus * center + 1) % event_modulus,
+            -blocker * (modulus * center + 1) % event_modulus,
+        )
+        < boundary_speed
+    )
+
+
+def boundary_bonferroni_witness_runner(
+    speeds: tuple[int, ...], *, order: int
+) -> int | None:
+    """Use an odd Bonferroni upper bound on covered boundary events."""
+    if not speeds or any(speed <= 0 for speed in speeds):
+        raise ValueError("speeds must be a nonempty tuple of positive integers")
+    if len(set(speeds)) != len(speeds):
+        raise ValueError("speeds must be distinct")
+    if order <= 0 or order % 2 == 0 or order > len(speeds) - 1:
+        raise ValueError("order must be odd and at most the blocker count")
+
+    modulus = len(speeds) + 1
+    for boundary_speed in speeds:
+        blocker_sets = tuple(
+            boundary_event_blocked_centers(
+                blocker=blocker,
+                boundary_speed=boundary_speed,
+                modulus=modulus,
+            )
+            for blocker in speeds
+            if blocker != boundary_speed
+        )
+        covered_upper_bound = 0
+        for intersection_order in range(1, order + 1):
+            moment = sum(
+                len(selected[0].intersection(*selected[1:]))
+                for selected in combinations(blocker_sets, intersection_order)
+            )
+            covered_upper_bound += (
+                moment if intersection_order % 2 else -moment
+            )
+        if covered_upper_bound < boundary_speed:
+            return boundary_speed
+    return None
+
+
 def strict_band_edge_grid_cover_certificate(
     speeds: tuple[int, ...],
 ) -> tuple[int, ...] | None:

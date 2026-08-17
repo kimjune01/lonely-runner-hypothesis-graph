@@ -1039,6 +1039,73 @@ def test_opposite_pair_quotient_classes_supply_independent_relation_rows():
     assert lrc.bounded_relation_rank(speeds, max_coefficient=1) >= len(rows)
 
 
+def test_all_runner_boundary_events_recover_witness_missed_by_largest_only():
+    speeds = (1, 3, 4, 5, 12)
+
+    assert lrc.largest_divisible_boundary_witness(speeds) is None
+    witness = lrc.lrc_boundary_event_witness(speeds)
+    assert witness is not None
+    assert all(
+        lrc.fractional_distance(speed * witness) >= Fraction(1, 6)
+        for speed in speeds
+    )
+
+
+def test_pair_boundary_event_count_matches_direct_enumeration():
+    for modulus in range(4, 10):
+        delta = Fraction(1, modulus)
+        for blocker in range(1, 16):
+            for boundary_speed in range(1, 16):
+                if blocker == boundary_speed:
+                    continue
+                direct = sum(
+                    lrc.fractional_distance(
+                        blocker * (Fraction(center) + delta) / boundary_speed
+                    )
+                    < delta
+                    for center in range(boundary_speed)
+                )
+                assert (
+                    lrc.boundary_event_block_count(
+                        blocker=blocker,
+                        boundary_speed=boundary_speed,
+                        modulus=modulus,
+                    )
+                    == direct
+                )
+
+
+def test_boundary_capacity_deficit_identifies_a_witness_runner():
+    speeds = (1, 2, 3)
+
+    assert lrc.boundary_capacity_witness_runner(speeds) == 1
+    witness = lrc.lrc_boundary_event_witness(speeds)
+    assert witness is not None
+    assert all(
+        lrc.fractional_distance(speed * witness) >= Fraction(1, 4)
+        for speed in speeds
+    )
+
+
+def test_third_order_boundary_sieve_recovers_sharp_divisible_fixture():
+    speeds = (1, 3, 4, 5, 18)
+
+    assert lrc.boundary_capacity_witness_runner(speeds) is None
+    assert lrc.boundary_bonferroni_witness_runner(speeds, order=3) == 4
+
+
+def test_third_order_boundary_sieve_handles_pair_capacity_survivor():
+    speeds = (141, 196, 215, 220, 227, 292, 300)
+
+    assert lrc.boundary_bonferroni_witness_runner(speeds, order=3) == 141
+    witness = lrc.lrc_boundary_event_witness(speeds)
+    assert witness is not None
+    assert all(
+        lrc.fractional_distance(speed * witness) >= Fraction(1, 8)
+        for speed in speeds
+    )
+
+
 def test_handoff_seeds_append_the_eight_speed_separator():
     speeds = (1, 4, 5, 6, 7, 11, 13, 16)
     seeds = lrc.handoff_seed_pair(speeds, delta=Fraction(1, 9))

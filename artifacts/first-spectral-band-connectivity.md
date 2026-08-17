@@ -551,6 +551,85 @@ rows from its three equal pair sums. This is not yet the `n-2` independent
 rows required by H39; the next question is whether the remaining kernel
 classes and non-unit handoffs supply the rank deficit.
 
+## Complete boundary-event sweep
+
+H52 failed because it retained only the divisible runner's phase boundaries.
+Retaining every runner's entry and exit events repairs completeness. At target
+width `1/N`, the event set is
+
+```text
+t = (j +/- 1/N)/v_i,       0 <= j < v_i.
+```
+
+If the closed feasible set is nonempty, it is not the whole circle (time zero
+is infeasible), so a boundary point of one of its components is one of these
+events. Thus checking all events is an exact algorithm for a fixed tuple. It
+recovers a witness for `(1,3,4,5,12)`, where every boundary of the largest
+runner alone fails. Its size is `2 sum_i v_i`, so it is not a uniform proof.
+
+The event formulation admits an exact pairwise capacity. Fix a boundary
+runner `v`, a possible blocker `u`, and one choice of sign. Put
+
+```text
+g=gcd(u,v),       U=u/g,       V=v/g.
+```
+
+As the `v` event center runs through `j`, `u` blocks exactly
+
+```text
+g * #{z in Z : -V < z < V and z = U mod N}
+```
+
+events. To see this, multiply the badness inequality by `Nv` and divide by
+`g`; the resulting integer `z=N(Uj-mV)+U` is in `(-V,V)`, is congruent to
+`U mod N`, and conversely determines a unique `j mod V`, repeated `g` times.
+The two event signs have equal counts by `z -> -z`.
+
+Therefore a counterexample must satisfy, for every runner `v`,
+
+```text
+v <= sum_{u != v} gcd(u,v)
+     * #{z : -v/gcd(u,v) < z < v/gcd(u,v),
+             z = [u/gcd(u,v)] mod N}.
+```
+
+If this fails, one side has a boundary event no other runner can block, and
+that event is an explicit lonely time. A residue-free but weaker form replaces
+the cardinality by `ceil((2v/g-1)/N)`. Exact exhaustive samples show the
+capacity deficit on 13,279 of 16,648 primitive three-speed tuples of height at
+most 50, and on substantial fractions through six speeds. The sharp
+divisible fixtures pass the necessary inequality, so higher-order overlap of
+blocker event sets—not another sum of capacities—is the next obstruction.
+
+That overlap has a canonical moment hierarchy. For a fixed boundary runner
+`v`, let `A_u` be the set of its plus-side event indices blocked by `u`, and
+put
+
+```text
+S_r = sum_{u_1<...<u_r} |A_{u_1} intersection ... intersection A_{u_r}|.
+```
+
+The odd Bonferroni truncations
+
+```text
+B_{2h+1}=S_1-S_2+S_3-...+S_{2h+1}
+```
+
+are upper bounds for the number of covered `v` events. Therefore
+`B_{2h+1}<v` proves an event witness. At second order, if at most `N-2`
+blockers meet an event, the excess incidence is at least
+`ceil(2S_2/(N-2))`, giving the alternative upper bound
+`S_1-ceil(2S_2/(N-2))`.
+
+Order three is already much stronger than H58. It certifies the sharp fixture
+`(1,3,4,5,18)` using boundary runner `4`; all 15,246 primitive five-speed
+tuples through height 20; 7,974 of 7,980 primitive six-speed tuples through
+height 16; and random pair-capacity survivors at seven through ten speeds.
+It is not universal: explicit eleven- and twelve-speed samples survive order
+three but fall to higher odd truncations. Thus the general target becomes a
+uniform bound on the Bonferroni order or on the high-load event patterns,
+rather than a search for an unstructured lucky time.
+
 The scheduling analogy is pinwheel/windows scheduling, where recurring tasks
 must receive service in every sliding window. Here the direction is dual: the
 periodic bad-window streams are fixed and one seeks a zero-load instant. The

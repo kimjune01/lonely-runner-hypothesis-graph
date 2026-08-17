@@ -208,6 +208,18 @@ H0  selected nine-runner target is open
                                                                                                                                                                            +--H56  opposite-unit
                                                                                                                                                                                     quotient collision
                                                                                                                                                                                     PROVED
+                                                                                                                                                                                    |
+                                                                                                                                                                                    +--H57  complete all-runner
+                                                                                                                                                                                             event sweep
+                                                                                                                                                                                             PROVED
+                                                                                                                                                                                             |
+                                                                                                                                                                                             +--H58  boundary-event
+                                                                                                                                                                                                      capacity sieve
+                                                                                                                                                                                                      PROVED
+                                                                                                                                                                                                      |
+                                                                                                                                                                                                      +--H59  boundary-event
+                                                                                                                                                                                                               moment hierarchy
+                                                                                                                                                                                                               PROVED
 ```
 
 ## Nodes
@@ -1246,6 +1258,39 @@ H0  selected nine-runner target is open
 - Verification: `opposite_unit_sum_relation_basis`, direct pair-sum and four-term fixtures, an exact rank regression, and the low-height pigeonhole regression.
 - Artifact: `artifacts/first-spectral-band-connectivity.md`.
 
+### H57 — All-runner boundary events form a complete witness set
+
+- Mode: proved exact networking-style event reduction
+- Statement: at width `1/N`, if a lonely time exists then one exists among `t=(j+/-1/N)/v_i` over every runner and every period index. The feasible set is closed and not the whole circle, so a component boundary is a runner event.
+- Contrast with H52: `(1,3,4,5,12)` has no witness on the largest runner's boundaries, but the all-runner event set finds one.
+- Limitation: the event set has size `2 sum_i v_i`; completeness for each fixed tuple is not a height-independent proof.
+- Verdict: proved.
+- Verification: `lrc_boundary_event_witness` and exact boundary regressions.
+- Artifact: `artifacts/first-spectral-band-connectivity.md`.
+
+### H58 — Exact pairwise boundary-event capacity sieve
+
+- Mode: proved incidence obstruction on the H57 event set
+- Statement: for one sign of runner `v`'s boundary events, runner `u` blocks exactly `g * #{z:-V<z<V, z=U mod N}`, where `g=gcd(u,v)`, `U=u/g`, and `V=v/g`. Hence a counterexample requires the sum of these capacities over `u!=v` to be at least `v` for every `v`.
+- Proof mechanism: after clearing denominators, blocked events correspond bijectively to integers `z=N(Uj-mV)+U` in the displayed interval; each reduced event repeats `g` times. The opposite sign has the same count by negation.
+- Consequence: any capacity deficit identifies a runner with an unblocked boundary event and therefore an LRC witness. A coarser closed bound replaces the exact count by `g ceil((2V-1)/N)`.
+- Reach: the exact sieve certifies 13,279 of 16,648 primitive three-speed tuples through height 50, plus large fractions of sampled four- through six-speed domains. It does not eliminate the known sharp divisible fixtures.
+- Verdict: proved necessary condition and sufficient witness test; not the general theorem.
+- Verification: `boundary_event_block_count`, exhaustive direct-event equality tests, and `boundary_capacity_witness_runner`.
+- Artifact: `artifacts/first-spectral-band-connectivity.md`.
+
+### H59 — Odd boundary-event moments give a certified hierarchy
+
+- Mode: proved overlap-aware escalation of H58
+- Statement: for blocker event sets `A_u` on one side of runner `v`, let `S_r` sum all `r`-fold intersection sizes. Every odd Bonferroni truncation `B_{2h+1}=S_1-S_2+...+S_{2h+1}` upper-bounds the covered events. If `B_{2h+1}<v`, an unblocked boundary event is an LRC witness.
+- Second-order waste bound: since an event has load at most `N-2`, its excess incidence is at least `2 binom(load,2)/(N-2)`. Hence `|union A_u|<=S_1-ceil(2S_2/(N-2))`.
+- Reach: order three certifies `(1,3,4,5,18)`, all 15,246 primitive five-speed tuples through height 20, and 7,974/7,980 six-speed tuples through height 16. It also closes sampled H58 survivors through ten speeds.
+- Boundary: explicit eleven- and twelve-speed samples survive order three and require higher odd orders, so order three is not the general theorem.
+- Consequence: the continuous adversarial problem is now an exact load-moment question on arithmetic event sets. A uniform order or structural high-load bound would prove the conjecture.
+- Verdict: proved hierarchy; uniform closing order open.
+- Verification: `boundary_event_blocked_centers`, `boundary_bonferroni_witness_runner`, sharp and high-dimensional survivor regressions.
+- Artifact: `artifacts/first-spectral-band-connectivity.md`.
+
 ## What the graph established
 
 1. The elementary measure branch recovers `1/(2n)` and dies by an exact factor-two deficit.
@@ -1305,6 +1350,9 @@ H0  selected nine-runner target is open
 55. Reset saturation does not localize the escape to the central cells: `(1,2,3,5,6)` kills that shortcut. The gap location depends on the actual quotient data above the residues.
 56. At each unit grid point, however, the full sweep has a deterministic local skeleton: residue `k^{-1}` approaches from the left, residue `-k^{-1}` from the right, and the unique divisible runner lies between them. Full reset saturation forces every such two-sided handoff.
 57. Pairing the forced opposite unit residues turns height into a finite quotient palette. The quotient classes supply coefficient-one relation rank at least `phi(N)/2-[2(w/N)-2]`; a positive value forces a relation of support at most four.
+58. The complete networking-style schedule consists of every runner's target-boundary events, not merely those of the reset runner. Any feasible component has such an event on its boundary, yielding an exact fixed-tuple algorithm of size `2 sum v_i`.
+59. Pairwise blocking of those events has an exact gcd-residue count. If the capacities aimed at either side of runner `v` sum below `v`, an explicit boundary witness exists; this sieve certifies most small three-speed tuples but leaves the sharp adversarial fixtures.
+60. Odd Bonferroni moments of the blocker event sets form a certified hierarchy. Order three closes the sharp divisible fixtures and nearly every completed small scan, but higher-dimensional examples require higher order; a uniform order or high-load structure theorem would prove the general case.
 
 ## Frontier
 
@@ -1325,6 +1373,8 @@ H0  selected nine-runner target is open
 - Primary: in the equality and near-equality cases of H53, exploit the forced unit permutation and maximal-kernel residues to constrain those handoff events. Start with the tight `N=6` pattern rather than a prime-modulus branch.
 - Primary: turn H55's opposite-residue divisibilities into a height-independent quantity. Candidate: compare the quotients `(v_r+v_{-r})/N` around the unit-grid cycle and seek a telescoping difference, rather than bounding each quotient separately.
 - Primary: combine H56's unit-pair rank with relations forced by the maximal nonunit kernel classes. The target is to cover the remaining `n-2-[P-d]` rank without assuming that relation contraction preserves the reset obstruction.
+- Primary: strengthen H58 from summed pair capacities to overlap-aware event ownership. Two blockers that hit the same `v` events waste capacity; quantify this by exact pairwise intersections before returning to a raw union bound.
+- Primary: prove a uniform H59 truncation bound from the arithmetic form of the event sets, or show that survival to order `2h+1` forces an `h`-way gcd/relation cluster usable by H39. Do not assume order three remains sufficient past the tested range.
 - Primary: turn H39 plus the ambient margin into a uniform contradiction, using determinant bounds for coefficient-two nullspaces rather than enumerating patterns separately for every `n`.
 - Secondary: if stronger auditability is desired, make the published sieve proof-producing or independently reimplement its three levels.
 - Historical: the local H21 37-prime scan and p=47 branch certificates remain useful cross-checks, but no longer block the nine-runner theorem.

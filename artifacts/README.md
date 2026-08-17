@@ -166,3 +166,9 @@ exact two-sided handoff skeleton forced at every unit grid point, pairing
 opposite unit residues through the unique divisible runner.
 H56 converts those pairs into a finite quotient palette and proves a
 coefficient-one relation-rank lower bound from collisions in that palette.
+H57 gives the complete all-runner boundary-event algorithm. H58 derives an
+exact gcd-residue capacity for one runner blocking another's events, yielding
+a strong necessary incidence condition for any counterexample.
+H59 organizes all blocker overlaps into odd Bonferroni certificates. The
+third-order certificate closes sharp fixtures and almost every small scan;
+higher-dimensional survivors define the next uniform-moment problem.
