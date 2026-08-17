@@ -580,6 +580,56 @@ def test_parameter_cutoff_requires_strict_ambient_margin():
         )
 
 
+def test_coefficient_relation_patterns_include_sharp_four_speed_subspace():
+    sharp = lrc.bounded_relation_pattern((3, 4, 7, 11), max_coefficient=2)
+    patterns = lrc.coefficient_relation_patterns(
+        coordinate_count=4, max_coefficient=2, nullity=2
+    )
+
+    assert sharp in patterns
+    assert len(patterns) == len(set(patterns))
+    assert all(len(pattern) == 2 for pattern in patterns)
+
+
+def test_positive_distinct_pattern_witness_filters_degenerate_coordinates():
+    sharp = ((2, -1, 1, 0), (1, -1, 0, -1))
+    witness = lrc.pattern_positive_distinct_witness(sharp)
+
+    assert witness is not None
+    values = [
+        sum(column[index] * parameter for column, parameter in zip(sharp, witness))
+        for index in range(4)
+    ]
+    assert all(value > 0 for value in values)
+    assert len(set(values)) == 4
+    assert lrc.pattern_positive_distinct_witness(((1, 1), (0, 0))) is None
+
+
+def test_four_coordinate_pattern_symmetry_reduction_is_replayable():
+    representatives = lrc.admissible_pattern_symmetry_representatives(
+        coordinate_count=4, max_coefficient=2, nullity=2
+    )
+
+    assert len(representatives) == 123
+    assert all(
+        lrc.pattern_positive_distinct_witness(pattern) is not None
+        for pattern in representatives
+    )
+
+
+def test_four_pattern_classifier_emits_symmetry_receipt():
+    result = subprocess.run(
+        [sys.executable, str(Path(__file__).with_name("classify_four_patterns.py"))],
+        check=True,
+        capture_output=True,
+        text=True,
+    )
+
+    assert "relation_subspaces\t18074" in result.stdout
+    assert "positive_distinct\t7332" in result.stdout
+    assert "symmetry_classes\t123" in result.stdout
+
+
 def test_full_bounded_relation_rank_recovers_the_primitive_speed_ray():
     speeds = (2, 5, 6, 8, 10, 11)
     pattern = lrc.bounded_relation_pattern(speeds, max_coefficient=2)
@@ -624,6 +674,30 @@ def test_first_band_scan_cli_emits_replayable_receipt():
 def test_coarse_inductive_first_band_height_bound():
     assert lrc.inductive_first_band_height_bound(3) == 1764
     assert lrc.inductive_first_band_height_bound(4) == 1_259_712
+
+
+def test_published_finite_checking_sum_bound():
+    assert lrc.inductive_counterexample_sum_bound(3) == 36
+    assert lrc.inductive_counterexample_sum_bound(4) == 1000
+
+
+def test_complete_three_speed_first_band_check_under_published_sum_bound():
+    bound = lrc.inductive_counterexample_sum_bound(3)
+    survivors = list(
+        lrc.first_band_survivors_by_sum(runner_count=3, sum_bound=bound)
+    )
+
+    assert [speeds for speeds, _ in survivors] == [
+        (1, 2, 3),
+        (1, 2, 6),
+        (1, 3, 4),
+        (1, 5, 6),
+        (2, 3, 5),
+    ]
+    assert all(
+        lrc.bounded_relation_rank(speeds, max_coefficient=2) >= 1
+        for speeds, _ in survivors
+    )
 
 
 def test_early_first_band_predicate_matches_exact_maximum():
