@@ -232,6 +232,10 @@ H0  selected nine-runner target is open
                                                                                                                                                                                                                                  +--H62  2026 lift/project
                                                                                                                                                                                                                                           theorem through k=12
                                                                                                                                                                                                                                           RETRIEVED
+                                                                                                                                                                                                                                          |
+                                                                                                                                                                                                                                          +--H63  temporal-spanner
+                                                                                                                                                                                                                                                   dismount-or-core
+                                                                                                                                                                                                                                                   SELECTED FOR TESTING
 ```
 
 ## Nodes
@@ -1339,6 +1343,18 @@ H0  selected nine-runner target is open
 - Verdict: retrieved known theorem; not a new result of this inquiry.
 - Artifact: `artifacts/2026-lrc12-literature-audit.md`.
 
+### H63 — Recursively dismount local handoffs or expose a rigid core
+
+- Mode: algorithmic transfer from temporal-spanner dismountability
+- Translation: regard each runner's periodic bad intervals as a temporal stream and the singleton-owner word as the ordered handoff trace of a work-conserving cyclic server. A runner is locally dismountable when a coefficient-two relation of support at most four absorbs its first handoff using its predecessor, the two initial seeds, and owners in the intervening segment.
+- Hypothesis: recursive local dismounting either removes all but two runners, proving the rank target H39, or stalls on a core whose entry and exit extrema form two matchings and whose handoff labels have shifted-matching structure. The latter should feed the reset/factor branches H51--H56 rather than require arbitrary further casework.
+- Source analogy: Baligacs's 2026 temporal-clique proof recursively dismounts locally reducible vertices; a nondismountable instance reduces to an extremally matched bi-clique, where short cut-crossing paths versus extended stars cover a constant fraction before recursion.
+- Exact trial: all 55 completed first-band survivors through nine speeds are fully dismounted by the existing H47 certificates: 229 local rows, coefficient bound two, support at most four. The same certificates pass at the exact first-band edge. The wider tuple `(1,2,3,12)` stalls above that edge, so the band restriction is load-bearing.
+- Kill condition: a strict primitive first-band survivor whose local peeling stalls and whose residual event core has neither the two-matching extremal structure nor a reset/factor reduction.
+- Caution: temporal reachability is not a theorem about circle-window coverage. Only the proof architecture transfers; every dismount or core claim still needs an exact arithmetic proof.
+- Verdict: selected; reducible branch strongly tested, rigid-core classification open.
+- Artifact: `artifacts/first-spectral-band-connectivity.md`.
+
 ## What the graph established
 
 1. The elementary measure branch recovers `1/(2n)` and dies by an exact factor-two deficit.
@@ -1404,10 +1420,12 @@ H0  selected nine-runner target is open
 61. Repeated four-way congestion does not automatically yield a coefficient-two relation: an explicit five-speed cluster co-blocks three events while having bounded-relation rank zero. Event indices or signed errors are load-bearing.
 62. Signed errors restore that lost information. Equal-cardinality event sums compress to wider simultaneous bad phases; below scale `N/6`, Kneser gives linear sumset growth unless the boundary runner and every blocker share a nontrivial gcd.
 63. The April 2026 lifting/projection and polynomial sieve proves `LRC(k)` through `k=12` relative speeds. Its backward-projection operator is the closest published analogue of H61's phase compression; the next bounded case is `k=13`, not nine.
+64. Temporal-spanner dismountability suggests a precise recursion for the handoff branch: peel a locally certified runner, or classify the nondismountable residue as an extremally matched, shifted core. All 55 completed first-band survivors peel completely; a wider explicit tuple stalls, confirming that the first-band cutoff cannot be dropped.
 
 ## Frontier
 
 - Primary: for the general conjecture, seek a uniform small-lift/backward-projection collapse theorem suggested by H62. The target is eventual survivor structure for arbitrary `k`, not another fixed-prime computation; keep the proved prime-field canonical-class lemma as an input rather than opening a prime-generalization branch.
+- Primary: prove the H63 nondismountable-core classification. First show that failure of every H47 local row forces the entry and exit extrema to be matchings; then test whether the induced cyclic label matrix is shifted-matching or falls into the composite reset/kernel branch. Do not import temporal reachability as a black box.
 - Primary: replace H23 by a height-sensitive gap theorem, or formulate a lift-tree invariant that distinguishes fixed ordinary integers from spurious profinite survivor branches.
 - Primary: combine H27's upper-gap constraints with finite-checking/volume bounds; seek a complementary lemma controlling cuts with at least half the runners above them.
 - Primary: for the finite H28 normal vectors, formulate and test a concrete relative-subtorus descent; do not use the phrase “compatible sign pattern” without the transformation and preserved invariant.

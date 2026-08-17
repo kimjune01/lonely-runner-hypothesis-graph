@@ -174,6 +174,35 @@ This is evidence that sliding-window geometry selects both seeds and row
 order, not yet a proof that handoff segments force the required bounded
 arithmetic relations without future owners.
 
+### Temporal-spanner dismountability experiment
+
+The 2026 proof that temporal cliques admit linear spanners supplies a useful
+proof architecture for this stalled step. It repeatedly **dismounts** a
+locally reducible vertex. If that process stops, the remaining instance has
+two extremal matchings; the proof then obtains a constant-fraction reduction
+from either many short cut-crossing paths or two extended stars.
+
+For the runner sweep, call a new singleton owner locally dismountable when its
+handoff admits the H47 coefficient-two relation: support at most four, using
+its predecessor, the two initial seeds, and owners from the intervening
+segment. Recursive dismounting is exactly the existing local elimination
+certificate. On the completed exact corpus it removes every non-seed runner:
+
+```text
+55 first-band survivors, 229 dismount steps, 0 residual cores.
+```
+
+The same test passes at the exact first-band edge `2/(2n+1)`. It is not a
+generic property of periodic windows: `(1,2,3,12)` stalls at width `25/104`,
+above that edge. This negative control makes the arithmetic cutoff essential.
+
+The resulting H63 is a dichotomy, not a claimed theorem transfer. Either a
+local runner dismounts, or the remaining entry/exit events must be shown to
+form an extremally matched core. The next exact target is to prove that a core
+with no H47 row is shifted-matching-like, or else exposes the composite
+reset/kernel structure from H51--H56. Temporal reachability itself says
+nothing directly about circle-window coverage.
+
 The sharper H47 audit requires every elimination row to contain the immediately
 preceding new owner and at most two additional owners drawn from the intervening
 handoff segment or the two initial seeds. All 229 rows in the 55 certificates
@@ -947,3 +976,5 @@ outside the counterexample sum bound open.
   and some of its variants*](https://arxiv.org/abs/2411.06903).
 - Tobias Jacobs and Salvatore Longo, [*A New Perspective on the Windows
   Scheduling Problem*](https://arxiv.org/abs/1410.7237) (analogy only).
+- Julia Baligacs, [*Temporal Cliques Admit Linear
+  Spanners*](https://arxiv.org/abs/2606.05156) (proof architecture only).
