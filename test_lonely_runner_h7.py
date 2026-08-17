@@ -1,5 +1,6 @@
 import importlib.util
 import csv
+import itertools
 import math
 import shutil
 import subprocess
@@ -322,3 +323,18 @@ def test_height_sensitive_grid_bound_for_small_non_tight_tuples():
                 )
                 for j in range(denominator)
             ) > threshold
+
+
+def test_multi_fast_union_condition_certifies_small_tuples():
+    for runner_count, height in [(4, 14), (5, 10)]:
+        certified = 0
+        for speeds in itertools.combinations(range(1, height + 1), runner_count):
+            for fast_count in range(1, (runner_count + 1) // 2):
+                if lrc.multi_fast_union_condition(speeds, fast_count=fast_count):
+                    certified += 1
+                    assert lrc.maximum_loneliness(speeds) >= Fraction(1, runner_count + 1)
+        assert certified > 0
+
+    for speeds in [(1, 2, 100, 101), (1, 2, 3, 120, 121)]:
+        assert lrc.multi_fast_union_condition(speeds, fast_count=2)
+        assert lrc.maximum_loneliness(speeds) >= Fraction(1, len(speeds) + 1)

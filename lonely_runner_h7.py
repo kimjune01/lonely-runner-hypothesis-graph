@@ -67,6 +67,38 @@ def height_sensitive_grid_bound(speeds: tuple[int, ...]) -> int:
     return (len(speeds) + 1) * max(speeds) ** 2 + 1
 
 
+def multi_fast_union_condition(speeds: tuple[int, ...], *, fast_count: int) -> bool:
+    """Whether a union bound certifies adding several fast runners.
+
+    Split the sorted tuple into a slow prefix and ``fast_count`` faster
+    runners. Around an exact maximizing time for the slow prefix, the slow
+    runners remain above the full-tuple threshold on an interval of radius
+    ``eta``. On that interval each fast runner is bad on measure at most
+    ``2*delta*length + 2*delta/speed``. If their union cannot fill the
+    interval, a simultaneous witness exists.
+    """
+    if not speeds or any(speed <= 0 for speed in speeds):
+        raise ValueError("speeds must be a nonempty tuple of positive integers")
+    ordered = tuple(sorted(speeds))
+    runner_count = len(ordered)
+    if not 1 <= fast_count < runner_count:
+        raise ValueError("fast_count must leave at least one slow runner")
+    if 2 * fast_count >= runner_count + 1:
+        return False
+
+    slow = ordered[:-fast_count]
+    fast = ordered[-fast_count:]
+    delta = Fraction(1, runner_count + 1)
+    slow_loneliness = maximum_loneliness(slow)
+    if slow_loneliness <= delta:
+        return False
+    eta = (slow_loneliness - delta) / max(slow)
+    return eta * (1 - 2 * fast_count * delta) > delta * sum(
+        (Fraction(1, speed) for speed in fast),
+        start=Fraction(0),
+    )
+
+
 def universal_grid_counterexample(*, r: int) -> tuple[int, tuple[int, int], Fraction]:
     """Give the r-th counterexample to the universal grid-witness conjecture.
 
