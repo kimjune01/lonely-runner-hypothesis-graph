@@ -3,6 +3,7 @@ import csv
 import math
 import shutil
 import subprocess
+from fractions import Fraction
 from pathlib import Path
 
 import pytest
@@ -275,3 +276,20 @@ def test_published_nine_runner_sieve_receipt_crosses_product_bound():
     bound_numerator = 36**56
     bound_denominator = 8**8
     assert product * bound_denominator > bound_numerator
+
+
+def test_counterexample_family_to_universal_grid_witness_conjecture():
+    for r in range(1, 101):
+        denominator, speeds, strict_witness = lrc.universal_grid_counterexample(r=r)
+        assert denominator == 6 * r + 1
+        assert speeds == (1, 3 * r)
+        assert math.gcd(denominator, math.prod(speeds)) == 1
+        assert min(lrc.fractional_distance(speed * strict_witness) for speed in speeds) > Fraction(1, 3)
+        assert all(
+            min(
+                lrc.fractional_distance(Fraction(j * speed, denominator))
+                for speed in speeds
+            )
+            < Fraction(1, 3)
+            for j in range(denominator)
+        )

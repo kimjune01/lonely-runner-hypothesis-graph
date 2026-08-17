@@ -35,3 +35,9 @@ The complete published nine-runner sieve audit is summarized in
 Its 39 exact intermediate counts are in
 [`artifacts/nine-runner-sieve-replay.tsv`](artifacts/nine-runner-sieve-replay.tsv)
 and are checked, together with the final product inequality, by the test suite.
+
+The continuing general-case inquiry found an infinite counterexample family
+to Conjecture 7.1 of Sungkawichai--Trakulthongchai as written. The exact proof,
+its stronger coprimality property, and the resulting restriction on profinite
+lift-tree hypotheses are recorded in
+[`artifacts/conjecture-7-1-counterexample.md`](artifacts/conjecture-7-1-counterexample.md).

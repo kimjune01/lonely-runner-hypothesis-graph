@@ -7,6 +7,7 @@ exhaustive search finds none for the given finite instance.
 
 from __future__ import annotations
 
+from fractions import Fraction
 from functools import lru_cache
 from math import gcd
 
@@ -17,6 +18,30 @@ def covers(*, v: int, j: int, k: int, p: int, denominator: int) -> bool:
     residue = (j * v) % modulus
     distance_numerator = min(residue, modulus - residue)
     return distance_numerator * denominator < modulus
+
+
+def fractional_distance(value: Fraction | int) -> Fraction:
+    """Return the exact distance from a rational value to the nearest integer."""
+    value = Fraction(value)
+    residue = value % 1
+    return min(residue, 1 - residue)
+
+
+def universal_grid_counterexample(*, r: int) -> tuple[int, tuple[int, int], Fraction]:
+    """Give the r-th counterexample to the universal grid-witness conjecture.
+
+    At denominator d=6r+1, the coprime speeds (1,3r) have no witness in
+    (1/d)Z, although the returned rational time is a strict real witness.
+    """
+    if r < 1:
+        raise ValueError("r must be positive")
+    denominator = 6 * r + 1
+    second_speed = 3 * r
+    if second_speed % 2:
+        strict_witness = Fraction(1, 2)
+    else:
+        strict_witness = Fraction(second_speed // 2, second_speed + 1)
+    return denominator, (1, second_speed), strict_witness
 
 
 def coverage_size(*, k: int, p: int, v: int) -> int:

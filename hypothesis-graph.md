@@ -64,6 +64,10 @@ H0  selected nine-runner target is open
                                         +--H22  published 1→3→9 sieve closes
                                                 the complete nine-runner proof
                                                 REPLAYED for all 39 primes
+                                                   |
+                                                   +--H23  universal denominator
+                                                           for non-tight tuples
+                                                           KILLED by (1,3r), d=6r+1
 ```
 
 ## Nodes
@@ -639,6 +643,23 @@ H0  selected nine-runner target is open
 - Credence: high. Remaining computational trust is common-mode source/compiler error because the sieve does not emit formal proof certificates.
 - Artifact: `artifacts/nine-runner-sieve-audit.md`.
 
+### H23 — Non-tight tuples have a universal grid denominator
+
+- Mode: direct falsification of Conjecture 7.1 in Sungkawichai--Trakulthongchai (2026)
+- Hypothesis: for fixed `k+1`, some `D` ensures that every coprime non-tight positive speed tuple has a witness in `(1/d)Z` for every `d >= D`.
+- Kill condition: an unbounded family of denominators `d` and coprime non-tight tuples with no witness on the `d`-grid.
+- Trial: for `k=2` and every `r >= 1`, set `d=6r+1` and take speeds `(1,3r)`.
+- Observed outcome:
+
+  - `gcd(d,3r)=1`, so even requiring every speed to be a unit modulo the denominator does not repair the statement.
+  - The tuple is non-tight. If `3r` is odd, `t=1/2` is a strict witness. If `3r=2a`, then `t=a/(2a+1)>1/3` gives both speeds the same distance `t`.
+  - No `j/d` is a witness. Outside the middle third, speed `1` is bad. Inside it, parity gives `3r(2s)=-s mod d` and `3r(2s+1)=3r-s mod d`; the resulting distance is at most `2r/(6r+1)<1/3`.
+  - The first 100 instances replay with exact rational arithmetic in the test suite.
+- Verdict: killed deductively as written.
+- Credence: deductive, subject only to the source statement having the intended quantifier order.
+- Edge generated: any repair must depend on tuple height or fixed-integer realizability. Uniform finite grids cannot control an object allowed to scale with the grid. Likewise, a prime-power lift theorem cannot quantify over all compatible profinite branches: compatible non-Archimedean survivor families exist.
+- Artifact: `artifacts/conjecture-7-1-counterexample.md`.
+
 ## What the graph established
 
 1. The elementary measure branch recovers `1/(2n)` and dies by an exact factor-two deficit.
@@ -663,10 +684,12 @@ H0  selected nine-runner target is open
 20. This finite result proves one prime divisor, `47`, for any hypothetical nine-runner counterexample. It does not alone prove the nine-runner case.
 21. The local 37-prime H21 route was overtaken by current literature before completion.
 22. Trakulthongchai's published 39-prime lifting sieve was replayed in full: every final improper set is empty and the forced divisor product exceeds the counterexample bound by a factor greater than 230. The known nine-runner theorem is thereby reconstructed, not newly discovered.
+23. The proposed universal grid-witness Conjecture 7.1 is false as written. The unit family `(1,3r)` at denominator `6r+1` is non-tight but misses every grid witness. Multiscale hypotheses must retain height or integer-realizability information.
 
 ## Frontier
 
 - Primary: for the general conjecture, study whether the published lifting and polynomial sieves admit a uniform argument; do not present this as part of the completed nine-runner result.
+- Primary: replace H23 by a height-sensitive gap theorem, or formulate a lift-tree invariant that distinguishes fixed ordinary integers from spurious profinite survivor branches.
 - Secondary: if stronger auditability is desired, make the published sieve proof-producing or independently reimplement its three levels.
 - Historical: the local H21 37-prime scan and p=47 branch certificates remain useful cross-checks, but no longer block the nine-runner theorem.
 - Secondary: retain H19's one-gap exchange fixtures as boundary tests for any proposed H20 lemma.
