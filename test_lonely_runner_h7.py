@@ -1481,6 +1481,27 @@ def test_canonical_factor_extension_has_exact_accumulating_value(
     ) >= runner_count - 2
 
 
+@pytest.mark.parametrize(
+    ("speeds", "expected_rank"),
+    [
+        ((1, 2, 6), 0),
+        ((1, 2, 3, 8), 1),
+        ((1, 3, 4, 5, 18), 2),
+    ],
+)
+def test_coefficient_one_rank_deficiency_lives_on_the_band_boundary(
+    speeds, expected_rank
+):
+    runner_count = len(speeds)
+
+    assert lrc.maximum_loneliness(speeds) == Fraction(
+        2, 2 * runner_count + 1
+    )
+    assert lrc.bounded_relation_rank(
+        speeds, max_coefficient=1
+    ) == expected_rank == runner_count - 3
+
+
 def test_local_handoff_elimination_reaches_nine_speed_survivor():
     speeds = (2, 5, 6, 8, 9, 11, 13, 14, 17)
     certificate = lrc.local_handoff_elimination_certificate(
@@ -1708,6 +1729,8 @@ def test_first_band_scan_cli_emits_replayable_receipt():
     assert "band_edge_local_handoff_eliminates" in lines[0]
     assert "band_edge_core_size" in lines[0]
     assert "circuit_quotient_rank" in lines[0]
+    assert "coefficient_one_rank" in lines[0]
+    assert "strict_first_band" in lines[0]
     assert "parameter_norm_squared_cutoff" in lines[0]
     assert any("1,2,6\t2/7" in line for line in lines[1:])
 

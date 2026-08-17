@@ -261,6 +261,11 @@ H0  selected nine-runner target is open
                                                                                                                                                                                                                                                                                                 extension family
                                                                                                                                                                                                                                                                                                 is harmless
                                                                                                                                                                                                                                                                                                 PROVED
+                                                                                                                                                                                                                                                                                                |
+                                                                                                                                                                                                                                                                                                +--H69  strict first-band
+                                                                                                                                                                                                                                                                                                         coefficient-one
+                                                                                                                                                                                                                                                                                                         rank n-2
+                                                                                                                                                                                                                                                                                                         SELECTED
 ```
 
 ## Nodes
@@ -1451,6 +1456,19 @@ H0  selected nine-runner target is open
 - Verification: exact critical-time and relation-rank regressions for `3<=n<=8` and several `r`.
 - Artifact: `artifacts/first-spectral-band-connectivity.md`.
 
+### H69 — Strict first-band tuples have coefficient-one rank at least `n-2`
+
+- Mode: stronger order-independent successor to H39, suggested by H41
+- Hypothesis: if `ML(v)<2/(2n+1)`, then the relations in `{-1,0,1}^n` have rational rank at least `n-2`.
+- Why sufficient: coefficient-one relations are coefficient-two relations, so H69 immediately implies H39. A hypothetical minimal LRC counterexample lies strictly below `1/(n+1)<2/(2n+1)` and satisfies the antecedent.
+- Exact audit: all 14 strict tuples in the completed 55-tuple first-band corpus through nine speeds have coefficient-one rank at least `n-2`; there are zero strict failures.
+- Boundary separation: the closed-band strengthening is false. `(1,2,6)`, `(1,2,3,8)`, and `(1,3,4,5,18)` have `ML=2/(2n+1)` and coefficient-one rank exactly `n-3`. No other completed survivor fails. Thus one unit-relation dimension appears precisely when moving into the strict interior in the observed spectrum.
+- Analytic bridge: H41 already proves that every hypothetical counterexample with `n>=18` has at least one coefficient-one relation. H69 asks for the rank form of that Riesz phenomenon, not an iteration of a coefficient-two scheduling algorithm.
+- Kill condition: a strict primitive first-band tuple with coefficient-one relation rank below `n-2`.
+- Verdict: selected for testing; unproved.
+- Verification: scan receipt columns `coefficient_one_rank` and `strict_first_band`, plus exact boundary regressions.
+- Artifact: `artifacts/first-spectral-band-connectivity.md`.
+
 ## What the graph established
 
 1. The elementary measure branch recovers `1/(2n)` and dies by an exact factor-two deficit.
@@ -1522,6 +1540,7 @@ H0  selected nine-runner target is open
 67. Back-substitution removes the algorithm from the remaining question. Modulo the independent local rows, every bounded circuit is supported on the two seeds plus the residual core, and H39 is exactly the inequality `dim Q>=|C|` for that quotient circuit space.
 68. No exact subcritical scan has produced two residual owners. The weakened H67 target `|C|<=1` would reduce any remaining repair to a three-coordinate quotient, but it does not by itself supply the last circuit.
 69. A replacement-arc argument exactly disposes of the canonical factor-extension family: `ML(1,2,...,n-1,nr)=r/(nr+1)`, and the canonical chain already supplies rank `n-2`. These one-scale accumulation examples cannot obstruct the general conjecture.
+70. Coefficient-one rank exhibits an even sharper boundary jump. Every strict survivor through nine speeds has rank at least `n-2`; the only three deficiencies have rank `n-3` and lie exactly at `ML=2/(2n+1)`. This upgrades the preferred invariant from coefficient-two handoff rank to a strict-interior unit-circuit hypothesis.
 
 ## Frontier
 
@@ -1532,6 +1551,7 @@ H0  selected nine-runner target is open
 - Primary: prove or kill H67. Two failed owners must lie in disjoint first-occurrence segments of every best rotation; retain their band-edge endpoint labels and test whether subtracting the two failures yields either one H47 row or a nonzero quotient circuit in H66.
 - Primary: lower-bound `dim Q` directly. For `|C|=1`, back-substitution leaves three integer speeds; seek a band-edge inequality that bounds their primitive determinant strongly enough to force one original coefficient-two circuit outside the local span.
 - Primary: use H68 as the equality model for H67. If a one-core tuple approaches `1/n`, compare its `n` near-packed arcs with the canonical translate and quantify how any second unresolved direction consumes more than the total packing slack.
+- Primary: prove or kill H69. Revisit H41 with the coefficient-one relation space quotiented out: the target is a lower bound on its rank, and the three exact boundary deficiencies are mandatory calibration cases for any strict-margin inequality.
 - Primary: replace H23 by a height-sensitive gap theorem, or formulate a lift-tree invariant that distinguishes fixed ordinary integers from spurious profinite survivor branches.
 - Primary: combine H27's upper-gap constraints with finite-checking/volume bounds; seek a complementary lemma controlling cuts with at least half the runners above them.
 - Primary: for the finite H28 normal vectors, formulate and test a concrete relative-subtorus descent; do not use the phrase “compatible sign pattern” without the transformation and preserved invariant.

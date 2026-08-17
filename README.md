@@ -72,4 +72,5 @@ The completed scan now reaches nine speeds; its sharper local certificate uses
 the preceding new owner and at most two earlier owners per relation. It also
 reports the residual handoff-core size at the normalized band edge and the
 rank of the full coefficient-two circuit space modulo those independent local
-rows.
+rows. It separately records coefficient-one relation rank and whether the
+tuple lies in the strict band interior.

@@ -18,6 +18,7 @@ def main() -> None:
 
     print(
         "runners\theight\tspeeds\tmaximum_loneliness\trelation_rank"
+        "\tcoefficient_one_rank\tstrict_first_band"
         "\tcomponents\tpositive_seeds\tsigned_dissociated_seeds"
         "\ttwo_seed_appendable\thandoff_seeds\thandoff_seed_appendable"
         "\thandoff_cycle_appendable\thandoff_order_eliminates"
@@ -33,6 +34,10 @@ def main() -> None:
         rank = lrc.bounded_relation_rank(
             speeds, max_coefficient=args.coefficient
         )
+        coefficient_one_rank = lrc.bounded_relation_rank(
+            speeds, max_coefficient=1
+        )
+        strict_first_band = loneliness < Fraction(2, 2 * args.runners + 1)
         components = lrc.bounded_relation_components(
             speeds, max_coefficient=args.coefficient
         )
@@ -106,7 +111,9 @@ def main() -> None:
         )
         print(
             f"{args.runners}\t{args.height}\t{','.join(map(str, speeds))}"
-            f"\t{loneliness}\t{rank}\t{component_text}\t{len(seeds)}"
+            f"\t{loneliness}\t{rank}\t{coefficient_one_rank}"
+            f"\t{'yes' if strict_first_band else 'no'}"
+            f"\t{component_text}\t{len(seeds)}"
             f"\t{len(signed_seeds)}\t{'yes' if appendable is not None else 'no'}"
             f"\t{','.join(map(str, handoff_seeds or ()))}"
             f"\t{'yes' if handoff_steps is not None else 'no'}"

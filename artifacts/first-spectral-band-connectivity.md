@@ -395,6 +395,32 @@ are `n-2` independent coefficient-two relations. Thus the dominant
 factor-chain accumulation family already satisfies H39; a multi-owner H67
 obstruction would need at least two noncanonical escaping directions.
 
+### Coefficient-one rank jumps in the strict interior
+
+The full first-band corpus was rerun with coefficient bound one. The stronger
+closed-band claim fails exactly three times:
+
+| tuple | maximum loneliness | coefficient-one rank |
+|---|---:|---:|
+| `(1,2,6)` | `2/7` | `0=n-3` |
+| `(1,2,3,8)` | `2/9` | `1=n-3` |
+| `(1,3,4,5,18)` | `2/11` | `2=n-3` |
+
+Every failure lies exactly on `2/(2n+1)`. All 14 strict survivors among the
+55 completed tuples through nine speeds have coefficient-one relation rank at
+least `n-2`; there are no strict failures. This motivates H69:
+
+```text
+ML(v)<2/(2n+1)  ==>  rank R_1(v)>=n-2.
+```
+
+H69 is stronger than H39 and is tailored to the actual counterexample
+quantifier, which is strict. It also aligns with H41: the Riesz argument already
+forces the first coefficient-one circuit for every hypothetical counterexample
+with at least 18 speeds. The missing theorem is a rank version of that analytic
+argument. Any attempted proof must preserve the strict margin; the three rows
+above show that closing the band loses exactly one required dimension.
+
 The sharper H47 audit requires every elimination row to contain the immediately
 preceding new owner and at most two additional owners drawn from the intervening
 handoff segment or the two initial seeds. All 229 rows in the 55 certificates
