@@ -1502,6 +1502,27 @@ def test_coefficient_one_rank_deficiency_lives_on_the_band_boundary(
     ) == expected_rank == runner_count - 3
 
 
+@pytest.mark.parametrize(
+    ("speeds", "expected_normalized_ratio"),
+    [
+        ((1, 2, 3, 7), Fraction(4, 5)),
+        ((1, 2, 3, 5, 12), Fraction(5, 8)),
+        ((1, 6, 10, 11, 12, 13), Fraction(9, 16)),
+    ],
+)
+def test_low_coefficient_one_rank_keeps_a_riesz_load_floor(
+    speeds, expected_normalized_ratio
+):
+    runner_count = len(speeds)
+
+    assert lrc.bounded_relation_rank(
+        speeds, max_coefficient=1
+    ) <= runner_count - 3
+    normalized_ratio = runner_count * lrc.riesz_cover_ratio(speeds)
+    assert normalized_ratio == expected_normalized_ratio
+    assert normalized_ratio >= Fraction(1, 3)
+
+
 def test_local_handoff_elimination_reaches_nine_speed_survivor():
     speeds = (2, 5, 6, 8, 9, 11, 13, 14, 17)
     certificate = lrc.local_handoff_elimination_certificate(
@@ -1731,6 +1752,8 @@ def test_first_band_scan_cli_emits_replayable_receipt():
     assert "circuit_quotient_rank" in lines[0]
     assert "coefficient_one_rank" in lines[0]
     assert "strict_first_band" in lines[0]
+    assert "riesz_cover_ratio" in lines[0]
+    assert "normalized_riesz_ratio" in lines[0]
     assert "parameter_norm_squared_cutoff" in lines[0]
     assert any("1,2,6\t2/7" in line for line in lines[1:])
 

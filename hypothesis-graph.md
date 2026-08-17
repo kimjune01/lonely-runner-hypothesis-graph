@@ -266,6 +266,11 @@ H0  selected nine-runner target is open
                                                                                                                                                                                                                                                                                                          coefficient-one
                                                                                                                                                                                                                                                                                                          rank n-2
                                                                                                                                                                                                                                                                                                          SELECTED
+                                                                                                                                                                                                                                                                                                         |
+                                                                                                                                                                                                                                                                                                         +--H70  low rank forces
+                                                                                                                                                                                                                                                                                                                  a reciprocal Riesz
+                                                                                                                                                                                                                                                                                                                  load floor
+                                                                                                                                                                                                                                                                                                                  SELECTED
 ```
 
 ## Nodes
@@ -1469,6 +1474,28 @@ H0  selected nine-runner target is open
 - Verification: scan receipt columns `coefficient_one_rank` and `strict_first_band`, plus exact boundary regressions.
 - Artifact: `artifacts/first-spectral-band-connectivity.md`.
 
+### H70 — Low coefficient-one rank forces a reciprocal Riesz load floor
+
+- Mode: quantitative load-balancing route to the large-`n` part of H69
+- Hypothesis: if `rank R_1(v)<=n-3`, then
+
+  ```text
+  riesz_cover_ratio(v)
+    = CT prod_i(1-cos(v_i x))
+      / sum_j CT prod_{i!=j}(1-cos(v_i x))
+    >= 1/(3n).
+  ```
+
+- Why useful: a width-`delta` bad-arc cover forces this ratio to be at most `1-cos(2*pi*delta)`. At the first-band width `delta=2/(2n+1)`, `1-cos x<=x^2/2` and `pi^2<10` make the upper bound smaller than `1/(3n)` for every `n>=59`. Thus H70 would prove H69 for all `n>=59`, leaving only a finite range and the separate strict-margin issue.
+- Networking interpretation: the deletion integrals are the loads assigned to the possible blocking runners. The normalized quotient measures how much simultaneous slack survives after adversarial correlations. Relation rank is the dependency budget; H70 says three unresolved directions prevent that load from collapsing below reciprocal scale.
+- Exact exhaustive trials: among primitive tuples with `rank R_1<=n-3`, the minima of `n*riesz_cover_ratio` were `1`, `4/5`, `5/8`, and `9/16` for scans `(n,height)=(3,40),(4,28),(5,18),(6,13)`. The minimizing tuples were `(1,2,4)`, `(1,2,3,7)`, `(1,2,3,5,12)`, and `(1,6,10,11,12,13)`.
+- Hostile structured trials: Fibonacci dependency chains through `n=10` reached a minimum `90/167>1/2`; tribonacci and cumulative-sum chains stayed above one. Random three-seed subset-sum constructions reached `20/49` at `n=8` and `27/62` at `n=9`, still above `1/3`.
+- Kill condition: any tuple with coefficient-one relation rank at most `n-3` and `n*riesz_cover_ratio<1/3`. Equality needs separate inspection because the intended first-band application is strict.
+- Limitation: this is a tested spectral inequality, not yet a theorem. It does not by itself settle `13<=n<=58`, and a proof must control all signed circuits rather than assume independent deletion loads.
+- Verdict: selected for testing.
+- Verification: exact Riesz ratio regressions and scan receipt columns `riesz_cover_ratio` and `normalized_riesz_ratio`.
+- Artifact: `artifacts/first-spectral-band-connectivity.md`.
+
 ## What the graph established
 
 1. The elementary measure branch recovers `1/(2n)` and dies by an exact factor-two deficit.
@@ -1552,6 +1579,7 @@ H0  selected nine-runner target is open
 - Primary: lower-bound `dim Q` directly. For `|C|=1`, back-substitution leaves three integer speeds; seek a band-edge inequality that bounds their primitive determinant strongly enough to force one original coefficient-two circuit outside the local span.
 - Primary: use H68 as the equality model for H67. If a one-core tuple approaches `1/n`, compare its `n` near-packed arcs with the canonical translate and quantify how any second unresolved direction consumes more than the total packing slack.
 - Primary: prove or kill H69. Revisit H41 with the coefficient-one relation space quotiented out: the target is a lower bound on its rank, and the three exact boundary deficiencies are mandatory calibration cases for any strict-margin inequality.
+- Primary: prove or kill H70. Expand the Riesz constant terms over the coefficient-one circuit space and seek a deletion inequality from codimension at least three; do not treat dependent deletion loads as independent. A proof gives the `n>=59` part of H69 immediately.
 - Primary: replace H23 by a height-sensitive gap theorem, or formulate a lift-tree invariant that distinguishes fixed ordinary integers from spurious profinite survivor branches.
 - Primary: combine H27's upper-gap constraints with finite-checking/volume bounds; seek a complementary lemma controlling cuts with at least half the runners above them.
 - Primary: for the finite H28 normal vectors, formulate and test a concrete relative-subtorus descent; do not use the phrase “compatible sign pattern” without the transformation and preserved invariant.

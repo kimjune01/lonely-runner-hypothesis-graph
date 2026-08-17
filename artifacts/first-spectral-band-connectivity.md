@@ -421,6 +421,45 @@ with at least 18 speeds. The missing theorem is a rank version of that analytic
 argument. Any attempted proof must preserve the strict margin; the three rows
 above show that closing the band loses exactly one required dimension.
 
+### A deletion-load inequality to test
+
+The networking analogy becomes an exact scalar after normalizing the Riesz
+certificate by its one-runner deletions. Write
+
+```text
+rho(v) = CT prod_i(1-cos(v_i x))
+         / sum_j CT prod_{i!=j}(1-cos(v_i x)).
+```
+
+A bad-window cover at width `delta` forces `rho(v)<=1-cos(2*pi*delta)`.
+The new H70 asks whether three remaining coefficient-one directions impose
+
+```text
+rank R_1(v)<=n-3  ==>  rho(v)>=1/(3n).
+```
+
+This is a load-balancing statement rather than an imported networking lemma:
+the deletion terms are the exact blocker loads, and the numerator is their
+correlated simultaneous slack. If H70 holds, then at `delta=2/(2n+1)` the
+elementary bounds `1-cos x<=x^2/2` and `pi^2<10` contradict a cover for every
+`n>=59`.
+
+Exact primitive scans under the rank antecedent found the following minima:
+
+| `n`, height | minimum `n rho(v)` | minimizer |
+|---|---:|---|
+| `3`, `40` | `1` | `(1,2,4)` |
+| `4`, `28` | `4/5` | `(1,2,3,7)` |
+| `5`, `18` | `5/8` | `(1,2,3,5,12)` |
+| `6`, `13` | `9/16` | `(1,6,10,11,12,13)` |
+
+Fibonacci, tribonacci, and cumulative dependency chains through ten speeds did
+not kill the conjectured `1/3` constant. Fibonacci was the most adverse,
+reaching `90/167`; random three-seed signed subset-sum constructions reached
+`20/49` at eight speeds and `27/62` at nine. These experiments calibrate H70;
+they do not establish it. A counterexample is any low-rank tuple with
+`n rho(v)<1/3`.
+
 The sharper H47 audit requires every elimination row to contain the immediately
 preceding new owner and at most two additional owners drawn from the intervening
 handoff segment or the two initial seeds. All 229 rows in the 55 certificates
