@@ -646,6 +646,12 @@ def test_periodic_bad_window_profile_has_exact_subtwo_average_load():
         2 * len(speeds) * delta
     )
     assert lrc.handoff_seed_pair(speeds, delta=delta) == (0, 2)
+    owners = lrc.singleton_handoff_owners(speeds, delta=delta)
+    assert set(owners) == {0, 1, 2}
+    assert lrc.handoff_transition_edges(speeds, delta=delta) == (
+        (0, 2),
+        (1, 2),
+    )
 
 
 def test_handoff_seeds_append_the_eight_speed_separator():
@@ -658,6 +664,44 @@ def test_handoff_seeds_append_the_eight_speed_separator():
     )
     assert steps is not None
     assert len(steps) == len(speeds) - 2
+
+
+def test_inductive_private_window_has_uniform_lrc_slack():
+    assert lrc.inductive_private_window_margin(3) == Fraction(1, 12)
+    assert lrc.inductive_private_window_margin(8) == Fraction(1, 72)
+
+
+def test_handoff_cycle_recovers_after_reset_pair_fails():
+    speeds = (2, 3, 5, 6, 8, 11)
+    delta = Fraction(37, 228)
+    reset_pair = lrc.handoff_seed_pair(speeds, delta=delta)
+
+    assert reset_pair == (0, 5)
+    assert (
+        lrc.bounded_appendability_from_seeds(
+            speeds, seeds=reset_pair, max_coefficient=2
+        )
+        is None
+    )
+    certificate = lrc.handoff_appendability_certificate(
+        speeds, delta=delta, max_coefficient=2
+    )
+    assert certificate is not None
+    seeds, steps = certificate
+    assert seeds == (5, 4)
+    assert len(steps) == len(speeds) - 2
+
+
+def test_cyclic_handoff_order_supplies_the_elimination_order():
+    speeds = (1, 6, 7, 8, 9, 15)
+    certificate = lrc.handoff_elimination_certificate(
+        speeds, delta=Fraction(1, 7), max_coefficient=2
+    )
+
+    assert certificate is not None
+    order, steps = certificate
+    assert order == (4, 3, 2, 1, 5, 0)
+    assert [target for target, _ in steps] == list(order[2:])
 
 
 def test_two_parameter_pattern_reconstructs_common_nullspace():
@@ -802,6 +846,8 @@ def test_first_band_scan_cli_emits_replayable_receipt():
     assert "signed_dissociated_seeds" in lines[0]
     assert "two_seed_appendable" in lines[0]
     assert "handoff_seed_appendable" in lines[0]
+    assert "handoff_cycle_appendable" in lines[0]
+    assert "handoff_order_eliminates" in lines[0]
     assert "parameter_norm_squared_cutoff" in lines[0]
     assert any("1,2,6\t2/7" in line for line in lines[1:])
 

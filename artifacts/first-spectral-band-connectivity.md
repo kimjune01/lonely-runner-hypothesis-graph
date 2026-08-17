@@ -61,14 +61,14 @@ parameters left after elimination.
 
 Complete primitive scans used the first-band cutoff `2/(2n+1)`:
 
-| speeds `n` | height | primitive first-band tuples | rank below `n-2` | missing positive tree | direct signed seeds above 2 | two-seed appendability failures | handoff-seed failures |
-|---:|---:|---:|---:|---:|---:|---:|---:|
-| 3 | 100 | 5 | 0 | 0 | 0 | 0 | 0 |
-| 4 | 35 | 6 | 0 | 0 | 0 | 0 | 0 |
-| 5 | 30 | 8 | 0 | 0 | 0 | 0 | 0 |
-| 6 | 22 | 10 | 0 | 0 | 0 | 0 | 0 |
-| 7 | 20 | 13 | 0 | 0 | 0 | 0 | 0 |
-| 8 | 18 | 7 | 0 | 0 | 1 | 0 | 0 |
+| speeds `n` | height | primitive first-band tuples | rank below `n-2` | missing positive tree | direct signed seeds above 2 | two-seed appendability failures | reset-pair failures | handoff-cycle failures | handoff-order failures |
+|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| 3 | 100 | 5 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
+| 4 | 35 | 6 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
+| 5 | 30 | 8 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
+| 6 | 22 | 10 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
+| 7 | 20 | 13 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
+| 8 | 18 | 7 | 0 | 0 | 1 | 0 | 0 | 0 | 0 |
 
 Thus all `49` survivors have coefficient-two relation rank at least `n-2`.
 They also have a spanning tree of indecomposable relations that can each be
@@ -135,17 +135,42 @@ L(t) = number of i with ||v_i t|| < delta.
 Each runner contributes bad-window measure `2 delta`, so the exact average
 load is `2n/(n+1)<2`. Hence some open cell in the circular endpoint
 arrangement has load at most one. The sweep records every constant-load cell
-exactly. Starting at the common reset and moving forward, take the first two
-distinct runners that individually own a singleton-load cell. H45 proposes
-that these canonical handoff owners seed an H44 appendability ordering in a
-minimal counterexample.
+exactly. Compress the singleton-load cells into their cyclic owner sequence.
+For each cyclic rotation, order runners by first appearance. H45 proposes
+that some rotation is a coefficient-two elimination order: the first two
+owners are seeds, and every later first-time owner is appendable using only
+owners already seen.
 
-The rule passes all 49 completed first-band survivors, even though they have
-zero-load gaps at the conjectured width and therefore are not counterexamples.
-For the eight-speed H42 separator the handoff pair is `(1,16)`; that pair
-coefficient-two-appends all six remaining speeds. This is evidence for a
-geometric seed-selection rule, not yet a proof that a full-cover handoff cycle
-must generate bounded relations.
+The lower-runner induction proves that every runner occurs in this owner
+sequence. Remove runner `i`; the lower LRC case gives a time `t_i` where all
+other runners have distance at least `1/n`. Their uniform slack above `delta`
+is
+
+```text
+1/n - 1/(n+1) = 1/(n(n+1)).
+```
+
+Because the full tuple is a counterexample, runner `i` is bad at `t_i`.
+Continuity therefore gives an open singleton-load window owned by `i`. Thus
+all `n` owners occur, and their cyclic transition graph is connected. This is
+a theorem under induction; upgrading the cyclic first-occurrence order to
+bounded elimination remains the hypothesis.
+
+The cyclic-order rule passes all 49 completed first-band survivors at the
+conjectured width and at three tested slack full-cover widths between `ML(v)`
+and `1/n`. Every one of the 385 distinct transition edges in those slack
+profiles also lies in some exact coefficient-two relation. For the
+eight-speed H42 separator, a successful rotation begins with `(1,16)` and
+eliminates all six remaining speeds in handoff first-occurrence order.
+
+The reset-anchored strengthening is not generic. On `(2,3,5,6,8,11)`, with
+`ML=3/19` just above the first-band ceiling `2/13`, the reset order stalls at
+the pair `(2,11)`, while rotating the cycle to start `(11,8)` yields the full
+elimination order `(11,8,6,5,3,2)`. Cycling repairs that failure.
+
+This is evidence that sliding-window geometry selects both seeds and row
+order, not yet a proof that overload blocks force the required bounded
+arithmetic relations without future owners.
 
 The scheduling analogy is pinwheel/windows scheduling, where recurring tasks
 must receive service in every sliding window. Here the direction is dual: the
@@ -176,8 +201,8 @@ uv run scan_first_band.py --runners 8 --height 18
 ```
 
 The CLI emits exact TSV rows containing maximum loneliness, relation rank,
-corrected components, positive and signed-dissociated seed counts, and
-positive-tree status.
+corrected components, positive and signed-dissociated seed counts,
+appendability, handoff, and positive-tree status.
 
 ## Killed strengthenings
 

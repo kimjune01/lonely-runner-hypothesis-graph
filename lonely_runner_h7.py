@@ -62,14 +62,51 @@ def handoff_seed_pair(
     speeds: tuple[int, ...], *, delta: Fraction
 ) -> tuple[int, int] | None:
     """First two distinct singleton-load owners encountered after reset."""
-    owners: list[int] = []
-    for _, _, active in periodic_bad_window_cells(speeds, delta=delta):
-        if len(active) != 1 or active[0] in owners:
+    distinct: list[int] = []
+    for owner in singleton_handoff_owners(speeds, delta=delta):
+        if owner in distinct:
             continue
-        owners.append(active[0])
-        if len(owners) == 2:
-            return owners[0], owners[1]
+        distinct.append(owner)
+        if len(distinct) == 2:
+            return distinct[0], distinct[1]
     return None
+
+
+def singleton_handoff_owners(
+    speeds: tuple[int, ...], *, delta: Fraction
+) -> tuple[int, ...]:
+    """Cyclic sequence of singleton-load cell owners after the common reset."""
+    states: list[tuple[int, ...]] = []
+    for _, _, active in periodic_bad_window_cells(speeds, delta=delta):
+        if not states or states[-1] != active:
+            states.append(active)
+    if len(states) > 1 and states[0] == states[-1]:
+        states.pop()
+    return tuple(active[0] for active in states if len(active) == 1)
+
+
+def handoff_transition_edges(
+    speeds: tuple[int, ...], *, delta: Fraction
+) -> tuple[tuple[int, int], ...]:
+    """Undirected owner transitions in their first cyclic occurrence order."""
+    owners = singleton_handoff_owners(speeds, delta=delta)
+    if len(owners) < 2:
+        return ()
+    edges: list[tuple[int, int]] = []
+    for first, second in zip(owners, owners[1:] + owners[:1]):
+        if first == second:
+            continue
+        edge = tuple(sorted((first, second)))
+        if edge not in edges:
+            edges.append(edge)
+    return tuple(edges)
+
+
+def inductive_private_window_margin(runner_count: int) -> Fraction:
+    """Slack at a private bad window supplied by the lower LRC case."""
+    if runner_count < 2:
+        raise ValueError("runner_count must be at least two")
+    return Fraction(1, runner_count) - Fraction(1, runner_count + 1)
 
 
 def _critical_times(speeds: tuple[int, ...]):
@@ -752,6 +789,80 @@ def bounded_appendability_from_seeds(
     return _bounded_appendability_steps(
         speeds, seeds=seeds, relations=relations
     )
+
+
+def handoff_appendability_certificate(
+    speeds: tuple[int, ...], *, delta: Fraction, max_coefficient: int
+) -> tuple[tuple[int, int], tuple[tuple[int, tuple[int, ...]], ...]] | None:
+    """Try successive singleton-owner handoffs as appendability seed pairs."""
+    owners = singleton_handoff_owners(speeds, delta=delta)
+    if len(owners) < 2:
+        return None
+    tried: set[tuple[int, int]] = set()
+    for first, second in zip(owners, owners[1:] + owners[:1]):
+        if first == second or (first, second) in tried:
+            continue
+        tried.add((first, second))
+        steps = bounded_appendability_from_seeds(
+            speeds,
+            seeds=(first, second),
+            max_coefficient=max_coefficient,
+        )
+        if steps is not None:
+            return (first, second), steps
+    return None
+
+
+def handoff_elimination_certificate(
+    speeds: tuple[int, ...], *, delta: Fraction, max_coefficient: int
+) -> tuple[
+    tuple[int, ...], tuple[tuple[int, tuple[int, ...]], ...]
+] | None:
+    """Use a cyclic handoff first-occurrence order as bounded elimination."""
+    owners = singleton_handoff_owners(speeds, delta=delta)
+    if len(owners) < len(speeds):
+        return None
+    relations = tuple(
+        sorted(
+            bounded_relations(speeds, max_coefficient=max_coefficient),
+            key=lambda row: (
+                sum(coefficient != 0 for coefficient in row),
+                sum(abs(coefficient) for coefficient in row),
+                row,
+            ),
+        )
+    )
+    for rotation in range(len(owners)):
+        order: list[int] = []
+        for owner in owners[rotation:] + owners[:rotation]:
+            if owner not in order:
+                order.append(owner)
+        if len(order) != len(speeds):
+            continue
+        available = set(order[:2])
+        steps: list[tuple[int, tuple[int, ...]]] = []
+        for target in order[2:]:
+            relation = next(
+                (
+                    row
+                    for row in relations
+                    if row[target]
+                    and all(
+                        not coefficient
+                        or index in available
+                        or index == target
+                        for index, coefficient in enumerate(row)
+                    )
+                ),
+                None,
+            )
+            if relation is None:
+                break
+            available.add(target)
+            steps.append((target, relation))
+        else:
+            return tuple(order), tuple(steps)
+    return None
 
 
 def bounded_relation_pattern(

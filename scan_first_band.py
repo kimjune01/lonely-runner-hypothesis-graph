@@ -20,6 +20,7 @@ def main() -> None:
         "runners\theight\tspeeds\tmaximum_loneliness\trelation_rank"
         "\tcomponents\tpositive_seeds\tsigned_dissociated_seeds"
         "\ttwo_seed_appendable\thandoff_seeds\thandoff_seed_appendable"
+        "\thandoff_cycle_appendable\thandoff_order_eliminates"
         "\tpositive_tree\tambient_maximum"
         "\tambient_margin\tparameter_norm_squared_cutoff"
     )
@@ -54,6 +55,16 @@ def main() -> None:
             if handoff_seeds is not None
             else None
         )
+        handoff_cycle = lrc.handoff_appendability_certificate(
+            speeds,
+            delta=Fraction(1, args.runners + 1),
+            max_coefficient=args.coefficient,
+        )
+        handoff_order = lrc.handoff_elimination_certificate(
+            speeds,
+            delta=Fraction(1, args.runners + 1),
+            max_coefficient=args.coefficient,
+        )
         tree = lrc.positive_triangular_relation_tree(
             speeds, max_coefficient=args.coefficient
         )
@@ -81,6 +92,8 @@ def main() -> None:
             f"\t{len(signed_seeds)}\t{'yes' if appendable is not None else 'no'}"
             f"\t{','.join(map(str, handoff_seeds or ()))}"
             f"\t{'yes' if handoff_steps is not None else 'no'}"
+            f"\t{'yes' if handoff_cycle is not None else 'no'}"
+            f"\t{'yes' if handoff_order is not None else 'no'}"
             f"\t{'yes' if tree is not None else 'no'}"
             f"\t{ambient}\t{margin}"
             f"\t{cutoff}"

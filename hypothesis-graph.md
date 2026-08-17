@@ -162,8 +162,12 @@ H0  selected nine-runner target is open
                                                                                            |       SELECTED FOR TESTING
                                                                                            |
                                                                                            +--H45  sliding-window handoff
-                                                                                                   owners seed H44
-                                                                                                   SELECTED FOR TESTING
+                                                                                           |       order eliminates
+                                                                                           |       SELECTED FOR TESTING
+                                                                                           |
+                                                                                           +--H46  every runner owns a
+                                                                                                   singleton-load window
+                                                                                                   PROVED BY INDUCTION
 ```
 
 ## Nodes
@@ -1061,14 +1065,25 @@ H0  selected nine-runner target is open
 
 - Mode: canonical geometric seed selection for H44, motivated by windows scheduling and augmenting-path load balancing
 - Load identity: at `delta=1/(n+1)`, the bad-window load `L(t)=#{i: ||v_i t||<delta}` has exact mean `2n/(n+1)<2`. Therefore some constant-load cell has load at most one.
-- Rule: sweep the exact rational bad-window endpoint arrangement forward from the common reset. Record the first two distinct runners that individually own singleton-load cells; call them the handoff seeds.
-- Hypothesis: in every primitive minimal LRC counterexample, two distinct handoff owners occur and their pair coefficient-two-appends every remaining speed.
-- Consequence: H45 supplies a canonical seed pair for H44, whose triangular relation certificate proves H39.
-- Evidence: the conjectured-width rule passes all 49 completed first-band survivors through eight speeds. On `(1,4,5,6,7,11,13,16)`, the handoff pair `(1,16)` appends the entire tuple even though direct H42 generation requires three seeds.
-- Caveat: the mean-load identity guarantees a singleton cell, not two distinct owners or bounded arithmetic relations. Those are the new mathematical claims.
+- Rule: compress the singleton-load cells into their cyclic owner sequence. For each cyclic rotation, order runners by first appearance.
+- Hypothesis: in every primitive minimal LRC counterexample, some rotation is a coefficient-two elimination order: its first two owners are seeds and every later first-time owner has a coefficient-two relation supported only on itself and earlier owners.
+- Consequence: the selected relations are triangular on the first-occurrence targets, giving `n-2` independent rows and proving H39 directly.
+- Evidence: the cyclic-order rule passes all 49 completed first-band survivors through eight speeds at the conjectured width and three tested slack full-cover widths. Every one of the 385 distinct handoff transition edges in those slack profiles lies in some coefficient-two relation.
+- Reset-order control: `(2,3,5,6,8,11)` has `ML=3/19`, just outside the first band. Its reset order stalls from `(2,11)`, while rotating to `(11,8)` gives the full elimination order `(11,8,6,5,3,2)`. This kills the generic reset-anchored strengthening and makes cyclic rotation load-bearing.
+- Caveat: H46 makes the transition graph connected, and the scan links every transition edge to a short relation, but neither fact guarantees that the relation avoids owners appearing later in the order.
 - Verdict: selected for testing, not proved.
-- Kill condition: a possible minimal counterexample with fewer than two distinct singleton owners, or whose first two owners fail H44 closure.
-- Verification: `periodic_bad_window_cells`, `handoff_seed_pair`, `bounded_appendability_from_seeds`, and scan column `handoff_seed_appendable`.
+- Kill condition: a possible minimal counterexample for which every cyclic first-occurrence order stalls before visiting all runners.
+- Verification: `periodic_bad_window_cells`, `singleton_handoff_owners`, `handoff_transition_edges`, `handoff_elimination_certificate`, and scan column `handoff_order_eliminates`.
+- Artifact: `artifacts/first-spectral-band-connectivity.md`.
+
+### H46 — Every runner in a minimal counterexample owns a singleton-load window
+
+- Mode: lower-runner induction plus continuity
+- Statement: assume LRC for `n-1` speeds and let `v` be an `n`-speed counterexample at `delta=1/(n+1)`. For every runner `i`, there is a nonempty open interval on which `i` is the unique bad runner.
+- Proof: apply the lower case to the tuple with `i` removed. At some `t_i`, every remaining runner has distance at least `1/n`, with uniform slack `1/n-1/(n+1)=1/(n(n+1))` above `delta`. Since the full tuple is a counterexample, runner `i` must be bad at `t_i`. Continuity preserves both strict conditions on a neighborhood of `t_i`.
+- Consequence: every runner occurs in the cyclic singleton-owner sequence. The handoff transition edges form a closed walk visiting all runners, hence their graph is connected. H45 only needs a rotation whose new owners can be eliminated using earlier ones.
+- Verdict: proved conditionally under the standard minimal-counterexample induction.
+- Verification: `inductive_private_window_margin`, exact load-profile tests, and the proof above.
 - Artifact: `artifacts/first-spectral-band-connectivity.md`.
 
 ## What the graph established
@@ -1118,7 +1133,8 @@ H0  selected nine-runner target is open
 43. A two-element inclusion-maximal coefficient-two dissociated seed would imply H39 by independent star relations. The first 42 scanned survivors pass, but an eight-speed first-band tuple kills the broad H42 form by requiring three direct seeds.
 44. Exact Riesz constant terms kill blind iteration: the circuit `(1,2,3)` lowers the normalized cover ratio from `1/3` to `1/4`, and the unmodified product excludes none of the 42 scanned survivors.
 45. Two-seed bounded appendability repairs H42's chain defect while retaining the rank implication. All 49 scanned survivors through eight speeds pass, including the exact H42 separator.
-46. Exact sliding-window sweeps select canonical handoff seeds from singleton-load cells. At the conjectured width, those seeds append every one of the 49 scanned survivors.
+46. Exact sliding-window sweeps form a cyclic first-occurrence order from singleton owners. Some rotation is a complete bounded elimination order for every one of the 49 scanned survivors and at three slack full-cover widths.
+47. Lower-runner induction proves that every runner in a minimal counterexample owns an open singleton-load window; consequently the handoff transition graph is connected.
 
 ## Frontier
 
