@@ -728,6 +728,66 @@ def test_band_edge_grid_cell_normal_form_matches_the_continuous_windows():
             assert normalized == original
 
 
+def test_lrc_reset_cell_normal_form_has_integer_radius_one():
+    speeds = (1, 2, 4)
+    modulus = len(speeds) + 1
+    intervals = lrc.lrc_grid_cell_intervals(speeds, grid_cell=1)
+
+    assert intervals == (
+        (1, 2, Fraction(1, 2), Fraction(3, 2)),
+        (2, 0, Fraction(-1, 4), Fraction(1, 4)),
+        (2, 4, Fraction(3, 4), Fraction(5, 4)),
+    )
+    assert {
+        runner for runner, _, left, right in intervals if left < 0 < right
+    } == {2}
+    for local_time in (Fraction(0), Fraction(1, 5), Fraction(1, 2), Fraction(4, 5), Fraction(1)):
+        global_time = Fraction(1 + local_time, modulus)
+        original = {
+            runner
+            for runner, speed in enumerate(speeds)
+            if lrc.fractional_distance(speed * global_time) < Fraction(1, modulus)
+        }
+        normalized = {
+            runner
+            for runner, _, left, right in intervals
+            if left < local_time < right
+        }
+        assert normalized == original
+
+
+def test_lrc_cell_cover_certificate_exposes_the_failed_reset_cell():
+    speeds = (2, 3, 4)
+
+    covered = lrc.strict_lrc_cell_cover_certificate(speeds, grid_cell=1)
+    assert covered is not None
+    assert [speeds[runner] for runner, _, _, _ in covered] == [4, 3, 2]
+    assert covered[0][2] < 0 < covered[0][3]
+    assert covered[-1][3] > 1
+    assert all(second[2] < first[3] for first, second in zip(covered, covered[1:]))
+    determinants = []
+    for first, second in zip(covered, covered[1:]):
+        first_runner, first_center, _, _ = first
+        second_runner, second_center, _, _ = second
+        determinant = (
+            second_center * speeds[first_runner]
+            - first_center * speeds[second_runner]
+        )
+        determinants.append(determinant)
+        assert 0 < determinant < speeds[first_runner] + speeds[second_runner]
+        assert determinant % 4 == 0
+    assert sum(
+        Fraction(
+            determinant,
+            speeds[first[0]] * speeds[second[0]],
+        )
+        for determinant, first, second in zip(
+            determinants, covered, covered[1:]
+        )
+    ) == 1
+    assert lrc.strict_lrc_cell_cover_certificate(speeds, grid_cell=0) is None
+
+
 def test_band_edge_cell_cover_certificate_is_a_strict_interval_chain():
     speeds = (1, 2, 3)
 
@@ -787,6 +847,14 @@ def test_divisible_speed_barrier_is_sharp_on_a_band_edge_tuple():
 
     assert 18 % 6 == 0
     assert lrc.maximum_loneliness(speeds) == Fraction(2, 11)
+
+
+def test_divisible_speed_barrier_requires_primitive_normalization():
+    speeds = (4, 8, 12)
+
+    assert all(speed % 4 == 0 for speed in speeds)
+    assert math.gcd(*speeds) == 4
+    assert lrc.maximum_loneliness(speeds) == Fraction(1, 4) < Fraction(2, 7)
 
 
 def test_divisible_speed_barrier_survives_small_three_speed_search():

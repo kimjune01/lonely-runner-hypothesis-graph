@@ -109,6 +109,29 @@ def strict_band_edge_grid_cover_certificate(
     return tuple(witnesses)
 
 
+def _grid_cell_intervals(
+    speeds: tuple[int, ...], *, modulus: int, radius: int, grid_cell: int
+) -> tuple[tuple[int, int, Fraction, Fraction], ...]:
+    if not speeds or any(speed <= 0 for speed in speeds):
+        raise ValueError("speeds must be a nonempty tuple of positive integers")
+    grid_cell %= modulus
+    intervals: list[tuple[int, int, Fraction, Fraction]] = []
+    for runner, speed in enumerate(speeds):
+        residue = (-grid_cell * speed) % modulus
+        for center in range(1 - radius, speed + radius):
+            if center % modulus != residue:
+                continue
+            intervals.append(
+                (
+                    runner,
+                    center,
+                    Fraction(center - radius, speed),
+                    Fraction(center + radius, speed),
+                )
+            )
+    return tuple(intervals)
+
+
 def band_edge_grid_cell_intervals(
     speeds: tuple[int, ...], *, grid_cell: int
 ) -> tuple[tuple[int, int, Fraction, Fraction], ...]:
@@ -118,32 +141,33 @@ def band_edge_grid_cell_intervals(
     ``2/q`` exactly when ``|v_i*x-r|<2`` for some integer
     ``r == -k*v_i (mod q)``.  Returned endpoints are not clipped to ``[0,1]``.
     """
-    if not speeds or any(speed <= 0 for speed in speeds):
-        raise ValueError("speeds must be a nonempty tuple of positive integers")
-    modulus = 2 * len(speeds) + 1
-    grid_cell %= modulus
-    intervals: list[tuple[int, int, Fraction, Fraction]] = []
-    for runner, speed in enumerate(speeds):
-        residue = (-grid_cell * speed) % modulus
-        for center in range(-1, speed + 2):
-            if center % modulus != residue:
-                continue
-            intervals.append(
-                (
-                    runner,
-                    center,
-                    Fraction(center - 2, speed),
-                    Fraction(center + 2, speed),
-                )
-            )
-    return tuple(intervals)
+    return _grid_cell_intervals(
+        speeds,
+        modulus=2 * len(speeds) + 1,
+        radius=2,
+        grid_cell=grid_cell,
+    )
 
 
-def strict_band_edge_cell_cover_certificate(
+def lrc_grid_cell_intervals(
     speeds: tuple[int, ...], *, grid_cell: int
+) -> tuple[tuple[int, int, Fraction, Fraction], ...]:
+    """Normalize one conjectured-width cell to integer-radius-one intervals.
+
+    With ``N=n+1`` and ``t=(k+x)/N``, runner ``i`` is strictly bad exactly
+    when ``|v_i*x-r|<1`` for an integer ``r == -k*v_i (mod N)``.
+    """
+    return _grid_cell_intervals(
+        speeds,
+        modulus=len(speeds) + 1,
+        radius=1,
+        grid_cell=grid_cell,
+    )
+
+
+def _strict_interval_cover_certificate(
+    intervals: tuple[tuple[int, int, Fraction, Fraction], ...],
 ) -> tuple[tuple[int, int, Fraction, Fraction], ...] | None:
-    """Greedily certify a strict radius-two interval cover of one grid cell."""
-    intervals = band_edge_grid_cell_intervals(speeds, grid_cell=grid_cell)
     first = max(
         (interval for interval in intervals if interval[2] < 0 < interval[3]),
         key=lambda interval: interval[3],
@@ -168,6 +192,24 @@ def strict_band_edge_cell_cover_certificate(
         chain.append(addition)
         reach = addition[3]
     return tuple(chain)
+
+
+def strict_band_edge_cell_cover_certificate(
+    speeds: tuple[int, ...], *, grid_cell: int
+) -> tuple[tuple[int, int, Fraction, Fraction], ...] | None:
+    """Greedily certify a strict radius-two interval cover of one grid cell."""
+    return _strict_interval_cover_certificate(
+        band_edge_grid_cell_intervals(speeds, grid_cell=grid_cell)
+    )
+
+
+def strict_lrc_cell_cover_certificate(
+    speeds: tuple[int, ...], *, grid_cell: int
+) -> tuple[tuple[int, int, Fraction, Fraction], ...] | None:
+    """Greedily certify a strict radius-one cover at the LRC width."""
+    return _strict_interval_cover_certificate(
+        lrc_grid_cell_intervals(speeds, grid_cell=grid_cell)
+    )
 
 
 def strict_band_edge_cover_certificate(

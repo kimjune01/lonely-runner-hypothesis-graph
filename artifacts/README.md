@@ -147,5 +147,6 @@ two owners from the intervening handoff segment or the two initial seeds.
 At the exact first-band edge, the same sweep passes all 55 survivors and gives
 endpoint labels `q m +/- 2`. The strict subset motivates H48: all 14 tuples
 strictly below the edge have full coefficient-two relation rank `n-1`.
-The same strict/interior split yields H49, a direct sufficient target: an
-`n+1`-divisible speed should force loneliness at least `2/(2n+1)`.
+The same strict/interior split yields H49, a direct sufficient target: in a
+primitive tuple, an `n+1`-divisible speed should force loneliness at least
+`2/(2n+1)`. The unnormalized form is false by dilation.

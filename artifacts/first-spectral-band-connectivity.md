@@ -294,23 +294,29 @@ two. On `(1,3,9)`, grid cell `k=3` has normalized intervals `[0,1/3)` and
 The remaining H48 lemma is now finite and explicit: show that radius-two
 chains for every `k mod q` force `n-1` independent coefficient-two relations.
 
-## A direct divisible-speed barrier
+## A direct primitive divisible-speed barrier
 
 The strict scan suggests an even shorter route:
 
-> If one of `n` speeds is divisible by `n+1`, then
+> If a primitive tuple of `n` speeds contains a speed divisible by `n+1`, then
 > `ML(v) >= 2/(2n+1)`.
 
-This single lemma would prove the general Lonely Runner Conjecture. If no
-speed is divisible by `n+1`, use
+Primitive normalization is essential. The unnormalized tuple `(4,8,12)` has
+every speed divisible by `4` but has `ML=1/4<2/7`, because it is a dilation of
+`(1,2,3)`. This kills the broader statement.
+
+The primitive lemma would still prove the general Lonely Runner Conjecture.
+Given arbitrary speeds, divide their common gcd `g` to obtain a primitive
+tuple `u`. If no `u_i` is divisible by `n+1`, use
 
 ```text
-t = 1/(n+1).
+t = 1/[g(n+1)]
 ```
 
-Every speed then has a nonzero residue modulo `n+1`, so every runner is at
-distance at least `1/(n+1)`. If a divisible speed exists, the proposed lemma
-gives the stronger bound `2/(2n+1)>1/(n+1)`.
+for the original tuple. Every `u_i` then has a nonzero residue modulo `n+1`,
+so every runner is at distance at least `1/(n+1)`. If a primitive divisible
+speed exists, the proposed lemma gives the stronger bound
+`2/(2n+1)>1/(n+1)`.
 
 All 14 strict first-band survivors through nine speeds avoid multiples of
 `n+1`; in fact they all contain speeds `1` and `n`. A separate targeted scan
@@ -328,10 +334,57 @@ The constant is sharp: `(1,3,4,5,18)` contains `18`, a multiple of `6`, and
 has `ML=2/11` exactly.
 
 This is a non-prime hypothesis. The known induction argument proves it when a
-divisible runner is at least `2n` times faster than every other runner: remove
-it, use the lower-runner `1/n` time, and spend the first-band slack to move the
-fast runner. The unresolved case has only a moderate speed ratio, where the
-radius-two cell chains offer a finite local representation.
+primitive divisible runner is at least `2n` times faster than every other
+runner: remove it, use the lower-runner `1/n` time, and spend the first-band
+slack to move the fast runner. The unresolved case has only a moderate speed
+ratio, where the radius-two cell chains offer a finite local representation.
+
+At the conjectured width itself there is a sharper reset/backoff normal form.
+Put `N=n+1` and write `t=(k+x)/N`. The bad windows in grid cell `k` are
+
+```text
+|v_i x-r| < 1,       r = -k v_i (mod N),
+```
+
+or equivalently the open intervals
+
+```text
+((r-1)/v_i, (r+1)/v_i).
+```
+
+A counterexample must supply a strict interval chain across `[0,1]` in every
+one of the `N` cells. A chain begins with a speed satisfying `k v_i=0 mod N`
+and ends with one satisfying `(k+1)v_i=0 mod N`. For consecutive labels
+`(v_i,r)` and `(v_j,s)`, after deleting contained intervals their centers
+increase, so
+
+```text
+0 < s v_i-r v_j < v_i+v_j,
+N divides s v_i-r v_j.
+```
+
+This is the exact temporal-spanner version of the reset/backoff idea: modular
+endpoint states are insufficient, and each unit time cell needs a chain of
+strict radius-one handoffs between them. H49 is reduced to showing that no
+primitive tuple with an `N`-multiple can realize all `N` chains. The reduction
+is proved; the final incompatibility is not.
+
+A literature audit found no published divisible-speed barrier of this form.
+[Kravitz's Loneliness Spectrum Conjecture](https://arxiv.org/abs/1912.06034)
+would rule out most values below the
+first-band edge, but it still leaves the tight value `1/(n+1)`; H49 additionally
+asserts that a primitive tight tuple cannot contain an `n+1` multiple. The
+classification of primitive tight instances remains open. Thus H49 is not a
+known corollary disguised by different notation.
+
+Known tight-instance constructions are consistent with H49. An exact replay
+of the [Goddyn--Wong single-acceleration condition](https://www.sfu.ca/~goddyn/Papers/063tight_lonely_runner.pdf)
+found no construction whose
+accelerated speed is divisible by `n+1` for `n<=500` and multiplier at most
+`100`. Replacing one member of canonical or known tight tuples by an
+`n+1`-multiple produced 7,840 further exact tests; only six entered the closed
+first band, all at the boundary, and none entered its strict interior. These
+searches are falsification evidence, not a completeness theorem.
 
 The scheduling analogy is pinwheel/windows scheduling, where recurring tasks
 must receive service in every sliding window. Here the direction is dual: the
