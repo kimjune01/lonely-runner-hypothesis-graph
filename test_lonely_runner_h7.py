@@ -1558,6 +1558,50 @@ def test_coefficient_one_rank_deficiency_lives_on_the_band_boundary(
 
 
 @pytest.mark.parametrize(
+    "speeds",
+    [
+        (1, 3, 4),
+        (1, 3, 4, 5),
+        (1, 3, 4, 5, 18),
+        (1, 4, 5, 6, 7, 11),
+        (1, 4, 5, 6, 7, 11, 16),
+    ],
+)
+def test_first_band_divisible_fixtures_have_full_coefficient_two_rank(speeds):
+    runner_count = len(speeds)
+
+    assert any(speed % (runner_count + 1) == 0 for speed in speeds)
+    assert lrc.maximum_loneliness(speeds) <= Fraction(2, 2 * runner_count + 1)
+    assert lrc.bounded_relation_rank(
+        speeds, max_coefficient=2
+    ) == runner_count - 1
+
+
+def test_full_bounded_relation_rank_forces_an_explicit_height_bound():
+    assert lrc.bounded_full_rank_height_bound(
+        runner_count=3, max_coefficient=2
+    ) == 8
+    assert lrc.bounded_full_rank_height_bound(
+        runner_count=4, max_coefficient=2
+    ) == 42
+
+    for speeds in ((1, 3, 4), (1, 3, 4, 5), (1, 3, 4, 5, 18)):
+        assert lrc.bounded_relation_rank(
+            speeds, max_coefficient=2
+        ) == len(speeds) - 1
+        assert max(speeds) <= lrc.bounded_full_rank_height_bound(
+            runner_count=len(speeds), max_coefficient=2
+        )
+
+
+def test_divisible_phase_partition_needs_the_first_band_for_rank():
+    speeds = (1, 4, 11)
+
+    assert lrc.maximum_loneliness(speeds) == Fraction(2, 5) > Fraction(2, 7)
+    assert lrc.bounded_relation_rank(speeds, max_coefficient=2) == 0
+
+
+@pytest.mark.parametrize(
     ("speeds", "expected_normalized_ratio"),
     [
         ((1, 2, 3, 7), Fraction(4, 5)),

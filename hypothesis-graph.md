@@ -291,6 +291,16 @@ H0  selected nine-runner target is open
                                                                                                                                                                                                                                                                                                                                                       quotient, then sweep
                                                                                                                                                                                                                                                                                                                                                       reset phases
                                                                                                                                                                                                                                                                                                                                                       PROVED SUBCASE
+                                                                                                                                                                                                                                                                                                                                                      |
+                                                                                                                                                                                                                                                                                                                                                      +--H75  first-band reset
+                                                                                                                                                                                                                                                                                                                                                               tuples have full
+                                                                                                                                                                                                                                                                                                                                                               coefficient-two rank
+                                                                                                                                                                                                                                                                                                                                                               SELECTED
+                                                                                                                                                                                                                                                                                                                                                               |
+                                                                                                                                                                                                                                                                                                                                                               +--H76  full bounded rank
+                                                                                                                                                                                                                                                                                                                                                                        forces an explicit
+                                                                                                                                                                                                                                                                                                                                                                        height bound
+                                                                                                                                                                                                                                                                                                                                                                        PROVED
 ```
 
 ## Nodes
@@ -1624,6 +1634,41 @@ H0  selected nine-runner target is open
 - Verification: `divisible_block_phase_sweep_capacity`, `divisible_block_phase_sweep_witness`, exact shifted-lattice capacity checks, and mixed composite fixtures.
 - Artifact: `artifacts/first-spectral-band-connectivity.md`.
 
+### H75 — First-band reset tuples have full coefficient-two rank
+
+- Mode: sharp first-band successor after broad equality-partition rank failed
+- Hypothesis: if a primitive `n`-speed tuple contains an `(n+1)`-divisible speed and
+
+  ```text
+  ML(v)<=2/(2n+1),
+  ```
+
+  then its coefficient-two relation space has rank `n-1`.
+- Why stronger than H39: H73 forces every hypothetical counterexample into the divisible-speed antecedent. H75 would therefore give full bounded rank, not merely the `n-2` rank needed for a two-dimensional reduction.
+- Exact evidence: complete first-band scans found respectively `1,2,2,4,2` divisible-speed survivors for `(n,height)=(3,100),(4,50),(5,30),(6,22),(7,20)`. Every one has coefficient-two rank exactly `n-1`. Representative fixtures are `(1,3,4)`, `(1,3,4,5,18)`, `(1,4,5,6,7,11)`, and `(1,4,5,6,7,11,16)`.
+- Broad kill: the spectral cutoff is essential. `(1,4,11)` has an `n+1=4` multiple and its quotient-maximizing phase partitions all four reset classes, yet `ML=2/5>2/7` and its coefficient-two rank is zero.
+- Suggested proof path: when the H74 sweep covers every reset phase at or above capacity, retain its exact two-point/coset partition and the first-band handoff events. The partition alone is insufficient by the broad kill; the strict band must turn its moving endpoints into the missing bounded rows.
+- Kill condition: a primitive first-band tuple containing an `(n+1)` multiple with coefficient-two rank below `n-1`.
+- Verdict: selected for testing; unproved.
+- Verification: exact divisible first-band rank regressions and the broad negative control.
+- Artifact: `artifacts/first-spectral-band-connectivity.md`.
+
+### H76 — Full bounded relation rank forces an explicit height bound
+
+- Mode: proved determinant consequence of H75
+- Statement: if a primitive positive `n`-speed vector has relation rank `n-1` using coefficients bounded by `C`, then
+
+  ```text
+  max_i v_i <= ceil((C^2(n-1))^((n-1)/2)).
+  ```
+
+  For H75, `C=2`, giving `ceil((4(n-1))^((n-1)/2))`.
+- Proof: choose `n-1` independent bounded relation rows. Their integer kernel is the cofactor vector. The primitive speed vector is that vector divided by its coordinate gcd. Each cofactor is an `(n-1)`-dimensional determinant; Hadamard bounds its square by `(C^2(n-1))^(n-1)`.
+- Consequence: H75 would reduce every hypothetical counterexample to a dramatically smaller explicit finite height than the general linearly-exponential checking theorem. This is still a finite reduction, not a uniform proof across all `n`.
+- Verdict: proved conditional implication.
+- Verification: `bounded_full_rank_height_bound` and exact full-rank fixtures.
+- Artifact: `artifacts/first-spectral-band-connectivity.md`.
+
 ## What the graph established
 
 1. The elementary measure branch recovers `1/(2n)` and dies by an exact factor-two deficit.
@@ -1701,6 +1746,8 @@ H0  selected nine-runner target is open
 73. H73 identifies the invariant behind H72: any arbitrary tuple compressed modulo `q` into the nonzero signed palette `+-[1,m]` is safe when the `q`-grid meets `[1/(n+1),1/(m+1)]`. For `m<n`, a simple explicit lower bound on `q` makes that intersection automatic.
 74. At the canonical modulus `q=n+1`, H73 gives the exact top-level dichotomy: a tuple with no zero residue is solved at `t=1/(n+1)`, so every hypothetical counterexample necessarily enters H49 with an `(n+1)`-divisible reset runner.
 75. H74 solves the many-zero-residue branch: first make the divisible quotients lonely by induction, then sweep that phase through all `n+1` resets. A nondivisible gcd-`g` runner blocks at most two phases for `g=1` and at most `g` for `g>1`; a total capacity below `n+1` proves LRC.
+76. Equality covers disprove a broad forced-overlap claim, and `(1,4,11)` shows that their partitions do not force bounded rank outside the first band. Inside the completed first-band scans, however, every tuple with an `(n+1)` multiple has full coefficient-two rank; this is the selected H75 reset invariant.
+77. H76 converts that full rank into height: cofactors and Hadamard give `max v_i<=ceil((4(n-1))^((n-1)/2))`. Thus H75 would make the exhaustive residual far smaller, though not eliminate it uniformly.
 
 ## Frontier
 
@@ -1717,6 +1764,8 @@ H0  selected nine-runner target is open
 - Proved extension: H72 also removes unequal and internally nonfactor block shapes at sufficiently large common scale. The live grouped-speed obstruction is now a small-scale transition or a sparse normalized block system with total count `n<=m`; test short-period points there before returning to handoff casework.
 - Proved modular abstraction: use H73 before any prime-specific lifting. A hypothetical counterexample must avoid every modulus whose nonzero signed residue radius `m<n` is small enough relative to `q`; zero residues and wide palettes are the exact remaining branches.
 - Proved reset subcase: use H74 when several speeds vanish modulo `n+1`. In a minimal counterexample fewer than half the runners can be divisible whenever all other gcd strata are at most two; more generally the weighted capacity `sum c(g)` must be at least `n+1`.
+- Primary reset invariant: prove or kill H75. A full H74 phase cover at the first-band width must be analyzed as a moving partition of two-point and subgroup-coset blockers; the fixed partition alone is insufficient because `(1,4,11)` kills it outside the band.
+- Proved consequence: if H75 holds, use H76's cofactor height bound before any general finite-checking bound. Do not mistake the smaller finite domain for a proof across arbitrary `n`.
 - Primary: replace H23 by a height-sensitive gap theorem, or formulate a lift-tree invariant that distinguishes fixed ordinary integers from spurious profinite survivor branches.
 - Primary: combine H27's upper-gap constraints with finite-checking/volume bounds; seek a complementary lemma controlling cuts with at least half the runners above them.
 - Primary: for the finite H28 normal vectors, formulate and test a concrete relative-subtorus descent; do not use the phrase “compatible sign pattern” without the transformation and preserved invariant.

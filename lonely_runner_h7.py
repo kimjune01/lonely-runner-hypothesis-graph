@@ -10,7 +10,7 @@ from __future__ import annotations
 from fractions import Fraction
 from functools import lru_cache
 from itertools import combinations, permutations, product
-from math import comb, gcd, lcm
+from math import comb, gcd, isqrt, lcm
 
 
 def covers(*, v: int, j: int, k: int, p: int, denominator: int) -> bool:
@@ -1406,6 +1406,25 @@ def _nullspace_pattern(
             integer_column = [-entry for entry in integer_column]
         columns.append(tuple(integer_column))
     return tuple(columns)
+
+
+def bounded_full_rank_height_bound(
+    *, runner_count: int, max_coefficient: int
+) -> int:
+    """Hadamard bound for a primitive kernel ray of bounded full rank.
+
+    If ``runner_count-1`` independent relations have coefficients bounded by
+    ``C``, the primitive speed vector is proportional to their cofactor vector.
+    Every squared cofactor is at most ``(C^2*(n-1))^(n-1)`` by Hadamard.
+    """
+    if runner_count < 2:
+        raise ValueError("runner_count must be at least two")
+    if max_coefficient < 1:
+        raise ValueError("max_coefficient must be positive")
+    squared_bound = (
+        max_coefficient * max_coefficient * (runner_count - 1)
+    ) ** (runner_count - 1)
+    return isqrt(squared_bound - 1) + 1
 
 
 def bounded_relation_rank(speeds: tuple[int, ...], *, max_coefficient: int) -> int:

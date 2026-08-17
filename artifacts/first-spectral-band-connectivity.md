@@ -673,6 +673,51 @@ H74's raw capacity and too much height/gcd structure for H51's unique-largest
 description; that is where event handoffs or overlap-aware counting remain
 necessary.
 
+### Equality partitions and full reset rank
+
+The first attempt to sharpen H74 was a forced-overlap claim at exact capacity.
+It is false. For `(1,3,4)`, the quotient-maximizing phase `x=1/2` makes the
+two remaining runners block `(0,3)` and `(1,2)`, a disjoint partition of all
+four reset classes. More sharply, `(1,4,11)` has the same full partition
+phenomenon but no coefficient-two relation at all. Its maximum loneliness is
+`2/5`, above the first-band ceiling `2/7`; therefore any rank conclusion must
+retain the spectral cutoff.
+
+With that cutoff retained, the evidence strengthens. Complete first-band
+scans gave the following numbers of tuples containing an `(n+1)` multiple:
+
+```text
+(n,height): (3,100) (4,50) (5,30) (6,22) (7,20)
+survivors:       1      2      2      4      2
+```
+
+Every survivor has coefficient-two rank exactly `n-1`, one dimension stronger
+than H39. This motivates H75:
+
+```text
+ML(v)<=2/(2n+1) and some (n+1)|v_i
+    ==> rank R_2(v)=n-1.
+```
+
+H73 makes this directly counterexample-relevant because every hypothetical
+counterexample has such a divisible speed. The missing proof must combine the
+reset partition with movement through the first-band handoff cells; the static
+partition cannot distinguish `(1,4,11)`.
+
+Full bounded rank has an immediate proved payoff. Select `n-1` independent
+relations with coefficients bounded by `C`. Their cofactor vector spans the
+integer kernel, and the primitive speed vector is obtained by dividing those
+cofactors by their common gcd. Hadamard's inequality gives
+
+```text
+max_i v_i <= ceil((C^2(n-1))^((n-1)/2)).
+```
+
+For `C=2`, the first values include `8` at `n=3` and `42` at `n=4`. This H76
+bound would turn H75 into an explicit finite search much smaller than the
+general counterexample bound. It does not by itself prove the remaining
+finite family for arbitrary `n`.
+
 The sharper H47 audit requires every elimination row to contain the immediately
 preceding new owner and at most two additional owners drawn from the intervening
 handoff segment or the two initial seeds. All 229 rows in the 55 certificates
