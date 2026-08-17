@@ -276,6 +276,11 @@ H0  selected nine-runner target is open
                                                                                                                                                                                                                                                                                                                            blocks share a
                                                                                                                                                                                                                                                                                                                            fixed phase
                                                                                                                                                                                                                                                                                                                            PROVED
+                                                                                                                                                                                                                                                                                                                           |
+                                                                                                                                                                                                                                                                                                                           +--H72  arbitrary geometric
+                                                                                                                                                                                                                                                                                                                                    multiplier blocks
+                                                                                                                                                                                                                                                                                                                                    synchronize eventually
+                                                                                                                                                                                                                                                                                                                                    PROVED
 ```
 
 ## Nodes
@@ -1525,6 +1530,35 @@ H0  selected nine-runner target is open
 - Verification: `geometric_canonical_block_witness`, exact phase/distinctness/LRC-distance regressions, and `scan_geometric_blocks.py` for the pre-proof falsification receipt.
 - Artifact: `artifacts/first-spectral-band-connectivity.md`.
 
+### H72 — Arbitrary geometric multiplier blocks eventually synchronize
+
+- Mode: proved mixed factor/nonfactor extension of H71
+- Setup: let `A_0,...,A_(r-1)` be nonempty finite sets of distinct positive multipliers, let `n=sum_j |A_j|`, and put `m=max union_j A_j`. For an integer scale `M>m`, take the distinct speeds
+
+  ```text
+  union_j M^j A_j.
+  ```
+
+- Exact fixed-phase certificate: if
+
+  ```text
+  ceil((M-1)/(n+1)) <= floor((M-1)/(m+1)),
+  ```
+
+  choose any integer `a` in that interval and set `t=a/(M-1)`. Then `M^j t=t mod 1`; moreover `1/(n+1)<=t<=1/(m+1)`, so every multiplier `1<=k<=m` satisfies `||kt||>=t`. Hence every runner is at least `1/(n+1)` lonely.
+- Uniform large-scale consequence: when `n>m`, the interval has length at least one—and therefore contains an integer—as soon as
+
+  ```text
+  M >= 1 + ceil((m+1)(n+1)/(n-m)).
+  ```
+
+  Thus every fixed collection of arbitrary multiplier blocks is safe at all sufficiently separated geometric scales. Unequal canonical prefixes are the special case `A_j={1,...,m_j}`.
+- Sharp method boundary: below the uniform scale the integer interval may still be nonempty; `(B_5,6B_2)` is the smallest recorded miss for this certificate, while `(B_5,7B_2)` succeeds at `t=1/6`. If `n<=m`, the low-phase safe interval itself is empty, though another phase may still prove the tuple safe.
+- Consequence for the user's case split: factor groups need not have equal shapes. Once their total runner count exceeds the largest normalized within-group multiplier and the inter-group scale is large enough, a single reset fixed point synchronizes every group; no induction over group handoffs is needed.
+- Verdict: proved certificate and eventual-family theorem.
+- Verification: `geometric_multiplier_block_witness`, `geometric_multiplier_block_scale_bound`, unequal-prefix wrappers, and exact positive/miss/boundary regressions.
+- Artifact: `artifacts/first-spectral-band-connectivity.md`.
+
 ## What the graph established
 
 1. The elementary measure branch recovers `1/(2n)` and dies by an exact factor-two deficit.
@@ -1598,6 +1632,7 @@ H0  selected nine-runner target is open
 69. A replacement-arc argument exactly disposes of the canonical factor-extension family: `ML(1,2,...,n-1,nr)=r/(nr+1)`, and the canonical chain already supplies rank `n-2`. These one-scale accumulation examples cannot obstruct the general conjecture.
 70. Coefficient-one rank exhibits an even sharper boundary jump. Every strict survivor through nine speeds has rank at least `n-2`; the only three deficiencies have rank `n-3` and lie exactly at `ML=2/(2n+1)`. This upgrades the preferred invariant from coefficient-two handoff rank to a strict-interior unit-circuit hypothesis.
 71. The rank-only Riesz load floor H70 is false, but its separated-block killer is itself harmless for a stronger reason. H71 synchronizes every geometric canonical block at the fixed phase `t=floor((M-1)/(m+1))/(M-1)` and proves the full LRC bound for any number of blocks.
+72. H72 removes both equal-size and consecutive-block assumptions. Arbitrary multiplier blocks `A_j` synchronize at `a/(M-1)` whenever the exact fixed-phase grid meets `[1/(n+1),1/(m+1)]`; if `n>m`, this is automatic beyond the explicit scale `1+ceil((m+1)(n+1)/(n-m))`.
 
 ## Frontier
 
@@ -1611,6 +1646,7 @@ H0  selected nine-runner target is open
 - Primary: prove or kill H69. Revisit H41 with the coefficient-one relation space quotiented out: the target is a lower bound on its rank, and the three exact boundary deficiencies are mandatory calibration cases for any strict-margin inequality.
 - Killed route: H70 shows that coefficient-one codimension three alone does not force a reciprocal Riesz load floor; three separated consecutive blocks violate it. A successor must use the strict first-band cover to forbid or couple such dense relation blocks.
 - Proved family: use H71 as the equality model for mixed factor groups. Any counterexample built from several geometric copies of a canonical block must break the common-scale fixed point—for example through unequal block shapes or non-geometric transitions—rather than merely separating the blocks.
+- Proved extension: H72 also removes unequal and internally nonfactor block shapes at sufficiently large common scale. The live grouped-speed obstruction is now a small-scale transition or a sparse normalized block system with total count `n<=m`; test short-period points there before returning to handoff casework.
 - Primary: replace H23 by a height-sensitive gap theorem, or formulate a lift-tree invariant that distinguishes fixed ordinary integers from spurious profinite survivor branches.
 - Primary: combine H27's upper-gap constraints with finite-checking/volume bounds; seek a complementary lemma controlling cuts with at least half the runners above them.
 - Primary: for the finite H28 normal vectors, formulate and test a concrete relative-subtorus descent; do not use the phrase “compatible sign pattern” without the transformation and preserved invariant.

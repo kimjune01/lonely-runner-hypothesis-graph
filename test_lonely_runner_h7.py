@@ -1559,6 +1559,85 @@ def test_geometric_canonical_block_witness_requires_separated_blocks():
         )
 
 
+@pytest.mark.parametrize(
+    ("block_sizes", "scale", "expected_time"),
+    [
+        ((5, 2), 7, Fraction(1, 6)),
+        ((7, 4, 1), 9, Fraction(1, 8)),
+        ((5, 2), 25, Fraction(1, 8)),
+    ],
+)
+def test_unequal_geometric_canonical_blocks_share_a_fixed_phase(
+    block_sizes, scale, expected_time
+):
+    certificate = lrc.unequal_geometric_canonical_block_witness(
+        block_sizes=block_sizes, scale=scale
+    )
+
+    assert certificate is not None
+    speeds, time = certificate
+    assert time == expected_time
+    assert len(speeds) == len(set(speeds)) == sum(block_sizes)
+    assert min(
+        lrc.fractional_distance(speed * time) for speed in speeds
+    ) >= Fraction(1, len(speeds) + 1)
+
+
+def test_unequal_geometric_blocks_report_when_the_fixed_phase_grid_misses():
+    assert lrc.unequal_geometric_canonical_block_witness(
+        block_sizes=(5, 2), scale=6
+    ) is None
+
+
+def test_unequal_geometric_blocks_require_distinct_scale_ranges():
+    with pytest.raises(ValueError, match="scale must exceed every block size"):
+        lrc.unequal_geometric_canonical_block_witness(
+            block_sizes=(5, 2), scale=5
+        )
+
+
+@pytest.mark.parametrize(
+    ("block_sizes", "expected_bound"),
+    [((5, 2), 25), ((7, 4, 1), 22), ((20, 1), 463)],
+)
+def test_large_scale_bound_guarantees_an_unequal_block_fixed_point(
+    block_sizes, expected_bound
+):
+    scale = lrc.unequal_geometric_canonical_scale_bound(block_sizes)
+
+    assert scale == expected_bound
+    assert lrc.unequal_geometric_canonical_block_witness(
+        block_sizes=block_sizes, scale=scale
+    ) is not None
+
+
+def test_arbitrary_geometric_multiplier_blocks_share_the_fixed_phase():
+    blocks = ((1, 4, 7), (2, 5, 7), (3, 6, 7))
+    scale = lrc.geometric_multiplier_block_scale_bound(blocks)
+    certificate = lrc.geometric_multiplier_block_witness(
+        blocks=blocks, scale=scale
+    )
+
+    assert scale == 41
+    assert certificate is not None
+    speeds, time = certificate
+    assert time == Fraction(1, 10)
+    assert len(speeds) == len(set(speeds)) == 9
+    assert min(
+        lrc.fractional_distance(speed * time) for speed in speeds
+    ) >= Fraction(1, 10)
+
+
+def test_sparse_multiplier_blocks_expose_fixed_phase_limit():
+    blocks = ((1, 4, 7), (2, 5), (3,))
+
+    with pytest.raises(ValueError, match="runner count must exceed"):
+        lrc.geometric_multiplier_block_scale_bound(blocks)
+    assert lrc.geometric_multiplier_block_witness(
+        blocks=blocks, scale=1000
+    ) is None
+
+
 def test_local_handoff_elimination_reaches_nine_speed_survivor():
     speeds = (2, 5, 6, 8, 9, 11, 13, 14, 17)
     certificate = lrc.local_handoff_elimination_certificate(

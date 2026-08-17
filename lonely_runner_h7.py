@@ -765,6 +765,90 @@ def geometric_canonical_block_witness(
     return speeds, time
 
 
+def _geometric_multiplier_block_parameters(
+    blocks: tuple[tuple[int, ...], ...],
+) -> tuple[int, int]:
+    if len(blocks) < 2 or any(not block for block in blocks):
+        raise ValueError("blocks must contain at least two nonempty blocks")
+    if any(
+        multiplier < 1
+        for block in blocks
+        for multiplier in block
+    ):
+        raise ValueError("block multipliers must be positive")
+    if any(len(block) != len(set(block)) for block in blocks):
+        raise ValueError("multipliers within each block must be distinct")
+    return sum(map(len, blocks)), max(map(max, blocks))
+
+
+def geometric_multiplier_block_scale_bound(
+    blocks: tuple[tuple[int, ...], ...],
+) -> int:
+    """Scale from which arbitrary multiplier blocks share a safe phase."""
+    runner_count, largest = _geometric_multiplier_block_parameters(blocks)
+    if runner_count <= largest:
+        raise ValueError("runner count must exceed the largest multiplier")
+    numerator = (largest + 1) * (runner_count + 1)
+    denominator = runner_count - largest
+    return 1 + (numerator + denominator - 1) // denominator
+
+
+def geometric_multiplier_block_witness(
+    *, blocks: tuple[tuple[int, ...], ...], scale: int
+) -> tuple[tuple[int, ...], Fraction] | None:
+    """Synchronize arbitrary geometrically scaled multiplier blocks.
+
+    At a fixed phase between ``1/(n+1)`` and ``1/(m+1)``, where ``n`` is
+    the runner count and ``m`` the largest multiplier, every runner is lonely.
+    Return ``None`` exactly when the ``1/(scale-1)`` fixed-phase grid misses
+    that interval.
+    """
+    runner_count, largest = _geometric_multiplier_block_parameters(blocks)
+    if scale <= largest:
+        raise ValueError("scale must exceed every block multiplier")
+
+    denominator = scale - 1
+    numerator = (denominator + runner_count) // (runner_count + 1)
+    if numerator > denominator // (largest + 1):
+        return None
+    time = Fraction(numerator, denominator)
+    speeds = tuple(
+        multiplier * scale**power
+        for power, block in enumerate(blocks)
+        for multiplier in block
+    )
+    return speeds, time
+
+
+def unequal_geometric_canonical_scale_bound(block_sizes: tuple[int, ...]) -> int:
+    """Scale from which unequal canonical blocks always share a safe phase."""
+    if len(block_sizes) < 2 or any(size < 1 for size in block_sizes):
+        raise ValueError("block_sizes must contain at least two positive sizes")
+    blocks = tuple(tuple(range(1, size + 1)) for size in block_sizes)
+    return geometric_multiplier_block_scale_bound(blocks)
+
+
+def unequal_geometric_canonical_block_witness(
+    *, block_sizes: tuple[int, ...], scale: int
+) -> tuple[tuple[int, ...], Fraction] | None:
+    """Synchronize unequal canonical blocks when the fixed grid hits safely.
+
+    For total size ``n`` and largest block size ``m``, a numerator ``a`` in
+    ``[(scale-1)/(n+1), (scale-1)/(m+1)]`` makes the common fixed phase
+    ``a/(scale-1)`` lonely for every block.  Return ``None`` exactly when
+    this interval contains no integer.
+    """
+    if len(block_sizes) < 2 or any(size < 1 for size in block_sizes):
+        raise ValueError("block_sizes must contain at least two positive sizes")
+    blocks = tuple(tuple(range(1, size + 1)) for size in block_sizes)
+    try:
+        return geometric_multiplier_block_witness(blocks=blocks, scale=scale)
+    except ValueError as error:
+        if str(error) == "scale must exceed every block multiplier":
+            raise ValueError("scale must exceed every block size") from error
+        raise
+
+
 def loneliness_at_most(speeds: tuple[int, ...], *, threshold: Fraction) -> bool:
     """Decide an upper bound exactly, returning early at a violating time."""
     if not speeds or any(speed <= 0 for speed in speeds):

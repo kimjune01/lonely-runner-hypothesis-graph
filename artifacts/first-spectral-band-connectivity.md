@@ -532,6 +532,53 @@ adversarial family exposed by the failure of H70: several internally dense,
 externally independent load blocks can be synchronized at a fixed phase even
 though a rank-only spectral inequality cannot control them.
 
+### Unequal and internally sparse blocks
+
+The fixed-point proof does not require consecutive or equal blocks. Let
+`A_0,...,A_(r-1)` be arbitrary nonempty sets of distinct positive integers,
+write
+
+```text
+n=sum_j |A_j|,       m=max union_j A_j,
+```
+
+and consider `union_j M^j A_j` with `M>m`. At a fixed phase
+`t=a/(M-1)`, all blocks again coincide modulo one. The phase is automatically
+an LRC witness whenever
+
+```text
+ceil((M-1)/(n+1)) <= a <= floor((M-1)/(m+1)).
+```
+
+Indeed, the lower inequality gives the target distance and the upper one puts
+`t` in the first canonical safe cell, where `||kt||>=t` for every `k<=m`.
+This is an exact certificate: its integer interval either contains `a` or it
+does not.
+
+When `n>m`, the interval length is at least one once
+
+```text
+M >= 1 + ceil((m+1)(n+1)/(n-m)).
+```
+
+Therefore every fixed collection of arbitrary multiplier blocks is safe for
+all sufficiently large geometric scales. For example, the sparse unequal
+blocks
+
+```text
+(1,4,7),       M(2,5,7),       M^2(3,6,7)
+```
+
+have `n=9`, `m=7`, and are certified for every `M>=41`; at `M=41`, `t=1/10`
+is exact. For canonical prefixes `(B_5,MB_2)`, scale `M=6` misses the fixed
+grid interval but `M=7` succeeds at `t=1/6`; the uniform bound `M>=25` is
+sufficient rather than necessary.
+
+This is the rigorous version of grouping factor-related runners and treating
+the groups on a common timeframe. The remaining adversarial cases are small
+inter-group scales, or sparse groups with `n<=m`, where the first safe phase
+cell is too narrow and a different periodic point is required.
+
 The sharper H47 audit requires every elimination row to contain the immediately
 preceding new owner and at most two additional owners drawn from the intervening
 handoff segment or the two initial seeds. All 229 rows in the 55 certificates
