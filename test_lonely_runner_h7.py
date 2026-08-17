@@ -985,6 +985,24 @@ def test_first_band_component_router_requires_a_divisible_speed():
     assert lrc.first_band_component_routing_witness((1, 2, 3)) is None
 
 
+def test_unit_reset_blocker_moves_one_slot_at_a_time():
+    before = lrc.reset_blocker_mask(speed=5, modulus=6, phase=Fraction(1, 10))
+    after = lrc.reset_blocker_mask(speed=5, modulus=6, phase=Fraction(1, 4))
+
+    assert before == (0, 1)
+    assert after == (1, 2)
+    assert set(before) & set(after) == {1}
+
+
+def test_nonunit_reset_blocker_is_one_gcd_coset_or_empty():
+    assert lrc.reset_blocker_mask(
+        speed=3, modulus=6, phase=Fraction(1, 6)
+    ) == (0, 2, 4)
+    assert lrc.reset_blocker_mask(
+        speed=3, modulus=6, phase=Fraction(1, 2)
+    ) == ()
+
+
 def test_half_divisible_gcd_two_corollary_is_exactly_in_capacity_range():
     speeds = (1, 2, 3, 8, 16, 24, 32)
     modulus = len(speeds) + 1

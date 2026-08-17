@@ -588,6 +588,35 @@ def divisible_block_phase_sweep_capacity(speeds: tuple[int, ...]) -> int | None:
     )
 
 
+def reset_blocker_mask(
+    *, speed: int, modulus: int, phase: Fraction
+) -> tuple[int, ...]:
+    """Reset slots blocked by one runner at the exact LRC width.
+
+    For ``t_k=(k+x)/N``, a slot is blocked when ``||v*t_k||<1/N``.
+    Away from a phase event, writing ``vx=a+y`` with ``0<y<1`` shows that
+    the mask is exactly the union of the congruence fibers
+    ``vk=-a`` and ``vk=-a-1 (mod N)``.  The direct exact predicate below also
+    handles event phases without a separate endpoint convention.
+    """
+    if speed < 1:
+        raise ValueError("speed must be positive")
+    if modulus < 2:
+        raise ValueError("modulus must be at least two")
+    phase = Fraction(phase)
+    if not 0 <= phase <= 1:
+        raise ValueError("phase must lie in the unit interval")
+    threshold = Fraction(1, modulus)
+    return tuple(
+        reset
+        for reset in range(modulus)
+        if fractional_distance(
+            speed * (reset + phase) / modulus
+        )
+        < threshold
+    )
+
+
 def divisible_block_phase_sweep_witness(
     speeds: tuple[int, ...],
 ) -> Fraction | None:

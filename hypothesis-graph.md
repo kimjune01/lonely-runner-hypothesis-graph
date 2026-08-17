@@ -1710,7 +1710,7 @@ H0  selected nine-runner target is open
   (n,height)   targeted   rank-deficient   failures
   (3,50)          8790             8784          0
   (4,25)          7480             6749          0
-  (5,15)          1695               93          0
+  (5,20)          9079             1021          0
   ```
 
   The rank-zero negative control `(1,4,11)` routes at `t=9/28` even though it
@@ -1727,6 +1727,44 @@ H0  selected nine-runner target is open
 - Verdict: selected for testing; unproved.
 - Verification: `first_band_component_routing_witness`, exact fixtures, and
   `scan_component_routing.py`.
+- Artifact: `artifacts/first-spectral-band-connectivity.md`.
+
+### H78 — Exact sliding-packet normal form
+
+- Mode: proved local dynamics behind H77
+- Statement: put `N=n+1`, fix a nondivisible speed `v`, and test reset slots
+  `t_k=(k+x)/N` at the exact LRC width `1/N`. Away from an event, write
+
+  ```text
+  vx=a+y,  a integer,  0<y<1.
+  ```
+
+  The blocked mask is exactly
+
+  ```text
+  B_v(x)={k:vk=-a mod N} union {k:vk=-a-1 mod N}.
+  ```
+- Unit dynamics: if `gcd(v,N)=1`, the mask consists of two slots. When `x`
+  crosses the next event `m/v`, `a` increases by one, so the old and new masks
+  share exactly one slot: one packet is dropped and one acquired. The two slots
+  form an edge in the cyclic order with step `v^{-1} mod N`.
+- Nonunit dynamics: for `g=gcd(v,N)>1`, each solvable congruence contributes a
+  full `g`-point fiber. At most one of the two consecutive right sides is
+  divisible by `g`; hence the mask is one `g`-coset or empty. Exact event phases
+  are handled by the strict endpoint predicate.
+- Proof: multiply `||v(k+x)/N||<1/N` by `N`. Among the integer residues
+  `vk+a mod N`, only residue `0` lies within distance `1` on the right and only
+  residue `N-1` lies within distance `1` on the left. These are precisely the
+  displayed congruences. Standard linear-congruence fiber counts give the
+  gcd cases.
+- Consequence for H77: the proposed deficit-round-robin sweep is not an analogy
+  anymore. Unit blockers are literal moving two-slot packets and nonunits are
+  flashing subgroup packets. A persistent cover yields a finite sequence of
+  one-slot handoffs plus coset insertions; the remaining task is to extract a
+  bounded speed relation from an alternating cycle in that sequence.
+- Verdict: proved.
+- Verification: `reset_blocker_mask`, unit one-slot transitions, and nonunit
+  coset/empty fixtures.
 - Artifact: `artifacts/first-spectral-band-connectivity.md`.
 
 ## What the graph established
@@ -1809,6 +1847,7 @@ H0  selected nine-runner target is open
 76. Equality covers disprove a broad forced-overlap claim, and `(1,4,11)` shows that their partitions do not force bounded rank outside the first band. Inside the completed first-band scans, however, every tuple with an `(n+1)` multiple has full coefficient-two rank; this is the selected H75 reset invariant.
 77. H76 converts that full rank into height: cofactors and Hadamard give `max v_i<=ceil((4(n-1))^((n-1)/2))`. Thus H75 would make the exhaustive residual far smaller, though not eliminate it uniformly.
 78. Freezing the divisible quotient block at its exact inductive optimum is too rigid even for `(1,3,4)`. H77 replaces the frozen phase by an augmenting sweep inside its first-band-safe component; every rank-deficient divisible tuple in three completed height boxes routes successfully, leaving a precise alternating-event-cycle theorem to prove.
+79. H78 proves the exact packet dynamics needed by that sweep. A unit speed carries a moving two-slot edge that drops and acquires one reset class per event; a gcd-`g` nonunit carries one `g`-coset or nothing. The networking model is therefore an arithmetic identity, not merely an analogy.
 
 ## Frontier
 
@@ -1828,6 +1867,7 @@ H0  selected nine-runner target is open
 - Primary reset invariant: prove or kill H75. A full H74 phase cover at the first-band width must be analyzed as a moving partition of two-point and subgroup-coset blockers; the fixed partition alone is insufficient because `(1,4,11)` kills it outside the band.
 - Proved consequence: if H75 holds, use H76's cofactor height bound before any general finite-checking bound. Do not mistake the smaller finite domain for a proof across arbitrary `n`.
 - Primary component router: prove or kill H77. Sweep the quotient-safe component in exact endpoint order and interpret a persistent full reset cover as an alternating blocker cycle. The desired output is one new coefficient-two relation, not a generic circular-arc LP claim; arbitrary circular-arc matrices have integrality gaps.
+- Proved packet dynamics: use H78 to encode the H77 sweep as moving unit edges and flashing gcd cosets. First attack the all-unit case, where every event has exactly one retained, one dropped, and one acquired slot; postpone nonunit coset insertions until the alternating-cycle invariant is explicit.
 - Primary: replace H23 by a height-sensitive gap theorem, or formulate a lift-tree invariant that distinguishes fixed ordinary integers from spurious profinite survivor branches.
 - Primary: combine H27's upper-gap constraints with finite-checking/volume bounds; seek a complementary lemma controlling cuts with at least half the runners above them.
 - Primary: for the finite H28 normal vectors, formulate and test a concrete relative-subtorus descent; do not use the phrase “compatible sign pattern” without the transformation and preserved invariant.

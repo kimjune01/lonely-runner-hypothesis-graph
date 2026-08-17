@@ -1467,7 +1467,7 @@ Complete primitive scans give:
 (n,height)   targeted   rank-deficient   routing failures
 (3,50)          8790             8784                  0
 (4,25)          7480             6749                  0
-(5,15)          1695               93                  0
+(5,20)          9079             1021                  0
 ```
 
 Replay one box with
@@ -1481,6 +1481,23 @@ that cycle into an additional coefficient-two speed relation. A generic
 minimum-cost circular-arc cover statement is insufficient: its proposed
 cost-at-most-one subcover would merely restate that a strict open cover is
 impossible, and general circular-arc matrices also have integrality gaps.
+
+The local packet motion has an exact normal form. At the target width `1/N`,
+write `vx=a+y` with `0<y<1`. The slots blocked by speed `v` are
+
+```text
+{k:vk=-a mod N} union {k:vk=-a-1 mod N}.
+```
+
+For a unit speed these are two vertices adjacent in the cyclic order with step
+`v^{-1}`. Crossing an event increments `a`, retains one vertex, drops one, and
+acquires one. For `g=gcd(v,N)>1`, at most one congruence is soluble and its
+solutions form a `g`-point coset; the packet therefore flashes between one
+coset and the empty set. This proves H78 and reduces the all-unit H77 branch to
+a finite alternating-edge process. The hard step is now sharply isolated:
+show that a persistent full cover in this process either opens a reset slot or
+contains an alternating cycle whose synchronized labels yield a new
+coefficient-two speed relation.
 
 ## Complete three-speed base case
 
