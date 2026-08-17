@@ -115,6 +115,12 @@ This is an independent execution of pinned source, not an independently
 generated formal certificate. Its semantic scope, provenance, exact integer
 contradiction, and remaining trust assumptions are documented in the audit.
 
+[`2026-lrc12-literature-audit.md`](2026-lrc12-literature-audit.md) records the
+newer primary-source theorem boundary: a computer-assisted preprint proves
+`LRC(k)` through `k=12` relative speeds. Its small-lift/backward-projection and
+polynomial components are summarized, but its computations are not replayed
+here.
+
 ## General-case bounded-relation branch
 
 [`first-spectral-band-connectivity.md`](first-spectral-band-connectivity.md)

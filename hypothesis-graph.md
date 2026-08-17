@@ -1,7 +1,7 @@
 # Lonely Runner Conjecture — hypothesis graph
 
-Date: 2026-08-16  
-Status: nine-runner case independently replayed; general conjecture remains open; no novelty claimed
+Date: 2026-08-17
+Status: LRC known through twelve relative speeds; nine-runner case independently replayed; general conjecture remains open; no novelty claimed
 Method: [The Proof Manual](/the-proof-manual) recorded using the replay contract from [The Hypothesis Graph](/the-hypothesis-graph-semantic-memory-methodeutics)
 
 ## Target
@@ -14,7 +14,7 @@ For distinct nonzero integer speeds `v_1, ..., v_n`, prove that there is a real 
 
 where `||x||` is the distance from `x` to the nearest integer.
 
-The general conjecture remains open. Integer speeds suffice after normalization. The strongest recent work also reduces every fixed `n` to a finite check, but the bound remains too large for a naive search.
+The general conjecture remains open. Integer speeds suffice after normalization. Sungkawichai--Trakulthongchai report a computer-assisted proof through `n=12` relative speeds. The strongest general work also reduces every fixed `n` to a finite check, but the bound remains too large for a naive search.
 
 Sources:
 
@@ -228,6 +228,10 @@ H0  selected nine-runner target is open
                                                                                                                                                                                                                         +--H61  signed-error
                                                                                                                                                                                                                                  sumset compression
                                                                                                                                                                                                                                  PROVED
+                                                                                                                                                                                                                                 |
+                                                                                                                                                                                                                                 +--H62  2026 lift/project
+                                                                                                                                                                                                                                          theorem through k=12
+                                                                                                                                                                                                                                          RETRIEVED
 ```
 
 ## Nodes
@@ -1322,6 +1326,19 @@ H0  selected nine-runner target is open
 - Verification: `boundary_event_signed_error`, `compressed_boundary_event_error`, `common_boundary_event_sum_difference_set`, and exact multiscale regressions.
 - Artifact: `artifacts/first-spectral-band-connectivity.md`.
 
+### H62 — Small lifts, backward projection, and a polynomial step prove `k<=12`
+
+- Mode: current-literature retrieval and semantic audit
+- Source theorem: Sungkawichai--Trakulthongchai, arXiv:2604.23906, Theorem 1.3, states `LRC(k)` for every `k<=12` relative speeds, or at most thirteen physical runners.
+- Computational mechanism: repeatedly lift improper residue tuples by small multipliers, delete proper lifts, and project survivors back modulo `p`. Projection preserves every residue class that is improper at all finite levels while collapsing many transient lifted branches.
+- Fixed-case outcomes: `2`- and `3`-lifts empty the `k=11` survivors. For `k=10,12`, repeated `2`-lifts leave only equivalents of `(1,2,...,k)`.
+- Analytic mechanism: when `k+1` and `p>k(k+1)` are odd primes, a degree-`k` polynomial identity over `Z/(k+1)` and a discontinuity-gap transfer prove eventual properness of that canonical class.
+- Verification grade: primary-source semantic match. The accompanying repository and result logs were inspected, but the `k=10,11,12` computations were not independently rerun here; this is not certificate grade.
+- Consequence: the current bounded frontier is `k=13` relative speeds (fourteen physical runners). The general non-prime question is whether small lift/project operators collapse arbitrary survivor sets uniformly to finitely many structured tight classes.
+- Prime boundary: the paper's prime-field polynomial proposition is accepted as a proved input. Per the user's instruction, no unresolved prime-generalization branch is pursued.
+- Verdict: retrieved known theorem; not a new result of this inquiry.
+- Artifact: `artifacts/2026-lrc12-literature-audit.md`.
+
 ## What the graph established
 
 1. The elementary measure branch recovers `1/(2n)` and dies by an exact factor-two deficit.
@@ -1386,10 +1403,11 @@ H0  selected nine-runner target is open
 60. Odd Bonferroni moments of the blocker event sets form a certified hierarchy. Order three closes the sharp divisible fixtures and nearly every completed small scan, but higher-dimensional examples require higher order; a uniform order or high-load structure theorem would prove the general case.
 61. Repeated four-way congestion does not automatically yield a coefficient-two relation: an explicit five-speed cluster co-blocks three events while having bounded-relation rank zero. Event indices or signed errors are load-bearing.
 62. Signed errors restore that lost information. Equal-cardinality event sums compress to wider simultaneous bad phases; below scale `N/6`, Kneser gives linear sumset growth unless the boundary runner and every blocker share a nontrivial gcd.
+63. The April 2026 lifting/projection and polynomial sieve proves `LRC(k)` through `k=12` relative speeds. Its backward-projection operator is the closest published analogue of H61's phase compression; the next bounded case is `k=13`, not nine.
 
 ## Frontier
 
-- Primary: for the general conjecture, study whether the published lifting and polynomial sieves admit a uniform argument; do not present this as part of the completed nine-runner result.
+- Primary: for the general conjecture, seek a uniform small-lift/backward-projection collapse theorem suggested by H62. The target is eventual survivor structure for arbitrary `k`, not another fixed-prime computation; keep the proved prime-field canonical-class lemma as an input rather than opening a prime-generalization branch.
 - Primary: replace H23 by a height-sensitive gap theorem, or formulate a lift-tree invariant that distinguishes fixed ordinary integers from spurious profinite survivor branches.
 - Primary: combine H27's upper-gap constraints with finite-checking/volume bounds; seek a complementary lemma controlling cuts with at least half the runners above them.
 - Primary: for the finite H28 normal vectors, formulate and test a concrete relative-subtorus descent; do not use the phrase “compatible sign pattern” without the transformation and preserved invariant.

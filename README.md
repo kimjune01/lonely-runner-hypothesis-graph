@@ -1,6 +1,6 @@
 # Lonely Runner proof audit
 
-A hypothesis-graph inquiry into the modular set-cover obstruction used in recent work on the Lonely Runner Conjecture. The initially selected nine-runner case was already solved in two independent 2025 preprints. This repository now records an independent replay of Trakulthongchai's published nine-runner sieve; it makes no novelty claim.
+A hypothesis-graph inquiry into the modular set-cover obstruction used in recent work on the Lonely Runner Conjecture. The initially selected nine-runner case was already solved in two independent 2025 preprints. A 2026 preprint now reports the conjecture through twelve relative speeds (thirteen physical runners). This repository records an independent replay only of Trakulthongchai's published nine-runner sieve; it makes no novelty claim.
 
 ## Replay
 
@@ -8,7 +8,7 @@ A hypothesis-graph inquiry into the modular set-cover obstruction used in recent
 uv run --with pytest --with z3-solver --with python-sat --with ortools pytest -q
 ```
 
-The project contains exploratory code, finite certificates, killed hypotheses, and a full replay receipt for the known nine-runner theorem. It does not claim a proof of the general conjecture or a new bounded-runner case.
+The project contains exploratory code, finite certificates, killed hypotheses, and a full replay receipt for the known nine-runner theorem. The newer `k<=12` result is recorded at primary-source audit grade in [`artifacts/2026-lrc12-literature-audit.md`](artifacts/2026-lrc12-literature-audit.md), not independently replayed. The project does not claim a proof of the general conjecture or a new bounded-runner case.
 
 The `k=8,p=47` finite obstruction is closed across every gcd profile. Under
 Rosenfeld's finite reduction, this proves that `47` divides the product of the
