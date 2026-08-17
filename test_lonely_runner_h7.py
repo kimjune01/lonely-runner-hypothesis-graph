@@ -1030,6 +1030,81 @@ def test_isolated_unit_event_transports_one_excess_token():
     assert after == (0, 0, 0, 0, 1)
 
 
+def test_simultaneous_unit_event_arcs_share_the_retained_slot():
+    retained, arcs = lrc.simultaneous_unit_event_arcs(
+        speeds=(2, 4), modulus=5, event=Fraction(1, 2)
+    )
+
+    assert retained == 2
+    assert arcs == ((2, 0, 4), (4, 1, 3))
+
+
+def test_zero_excess_opposite_residues_form_a_two_cycle():
+    retained, arcs = lrc.simultaneous_unit_event_arcs(
+        speeds=(6, 9), modulus=5, event=Fraction(1, 3)
+    )
+
+    assert retained == 3
+    assert arcs == ((6, 4, 2), (9, 2, 4))
+    assert {outgoing for _, outgoing, _ in arcs} == {
+        incoming for _, _, incoming in arcs
+    }
+    assert lrc.simultaneous_unit_event_excess_lower_bound(arcs) == 1
+
+
+def test_asymmetric_simultaneous_batch_costs_more_excess():
+    _, arcs = lrc.simultaneous_unit_event_arcs(
+        speeds=(2, 4), modulus=5, event=Fraction(1, 2)
+    )
+
+    assert lrc.simultaneous_unit_event_excess_lower_bound(arcs) == 3
+
+
+def test_simultaneous_pair_cannot_cover_at_zero_excess():
+    for phase in (Fraction(1, 3) - Fraction(1, 1000), Fraction(1, 3) + Fraction(1, 1000)):
+        assert lrc.unit_reset_cover_excess_profile(
+            speeds=(3, 9), modulus=4, phase=phase
+        ) is None
+
+
+def test_singleton_quotient_event_grid_avoidance_detects_factors():
+    reserve = Fraction(2, 7)
+
+    assert lrc.singleton_quotient_event_grid_avoids_safe_region(
+        speed=3, quotient=12, reserve=reserve
+    )
+    assert not lrc.singleton_quotient_event_grid_avoids_safe_region(
+        speed=5, quotient=12, reserve=reserve
+    )
+
+
+def test_subthird_event_grid_avoidance_forces_divisibility():
+    reserve = Fraction(2, 7)
+    for quotient in range(1, 20):
+        for speed in range(1, 20):
+            if lrc.singleton_quotient_event_grid_avoids_safe_region(
+                speed=speed, quotient=quotient, reserve=reserve
+            ):
+                assert quotient % speed == 0
+
+
+def test_inductive_event_grid_avoidance_has_explicit_height_bound():
+    assert lrc.inductive_event_grid_avoidance_height_bound(
+        quotient_count=4,
+        max_quotient=10,
+        reserve=Fraction(2, 15),
+    ) == 74
+
+
+def test_event_grid_height_bound_requires_inductive_slack():
+    with pytest.raises(ValueError, match="below the inductive threshold"):
+        lrc.inductive_event_grid_avoidance_height_bound(
+            quotient_count=4,
+            max_quotient=10,
+            reserve=Fraction(1, 5),
+        )
+
+
 def test_half_divisible_gcd_two_corollary_is_exactly_in_capacity_range():
     speeds = (1, 2, 3, 8, 16, 24, 32)
     modulus = len(speeds) + 1

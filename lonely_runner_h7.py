@@ -648,6 +648,116 @@ def unit_reset_cover_excess_profile(
     return tuple(degree - 1 for degree in degrees)
 
 
+def simultaneous_unit_event_arcs(
+    *, speeds: tuple[int, ...], modulus: int, event: Fraction
+) -> tuple[int, tuple[tuple[int, int, int], ...]]:
+    """Token arcs for unit packets moving at one common rational event.
+
+    If ``v*x`` is integral, the packet retains ``b=-v*x*v^{-1}`` modulo
+    ``N``, drops ``b+v^{-1}``, and acquires ``b-v^{-1}``.  At a common event
+    the retained slot is independent of ``v``.  Each returned row is
+    ``(speed, outgoing, incoming)``.
+    """
+    if not speeds or any(speed <= 0 for speed in speeds):
+        raise ValueError("speeds must be a nonempty tuple of positive integers")
+    if len(set(speeds)) != len(speeds):
+        raise ValueError("speeds must be distinct")
+    if modulus < 2:
+        raise ValueError("modulus must be at least two")
+    event = Fraction(event)
+    if not 0 < event < 1:
+        raise ValueError("event must lie strictly inside the unit interval")
+    if any(gcd(speed, modulus) != 1 for speed in speeds):
+        raise ValueError("every speed must be a unit modulo the modulus")
+    if any((speed * event).denominator != 1 for speed in speeds):
+        raise ValueError("every speed must move at the supplied event")
+
+    arcs = []
+    retained_slots = set()
+    for speed in speeds:
+        inverse = pow(speed, -1, modulus)
+        event_index = int(speed * event)
+        retained = (-event_index * inverse) % modulus
+        retained_slots.add(retained)
+        arcs.append(
+            (
+                speed,
+                (retained + inverse) % modulus,
+                (retained - inverse) % modulus,
+            )
+        )
+    if len(retained_slots) != 1:
+        raise AssertionError("common unit events must retain one shared slot")
+    return retained_slots.pop(), tuple(arcs)
+
+
+def simultaneous_unit_event_excess_lower_bound(
+    arcs: tuple[tuple[int, int, int], ...],
+) -> int:
+    """Necessary excess-token mass for a common event batch to persist.
+
+    Every moving packet shares one retained slot, costing ``m-1`` excess.
+    At other slots, compare the outgoing and incoming packet multiplicities.
+    Minimal background coverage adds another
+    ``m-|support(outgoing) intersect support(incoming)|`` units before the
+    event.  Their sum is the returned lower bound.
+    """
+    if not arcs:
+        raise ValueError("arcs must be nonempty")
+    if len({speed for speed, _, _ in arcs}) != len(arcs):
+        raise ValueError("arc speeds must be distinct")
+    outgoing = {source for _, source, _ in arcs}
+    incoming = {target for _, _, target in arcs}
+    batch_size = len(arcs)
+    return 2 * batch_size - 1 - len(outgoing & incoming)
+
+
+def singleton_quotient_event_grid_avoids_safe_region(
+    *, speed: int, quotient: int, reserve: Fraction
+) -> bool:
+    """Whether every interior packet event is bad for one quotient speed.
+
+    The event phases of ``speed`` are ``m/speed``. Their images under the
+    quotient speed form the uniform grid of order
+    ``speed/gcd(speed, quotient)``.  For reserve below ``1/3``, avoidance is
+    therefore possible exactly when ``speed`` divides ``quotient``.
+    """
+    if speed < 1 or quotient < 1:
+        raise ValueError("speed and quotient must be positive")
+    reserve = Fraction(reserve)
+    if not 0 < reserve < Fraction(1, 2):
+        raise ValueError("reserve must lie strictly between zero and one half")
+    return all(
+        fractional_distance(Fraction(quotient * event, speed)) < reserve
+        for event in range(1, speed)
+    )
+
+
+def inductive_event_grid_avoidance_height_bound(
+    *, quotient_count: int, max_quotient: int, reserve: Fraction
+) -> int:
+    """Largest packet height that can evade inductive grid rounding.
+
+    Assuming LRC for ``d=quotient_count`` speeds, choose a quotient phase safe
+    at ``1/(d+1)``. Rounding it to the nearest point of a ``v``-event grid
+    loses at most ``max_quotient/(2v)``. Thus avoidance at ``reserve`` requires
+    ``v < U/(2*(1/(d+1)-reserve))``; this returns the largest possible integer
+    below that strict bound.
+    """
+    if quotient_count < 1:
+        raise ValueError("quotient_count must be positive")
+    if max_quotient < 1:
+        raise ValueError("max_quotient must be positive")
+    reserve = Fraction(reserve)
+    inductive_threshold = Fraction(1, quotient_count + 1)
+    if not 0 < reserve < inductive_threshold:
+        raise ValueError("reserve must lie below the inductive threshold")
+    strict_bound = Fraction(max_quotient, 2) / (
+        inductive_threshold - reserve
+    )
+    return (strict_bound.numerator - 1) // strict_bound.denominator
+
+
 def divisible_block_phase_sweep_witness(
     speeds: tuple[int, ...],
 ) -> Fraction | None:

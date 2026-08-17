@@ -1527,6 +1527,92 @@ five. Complete all-rank scans likewise had zero failures among `50,622`,
 `21,672`, and `105` tuples at `(n,H)=(3,120),(4,35),(5,20)`. These data select
 the timestamped simultaneous-cycle lemma; they do not prove it.
 
+The timestamped batch can in fact be classified exactly. If the common event
+is `x=a/q` and `w_i=v_i^{-1} mod N`, every moving unit packet retains the same
+slot
+
+```text
+b=-a*q^{-1} mod N
+```
+
+and transports a token from `b+w_i` to `b-w_i`. Thus a batch of size `m`
+forces degree at least `m` at the retained slot and consumes at least `m-1`
+excess tokens there. This is H80.
+
+Consequently an exact-capacity cover (`2r=N`) cannot cross any event. A batch
+of size at least two contradicts zero excess at the common retained slot; a
+single moving edge drops a distinct slot before acquiring another. Even an
+opposite-residue pair, whose token arcs form a two-cycle, fails because its two
+edges overlap at the retained slot. The tight all-unit obstruction is therefore
+static on each quotient-safe component. To finish that branch one no longer
+needs a moving-edge classification: one must show that the event grids
+`{m/v_i}` cannot all avoid every component containing a maximizing quotient
+phase, unless the speeds fall into one of the already solved factor-block or
+small-residue families.
+
+For one quotient speed, the remaining grid avoidance has an elementary exact
+answer. The packet-event phases `m/v`, viewed by quotient speed `u`, form the
+uniform grid of order
+
+```text
+L=v/gcd(u,v).
+```
+
+If `L>=2`, that grid has a point at distance at least `1/3` from the nearest
+integer. Since the first-band reserve `2/(2N-1)` is below `1/3` for `N>=4`,
+every event can miss the quotient-safe region only when `L=1`, or `v|u`. This
+is H81.
+
+It closes the exact-capacity singleton unit branch. A singleton divisible block
+has `r=N-2` remaining packets, so `2r=N` forces `N=4`. H80 forbids any event
+inside a persistently covered safe component; H81 then makes both packet speeds
+divide `u`. In the first maximizing component around `1/(2u)`, both packet
+phases have integer part zero, so both edges contain reset slot zero. Their
+overlap prevents two edges from covering four slots. Hence the component router
+always finds a free slot in this branch. The next non-prime extension is the
+same event-grid question for the intersection of several quotient-safe sets.
+
+Induction gives a quantitative answer for several quotient speeds. If there
+are `d` quotients of maximum height `U`, choose their LRC phase at
+`1/(d+1)` and round it to the nearest event `m/v`. The phase displacement is
+at most `1/(2v)`, so every quotient loses at most `U/(2v)`. Hence an event grid
+can avoid the reserve `beta<1/(d+1)` only if
+
+```text
+v < U / (2(1/(d+1)-beta)).
+```
+
+This is H82. At first-band reserve `beta=2/(2N-1)` the slack is positive for
+every proper quotient block. In the balanced tight case `d=N/2`, the bound is
+
+```text
+v < U (N+2)(2N-1) / (4(N-3)).
+```
+
+Thus H80 eliminates every sufficiently fast unit packet and H82 bounds all
+remaining packet heights relative to the quotient block. This is not yet a
+uniform contradiction—the scale `U` remains—but it removes arbitrary upper
+speed separation from the exact-capacity branch without using primes.
+
+For positive excess, H80 also yields a sharp local capacity inequality. Let a
+simultaneous batch have size `m`, outgoing support `O`, and incoming support
+`I`. Persistence requires
+
+```text
+E >= 2m-1-|O intersect I|.
+```
+
+The shared retained slot costs `m-1` tokens. At every other outgoing slot, a
+fixed background edge must cover whatever the batch will no longer cover after
+the event; summing the unavoidable pre-event redundancy contributes the
+remaining `m-|O intersect I|`. This is H83. An isolated event costs one token,
+a two-packet batch with disjoint supports costs three, and an opposite-paired
+two-cycle costs one. Thus a near-capacity adversarial sweep can contain only
+small batches with strong opposite-residue recycling. The remaining global
+problem is to show that its finite token stock cannot circulate through all
+quotient-safe components without either opening a slot or creating a usable
+integer relation.
+
 ## Complete three-speed base case
 
 The 2025 finite-checking theorem of Malikiosis--Santos--Schymura gives a much

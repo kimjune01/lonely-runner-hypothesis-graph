@@ -1821,6 +1821,170 @@ H0  selected nine-runner target is open
   isolated event transporting one token.
 - Artifact: `artifacts/first-spectral-band-connectivity.md`.
 
+### H80 — Simultaneous batches share a retained slot
+
+- Mode: proved timestamped strengthening of H79
+- Statement: let unit speeds `v_1,...,v_m` all move at the same reduced event
+  phase `x=a/q`. For each moving packet, let `w_i=v_i^{-1} mod N`. There is a
+  single retained reset slot
+
+  ```text
+  b=-a*q^{-1} mod N
+  ```
+
+  and the packet transports load along
+
+  ```text
+  b+w_i  -->  b-w_i.
+  ```
+- Proof: because `q|v_i`, write `v_i=q s_i`. At the event index
+  `v_i x=a s_i`, multiplication by `v_i^{-1}=q^{-1}s_i^{-1}` gives the same
+  retained slot `-a q^{-1}` for every `i`. H78 gives the outgoing and incoming
+  endpoints one inverse step to either side.
+- Excess consequence: immediately before and after the batch, the retained
+  slot has degree at least `m`. Any covered state therefore spends at least
+  `m-1` of H79's excess tokens at that one slot.
+- Tight-capacity theorem: if `2r=N`, no event batch can preserve a unit-packet
+  cover. For `m>=2`, the shared retained slot contradicts zero excess. For
+  `m=1`, the outgoing slot loses its unique covering edge and differs from the
+  incoming slot. Hence a persistent exact-capacity cover is constant on every
+  open phase interval it covers; if such an interval contains any packet event,
+  a reset slot opens.
+- Opposite-residue calibration: equality of the outgoing and incoming
+  multisets would pair `w` with `-w`, equivalently pair speeds `v` and `-v mod
+  N`. This recovers the opposite-residue relation from H55, but it does not save
+  a tight cover because the common retained slot already consumes excess.
+- New reduction: in the tight all-unit branch, an H77 obstruction must avoid
+  every nondivisible packet event throughout every quotient-maximizing safe
+  component. The moving-cover problem has become a grid-avoidance problem.
+- Verdict: proved.
+- Verification: `simultaneous_unit_event_arcs`, common-retained fixtures,
+  opposite-residue two-cycles, and the zero-excess noncover `(3,9) mod 4`.
+- Artifact: `artifacts/first-spectral-band-connectivity.md`.
+
+### H81 — Singleton-quotient grid avoidance forces a factor
+
+- Mode: proved non-prime grid lemma and tight-router subcase
+- Statement: let the divisible block consist of one quotient speed `u`, and
+  let `v` be a nondivisible packet speed. The images of its interior event grid
+  under the quotient phase are
+
+  ```text
+  {u*m/v mod 1 : 1<=m<v}.
+  ```
+
+  Put `L=v/gcd(u,v)`. These images contain the complete uniform `L`-grid. If
+  `0<beta<1/3` and every event avoids the quotient-safe set
+
+  ```text
+  {x:||ux||>=beta},
+  ```
+
+  then `L=1`, hence `v|u`.
+- Proof: multiplication by `u/gcd(u,v)` permutes the residues modulo `L`. If
+  `L>=2`, the `L`-grid contains a point of distance at least `1/3` from the
+  nearest integer: take `floor(L/2)/L`. This contradicts avoidance at reserve
+  below `1/3`.
+- Applicability: the first-band reserve `beta=2/(2N-1)` is below `1/3` for
+  every `N>=4`.
+- Tight singleton corollary: suppose all nondivisible blockers are units, their
+  capacity is exact (`2r=N`), and the quotient block has one speed. Then
+  `r=N-2` and `2r=N` force `N=4`. H80 says a persistent cover contains no
+  packet event in a quotient-safe component, so H81 forces both packet speeds
+  to divide `u`. In the first maximizing component around `x=1/(2u)`, both
+  have phase floor zero and both packet edges contain reset slot `0`. They
+  overlap and cannot cover four slots at exact capacity. Thus the H77 router
+  succeeds in this entire tight singleton branch.
+- Significance: “all events miss the safe component” is not an amorphous height
+  obstruction. For a singleton quotient it collapses to the user's factor
+  case, which can be attacked by fixed-phase synchronization rather than prime
+  lifting.
+- Verdict: proved.
+- Verification: `singleton_quotient_event_grid_avoids_safe_region`, factor and
+  nonfactor fixtures, and exhaustive sub-third implication checks.
+- Artifact: `artifacts/first-spectral-band-connectivity.md`.
+
+### H82 — Inductive rounding bounds every avoided event grid
+
+- Mode: proved conditional height reduction for the multi-quotient branch
+- Statement: let `D` be a block of `d` quotient speeds, let
+  `U=max(D)`, and choose a reserve `beta<1/(d+1)`. Assuming LRC for `d`
+  speeds, the event grid `{m/v}` of a packet speed `v` contains a phase safe
+  for every quotient speed at reserve `beta` whenever
+
+  ```text
+  v >= U / (2(1/(d+1)-beta)).
+  ```
+
+  Consequently complete avoidance forces the strict relative-height bound
+
+  ```text
+  v < U / (2(1/(d+1)-beta)).
+  ```
+- Proof: by induction choose `x` with `min_{u in D}||ux||>=1/(d+1)`.
+  Round `x` to the nearest `m/v`, moving by at most `1/(2v)`. Every quotient
+  phase loses at most `U/(2v)`. Under the displayed inequality the rounded
+  event remains safe at `beta`; because `beta>0`, it is automatically an
+  interior event.
+- First-band specialization: `beta=2/(2N-1)` and `d<=N-2`, so the inductive
+  slack is always positive. In the exact-capacity unit branch H80 turns any
+  such safe packet event into a free reset slot. Therefore an obstruction has
+  every nondivisible unit speed explicitly bounded relative to the largest
+  divisible quotient speed.
+- Tight balanced value: when `d=N/2`, the avoidance bound is
+
+  ```text
+  v < U (N+2)(2N-1) / (4(N-3)).
+  ```
+
+  This is asymptotic to `NU/2`; it is a relative-height reduction, not yet a
+  contradiction.
+- Relation to H81: the singleton uniform-grid argument is much sharper—it
+  upgrades height control to exact divisibility. H82 is the robust extension
+  that survives an arbitrary quotient tuple.
+- Verdict: proved under lower-dimensional LRC induction.
+- Verification: `inductive_event_grid_avoidance_height_bound`, including the
+  exact `(d,U,beta)=(4,10,2/15)` bound `74`.
+- Artifact: `artifacts/first-spectral-band-connectivity.md`.
+
+### H83 — Simultaneous batches have an exact excess lower bound
+
+- Mode: proved positive-excess extension of H80
+- Statement: at a common unit-packet event, let `m` be the batch size, `O` the
+  support of its outgoing slots, and `I` the support of its incoming slots. If
+  reset coverage persists across the event, H79's total excess satisfies
+
+  ```text
+  E >= 2m-1-|O intersect I|.
+  ```
+- Proof: the common retained slot from H80 has degree at least `m`, spending
+  `m-1` excess. Away from it, choose the smallest possible fixed background
+  degree that covers each slot both before and after the batch. An outgoing
+  multiplicity at a slot outside `I` needs a background cover after the event
+  and hence contributes its full multiplicity as pre-event excess. At a slot
+  in `O intersect I`, one outgoing copy can serve as baseline and every further
+  outgoing copy is excess. Summing gives
+
+  ```text
+  (m-1) + m - |O intersect I|.
+  ```
+- Consequences:
+
+  - an isolated event needs at least one excess token;
+  - a batch with disjoint outgoing and incoming supports needs `2m-1` tokens;
+  - the cheapest size-`m` batch costs at least `m-1`, attained only when its
+    outgoing support is completely recycled as incoming support, forcing the
+    opposite-residue pairing pattern;
+  - any batch whose displayed lower bound exceeds `E=2r-N` opens a reset slot.
+
+- Role in H77: H80 solved `E=0`; H83 prunes large or asymmetric batches for
+  every positive-excess stratum. Only small, heavily paired batches can persist,
+  so the adversarial schedule has bounded local complexity in terms of `E`.
+- Verdict: proved.
+- Verification: `simultaneous_unit_event_excess_lower_bound`; opposite-pair
+  cost `1` and asymmetric two-packet cost `3`.
+- Artifact: `artifacts/first-spectral-band-connectivity.md`.
+
 ## What the graph established
 
 1. The elementary measure branch recovers `1/(2n)` and dies by an exact factor-two deficit.
@@ -1903,6 +2067,10 @@ H0  selected nine-runner target is open
 78. Freezing the divisible quotient block at its exact inductive optimum is too rigid even for `(1,3,4)`. H77 replaces the frozen phase by an augmenting sweep inside its first-band-safe component; every rank-deficient divisible tuple in three completed height boxes routes successfully, leaving a precise alternating-event-cycle theorem to prove.
 79. H78 proves the exact packet dynamics needed by that sweep. A unit speed carries a moving two-slot edge that drops and acquires one reset class per event; a gcd-`g` nonunit carries one `g`-coset or nothing. The networking model is therefore an arithmetic identity, not merely an analogy.
 80. H79 finds the conserved load-balancing quantity: after reserving one packet per reset slot, a persistent unit cover has exactly `2r-N` movable excess tokens. Isolated events transport one token; zero-excess covers can change only through simultaneous directed cycles. Static cycles remember modular inverses but forget the event times needed for bounded integer relations.
+81. H80 restores the timestamp and improves that conclusion: every packet moving at one rational event retains the same reset slot. A batch of size `m` therefore consumes at least `m-1` excess tokens at that slot. At zero excess no isolated or simultaneous event can preserve coverage, reducing the tight branch to avoidance of every packet-event grid inside the quotient-safe components.
+82. H81 solves that grid avoidance for a singleton quotient: below reserve `1/3`, an entire event grid can miss the safe set only when the packet speed divides the quotient speed. Combined with H80, this proves the exact-capacity singleton unit-router branch and turns its residue into the already motivated factor structure.
+83. H82 extends grid avoidance to an arbitrary quotient block by induction and rounding. Any packet speed above an explicit multiple of the largest quotient speed has a safe event and therefore opens a tight cover; the remaining exact-capacity obstruction has bounded relative height.
+84. H83 extends the timestamped analysis to positive excess. A common batch of size `m` with outgoing/incoming support overlap `s` needs at least `2m-1-s` excess tokens. Hence only small, strongly opposite-paired batches can survive when the reset cover is near capacity.
 
 ## Frontier
 
@@ -1924,6 +2092,10 @@ H0  selected nine-runner target is open
 - Primary component router: prove or kill H77. Sweep the quotient-safe component in exact endpoint order and interpret a persistent full reset cover as an alternating blocker cycle. The desired output is one new coefficient-two relation, not a generic circular-arc LP claim; arbitrary circular-arc matrices have integrality gaps.
 - Proved packet dynamics: use H78 to encode the H77 sweep as moving unit edges and flashing gcd cosets. First attack the all-unit case, where every event has exactly one retained, one dropped, and one acquired slot; postpone nonunit coset insertions until the alternating-cycle invariant is explicit.
 - Proved token invariant: H79 reduces persistent all-unit coverage to a finite token-routing process of mass `2r-N`. In the tight case, classify simultaneous cycle batches using their common event denominator. Do not discard the timestamp: the unlabelled rotor cycle yields only a modular-inverse congruence, not a coefficient-two relation among speeds.
+- Proved timestamped batch lemma: H80 eliminates all event crossings at exact unit capacity. Attack the resulting grid-avoidance statement: if every event `m/v_i` misses every quotient-maximizing safe component, use the quotient event lattice to force a divisibility/factor-block structure, then apply H71--H73 rather than opening a prime branch.
+- Proved singleton grid lemma: H81 completes the exact-capacity singleton unit branch. Extend its uniform-grid argument to several quotient speeds by studying the intersection of their safe sets on the event grid; the desired output is either one safe event or a common factor block suitable for induction.
+- Proved multi-quotient height reduction: H82 bounds every event-grid-avoiding packet relative to the quotient height. Combine this with H27's multiplicative gap restriction and H76's cofactor bound; the remaining missing step is a scale-free descent, not control of arbitrarily fast packets.
+- Proved batch capacity: use H83 to stratify H77 by excess `E=2r-N`. For fixed small `E`, enumerate only batches of size at most `E+1` and retain their opposite-pair defects; seek a global token-potential decrease between successive batches rather than another union bound.
 - Primary: replace H23 by a height-sensitive gap theorem, or formulate a lift-tree invariant that distinguishes fixed ordinary integers from spurious profinite survivor branches.
 - Primary: combine H27's upper-gap constraints with finite-checking/volume bounds; seek a complementary lemma controlling cuts with at least half the runners above them.
 - Primary: for the finite H28 normal vectors, formulate and test a concrete relative-subtorus descent; do not use the phrase “compatible sign pattern” without the transformation and preserved invariant.
