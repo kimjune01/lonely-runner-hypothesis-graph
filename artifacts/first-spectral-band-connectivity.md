@@ -197,11 +197,92 @@ generic property of periodic windows: `(1,2,3,12)` stalls at width `25/104`,
 above that edge. This negative control makes the arithmetic cutoff essential.
 
 The resulting H63 is a dichotomy, not a claimed theorem transfer. Either a
-local runner dismounts, or the remaining entry/exit events must be shown to
-form an extremally matched core. The next exact target is to prove that a core
-with no H47 row is shifted-matching-like, or else exposes the composite
-reset/kernel structure from H51--H56. Temporal reachability itself says
-nothing directly about circle-window coverage.
+local runner dismounts, or the remaining entry/exit events require a new
+arithmetic argument. The phrase “extremally matched core” is not yet such an
+argument: until it is defined in endpoint labels, it adds nothing to H47.
+Temporal reachability itself says nothing directly about circle-window
+coverage.
+
+The exact residual diagnostic chooses the cyclic rotation with the fewest
+unresolved later first owners and calls that set `C`. Every successful local
+row has a distinct latest first owner and contains no later owner, so the rows
+are triangular and independent. Consequently
+
+```text
+rank R_2(v) >= n - 2 - |C|.
+```
+
+This gives the analogy an operational output. Empty `C` is exactly H47; a
+uniform bound `|C|<=c` reduces a hypothetical counterexample to ambient
+dimension at most `c+2` even if full peeling fails.
+
+Lower-runner induction also removes one false source of residual cores. For a
+full `n`-speed cover at any width `delta<1/n`, delete runner `i` and take the
+lower-case witness where every remaining runner has distance at least `1/n`.
+The full cover forces `i` to be bad there, and the slack
+
+```text
+1/n - delta
+```
+
+gives an open singleton window owned by `i`. At the first-band edge this is
+`1/[n(2n+1)]`. Thus every runner occurs in the owner word of a hypothetical
+counterexample; only a genuine row failure can enter `C`.
+
+The completed 55-tuple corpus still has `C=empty`. A fresh exact extension
+found no core among the five primitive three-speed survivors through height
+`100` or the six four-speed survivors through height `50`. Outside the first
+band the core can be real: at width `25/104`, `(1,2,3,12)` has every owner but
+the best rotation `(3,12,1,2)` leaves speed `1` unresolved. Its core has size
+one, so a blanket dismountability theorem without the band cutoff is false.
+
+### Rerooting the residual core
+
+The temporal-spanner analogy suggests changing the pivot before declaring a
+core rigid. This repairs the first obstruction. For `(1,2,3,12)`, promote the
+residual speed `1` and its adjacent owner `12` to seeds; the remaining speeds
+append by
+
+```text
+2*1 - 2 = 0,        1 + 2 - 3 = 0.
+```
+
+The same core-pivot rule repairs four exact subcritical core examples through
+five speeds and the structured trials through seven speeds. It is nevertheless
+false in general. At width `97/784`,
+
+```text
+(1,4,5,6,7,11,13,48),       ML=6/49,
+```
+
+leaves speed `1` unresolved and has no adjacent-core pivot certificate. A
+different handoff pair still supplies a full elimination order, and the full
+coefficient-two relation rank is `7`.
+
+The next dilation separates handoff selection from the arithmetic invariant
+itself:
+
+```text
+(1,4,5,6,7,11,13,96),       ML=12/97.
+```
+
+It leaves a one-owner core, has neither an adjacent-core repair nor any
+handoff-selected two-seed appendability certificate, yet its coefficient-two
+rank is exactly `6=n-2`.
+
+More generally, exact checks for `2<=r<=15` on
+
+```text
+(1,4,5,6,7,11,13,8r)
+```
+
+give `ML=r/(8r+1)`. The member `r=2` lies exactly at the first-band edge
+`2/17` and passes the whole handoff hierarchy. Local cores and pivot failures
+appear only as the values rise toward the lower-dimensional accumulation point
+`1/8`; the full rank target survives every checked member. This is a sharp
+warning: scheduling geometry can select useful relations, but the theorem must
+control the span of all circuits rather than certify one particular greedy or
+rerooted order.
 
 The sharper H47 audit requires every elimination row to contain the immediately
 preceding new owner and at most two additional owners drawn from the intervening

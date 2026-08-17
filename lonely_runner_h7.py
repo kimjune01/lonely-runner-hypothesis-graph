@@ -481,7 +481,28 @@ def inductive_private_window_margin(runner_count: int) -> Fraction:
     """Slack at a private bad window supplied by the lower LRC case."""
     if runner_count < 2:
         raise ValueError("runner_count must be at least two")
-    return Fraction(1, runner_count) - Fraction(1, runner_count + 1)
+    return inductive_private_window_margin_at_width(
+        runner_count, delta=Fraction(1, runner_count + 1)
+    )
+
+
+def inductive_private_window_margin_at_width(
+    runner_count: int, *, delta: Fraction
+) -> Fraction:
+    """Inductive singleton slack at any width below the lower LRC threshold.
+
+    If the LRC holds for ``runner_count - 1`` speeds, deleting runner ``i``
+    gives a time at which every remaining runner has distance at least
+    ``1 / runner_count``.  A full cover at a smaller width ``delta`` then
+    forces an open private window for ``i`` with the returned uniform slack.
+    """
+    if runner_count < 2:
+        raise ValueError("runner_count must be at least two")
+    delta = Fraction(delta)
+    threshold = Fraction(1, runner_count)
+    if not 0 < delta < threshold:
+        raise ValueError("delta must lie strictly below the lower LRC threshold")
+    return threshold - delta
 
 
 def largest_divisible_reset_blocked_indices(
@@ -1510,6 +1531,139 @@ def local_handoff_elimination_certificate(
             steps.append((target, relation))
         else:
             return tuple(order), tuple(steps)
+    return None
+
+
+def local_handoff_residual_core(
+    speeds: tuple[int, ...],
+    *,
+    delta: Fraction,
+    max_coefficient: int,
+    max_support: int,
+) -> tuple[
+    tuple[int, ...],
+    tuple[tuple[int, tuple[int, ...]], ...],
+    tuple[int, ...],
+]:
+    """Minimize the unresolved first-owner core over cyclic sweep rotations.
+
+    A non-seed owner is resolved exactly when the segment-local H47 row exists.
+    Unlike :func:`local_handoff_elimination_certificate`, this diagnostic keeps
+    the best residual set when no rotation eliminates every owner.
+    """
+    if max_support < 2:
+        raise ValueError("max_support must be at least two")
+    owners = singleton_handoff_owners(speeds, delta=delta)
+    if len(set(owners)) < len(speeds):
+        missing = tuple(index for index in range(len(speeds)) if index not in owners)
+        return tuple(dict.fromkeys(owners)), (), missing
+    relations = tuple(
+        sorted(
+            bounded_relations(speeds, max_coefficient=max_coefficient),
+            key=lambda row: (
+                sum(coefficient != 0 for coefficient in row),
+                sum(abs(coefficient) for coefficient in row),
+                row,
+            ),
+        )
+    )
+    candidates = []
+    for rotation in range(len(owners)):
+        rotated = owners[rotation:] + owners[:rotation]
+        order: list[int] = []
+        first_positions: list[int] = []
+        for position, owner in enumerate(rotated):
+            if owner not in order:
+                order.append(owner)
+                first_positions.append(position)
+        if len(order) != len(speeds):
+            continue
+        seeds = set(order[:2])
+        steps: list[tuple[int, tuple[int, ...]]] = []
+        core: list[int] = []
+        for position, target in enumerate(order[2:], 2):
+            predecessor = order[position - 1]
+            segment = set(
+                rotated[
+                    first_positions[position - 1] : first_positions[position] + 1
+                ]
+            )
+            allowed = seeds | segment
+            relation = next(
+                (
+                    row
+                    for row in relations
+                    if row[target]
+                    and row[predecessor]
+                    and sum(coefficient != 0 for coefficient in row)
+                    <= max_support
+                    and all(
+                        not coefficient or index in allowed
+                        for index, coefficient in enumerate(row)
+                    )
+                ),
+                None,
+            )
+            if relation is None:
+                core.append(target)
+            else:
+                steps.append((target, relation))
+        candidates.append((tuple(core), tuple(order), tuple(steps)))
+    if not candidates:
+        return (), (), tuple(range(len(speeds)))
+    core, order, steps = min(
+        candidates,
+        key=lambda candidate: (
+            len(candidate[0]),
+            candidate[0],
+            candidate[1],
+        ),
+    )
+    return order, steps, core
+
+
+def handoff_core_pivot_certificate(
+    speeds: tuple[int, ...],
+    *,
+    delta: Fraction,
+    max_coefficient: int,
+    max_support: int,
+) -> tuple[tuple[int, int], tuple[tuple[int, tuple[int, ...]], ...]] | None:
+    """Reroot bounded appendability at a residual owner and its neighbor.
+
+    Temporal dismountability permits changing the pivot before declaring a
+    residual instance rigid.  Here the analogous exact operation promotes an
+    unresolved H47 owner and an adjacent singleton owner to the two seeds,
+    then asks for the existing coefficient-bounded appendability certificate.
+    """
+    _, _, core = local_handoff_residual_core(
+        speeds,
+        delta=delta,
+        max_coefficient=max_coefficient,
+        max_support=max_support,
+    )
+    if not core:
+        return None
+    owners = singleton_handoff_owners(speeds, delta=delta)
+    if len(owners) < 2:
+        return None
+    tried: set[tuple[int, int]] = set()
+    for target in core:
+        for position, owner in enumerate(owners):
+            if owner != target:
+                continue
+            for neighbor in (owners[position - 1], owners[(position + 1) % len(owners)]):
+                seeds = (target, neighbor)
+                if target == neighbor or seeds in tried:
+                    continue
+                tried.add(seeds)
+                steps = bounded_appendability_from_seeds(
+                    speeds,
+                    seeds=seeds,
+                    max_coefficient=max_coefficient,
+                )
+                if steps is not None:
+                    return seeds, steps
     return None
 
 

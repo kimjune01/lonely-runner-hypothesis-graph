@@ -235,7 +235,17 @@ H0  selected nine-runner target is open
                                                                                                                                                                                                                                           |
                                                                                                                                                                                                                                           +--H63  temporal-spanner
                                                                                                                                                                                                                                                    dismount-or-core
-                                                                                                                                                                                                                                                   SELECTED FOR TESTING
+                                                                                                                                                                                                                                                   REFINED
+                                                                                                                                                                                                                                                   |
+                                                                                                                                                                                                                                                   +--H64  residual-core rank
+                                                                                                                                                                                                                                                            accounting and
+                                                                                                                                                                                                                                                            singleton persistence
+                                                                                                                                                                                                                                                            PROVED
+                                                                                                                                                                                                                                                            |
+                                                                                                                                                                                                                                                            +--H65  promote a core
+                                                                                                                                                                                                                                                                     owner to a handoff
+                                                                                                                                                                                                                                                                     seed pair
+                                                                                                                                                                                                                                                                     KILLED
 ```
 
 ## Nodes
@@ -1349,10 +1359,35 @@ H0  selected nine-runner target is open
 - Translation: regard each runner's periodic bad intervals as a temporal stream and the singleton-owner word as the ordered handoff trace of a work-conserving cyclic server. A runner is locally dismountable when a coefficient-two relation of support at most four absorbs its first handoff using its predecessor, the two initial seeds, and owners in the intervening segment.
 - Hypothesis: recursive local dismounting either removes all but two runners, proving the rank target H39, or stalls on a core whose entry and exit extrema form two matchings and whose handoff labels have shifted-matching structure. The latter should feed the reset/factor branches H51--H56 rather than require arbitrary further casework.
 - Source analogy: Baligacs's 2026 temporal-clique proof recursively dismounts locally reducible vertices; a nondismountable instance reduces to an extremally matched bi-clique, where short cut-crossing paths versus extended stars cover a constant fraction before recursion.
-- Exact trial: all 55 completed first-band survivors through nine speeds are fully dismounted by the existing H47 certificates: 229 local rows, coefficient bound two, support at most four. The same certificates pass at the exact first-band edge. The wider tuple `(1,2,3,12)` stalls above that edge, so the band restriction is load-bearing.
+- Exact trial: all 55 completed first-band survivors through nine speeds are fully dismounted by the existing H47 certificates: 229 local rows, coefficient bound two, support at most four. The same certificates pass at the exact first-band edge. The wider tuple `(1,2,3,12)` at width `25/104` has every singleton owner but leaves speed `1` unresolved in the best rotation `(3,12,1,2)`, so the band restriction is load-bearing.
 - Kill condition: a strict primitive first-band survivor whose local peeling stalls and whose residual event core has neither the two-matching extremal structure nor a reset/factor reduction.
 - Caution: temporal reachability is not a theorem about circle-window coverage. Only the proof architecture transfers; every dismount or core claim still needs an exact arithmetic proof.
-- Verdict: selected; reducible branch strongly tested, rigid-core classification open.
+- Verdict: refined. The reducible branch is now an exact diagnostic, but “extremally matched” has not yet been defined arithmetically and therefore supplies no theorem beyond H47. Retain the dismount-or-core decomposition; withdraw any implication that temporal-spanner structure automatically classifies the core.
+- Artifact: `artifacts/first-spectral-band-connectivity.md`.
+
+### H64 — The residual core exactly measures the missing relation rank
+
+- Mode: proved diagnostic invariant under lower-runner induction
+- Definition: for each cyclic rotation of the singleton-owner word, retain every H47 segment-local row that exists and record the unresolved later first owners. Choose a rotation minimizing that residual core `C`.
+- Rank theorem: the retained rows are triangular in first-occurrence order. Each has a distinct latest owner with nonzero coefficient and no later owner in its support. Hence they are independent and `rank R_2(v) >= n-2-|C|`.
+- Singleton theorem: assuming LRC for `n-1` speeds, a full `n`-speed cover at any width `delta<1/n` gives every runner an open singleton window, with uniform margin `1/n-delta`. In particular, at the first-band edge `2/(2n+1)` the margin is `1/[n(2n+1)]`; a hypothetical counterexample cannot create a fake core merely by omitting an owner.
+- Exact trials: the five primitive three-speed first-band survivors through height `100` and the six four-speed survivors through height `50` have empty core at the band edge. The full earlier 55-tuple corpus also has empty core. At the wider width `25/104`, `(1,2,3,12)` has `|C|=1`, confirming that core size becomes nontrivial outside the first band.
+- Consequence: H47 is now equivalent to the operational statement `C=empty`; a bound `|C|<=c` would still reduce any counterexample to ambient dimension at most `c+2`.
+- Verdict: proved; uniform core emptiness remains H47.
+- Verification: `local_handoff_residual_core`, `inductive_private_window_margin_at_width`, and exact regressions.
+- Artifact: `artifacts/first-spectral-band-connectivity.md`.
+
+### H65 — Rerooting at a residual owner always repairs local peeling
+
+- Mode: temporal-spanner pivot analogue, tested exactly
+- Hypothesis: if H47 leaves a residual owner, promote that owner and one adjacent singleton owner to the two seeds; coefficient-two appendability then eliminates every remaining speed.
+- Positive trials: the stalled four-speed tuple `(1,2,3,12)` is repaired by seeds `(1,12)`, followed by `2*1=2` and `1+2=3`. Four local-core examples in exact subcritical scans through five speeds all repair this way; structured families through seven speeds also pass.
+- Kill: at width `97/784`, the tuple `(1,4,5,6,7,11,13,48)` has maximum loneliness `6/49`, residual core `{1}`, and no adjacent-core pivot certificate. A different handoff pair still gives full appendability and the coefficient-two relation rank is `7`.
+- Stronger separation: `(1,4,5,6,7,11,13,96)` has maximum loneliness `12/97`, residual core `{7}`, no core pivot, and no handoff-selected two-seed appendability at all, while its coefficient-two rank remains exactly `6=n-2`.
+- Sharp family audit: for `(1,4,5,6,7,11,13,8r)`, exact checks for `2<=r<=15` give maximum loneliness `r/(8r+1)`. At `r=2` this is the first-band edge `2/17`; the handoff hierarchy succeeds. Failures begin only above the edge, while the rank target survives throughout.
+- Lesson: rerooting is a useful repair heuristic but not a uniform theorem. Outside the first band, the scheduling-selected order can lose relations that remain present in the full circuit lattice. The invariant to prove is rank, not success of one owner-selection algorithm.
+- Verdict: killed in its broad form. Its strict first-band restriction adds nothing beyond H47 because every tested first-band core is empty.
+- Verification: `handoff_core_pivot_certificate` and the `r=2,6,12` hierarchy regressions.
 - Artifact: `artifacts/first-spectral-band-connectivity.md`.
 
 ## What the graph established
@@ -1421,11 +1456,15 @@ H0  selected nine-runner target is open
 62. Signed errors restore that lost information. Equal-cardinality event sums compress to wider simultaneous bad phases; below scale `N/6`, Kneser gives linear sumset growth unless the boundary runner and every blocker share a nontrivial gcd.
 63. The April 2026 lifting/projection and polynomial sieve proves `LRC(k)` through `k=12` relative speeds. Its backward-projection operator is the closest published analogue of H61's phase compression; the next bounded case is `k=13`, not nine.
 64. Temporal-spanner dismountability suggests a precise recursion for the handoff branch: peel a locally certified runner, or classify the nondismountable residue as an extremally matched, shifted core. All 55 completed first-band survivors peel completely; a wider explicit tuple stalls, confirming that the first-band cutoff cannot be dropped.
+65. Residual-core accounting makes that recursion exact without importing temporal reachability. If `C` owners remain unresolved, the local rows already have independent rank `n-2-|C|`; induction guarantees that every runner appears throughout the subcritical first-band sweep. Thus only genuine arithmetic row failures, not missing owners, can populate a hypothetical core.
+66. Promoting a residual owner to a new handoff pivot repairs small stalls but fails at eight speeds. The family `(1,4,5,6,7,11,13,8r)` separates three levels above the sharp first-band edge: local peeling, handoff-selected appendability, and full coefficient-two rank. The first two eventually fail; the rank target survives.
 
 ## Frontier
 
 - Primary: for the general conjecture, seek a uniform small-lift/backward-projection collapse theorem suggested by H62. The target is eventual survivor structure for arbitrary `k`, not another fixed-prime computation; keep the proved prime-field canonical-class lemma as an input rather than opening a prime-generalization branch.
 - Primary: prove the H63 nondismountable-core classification. First show that failure of every H47 local row forces the entry and exit extrema to be matchings; then test whether the induced cyclic label matrix is shifted-matching or falls into the composite reset/kernel branch. Do not import temporal reachability as a black box.
+- Primary: use H64 rather than the informal temporal vocabulary. Bound the residual core `C` directly from the band-edge endpoint labels `q m+/-2`; empty `C` proves H39, while `|C|=1` reduces the remaining orbit to a three-dimensional ambient pattern. Any claimed matching structure must be stated as an exact condition on these labels.
+- Primary: H65 shows that more elaborate rerooting rules are not the invariant. For the strict first band, compare the span of all coefficient-two circuits with the triangular handoff rows and prove that any residual core contributes an independent global circuit, regardless of whether a handoff order discovers it.
 - Primary: replace H23 by a height-sensitive gap theorem, or formulate a lift-tree invariant that distinguishes fixed ordinary integers from spurious profinite survivor branches.
 - Primary: combine H27's upper-gap constraints with finite-checking/volume bounds; seek a complementary lemma controlling cuts with at least half the runners above them.
 - Primary: for the finite H28 normal vectors, formulate and test a concrete relative-subtorus descent; do not use the phrase “compatible sign pattern” without the transformation and preserved invariant.

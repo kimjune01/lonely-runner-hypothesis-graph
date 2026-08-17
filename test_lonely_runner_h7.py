@@ -1236,6 +1236,16 @@ def test_inductive_private_window_has_uniform_lrc_slack():
     assert lrc.inductive_private_window_margin(8) == Fraction(1, 72)
 
 
+def test_inductive_private_window_extends_to_every_subcritical_width():
+    assert lrc.inductive_private_window_margin_at_width(
+        4, delta=Fraction(2, 9)
+    ) == Fraction(1, 36)
+    with pytest.raises(ValueError):
+        lrc.inductive_private_window_margin_at_width(
+            4, delta=Fraction(1, 4)
+        )
+
+
 def test_handoff_cycle_recovers_after_reset_pair_fails():
     speeds = (2, 3, 5, 6, 8, 11)
     delta = Fraction(37, 228)
@@ -1295,6 +1305,103 @@ def test_local_handoff_elimination_needs_and_uses_four_term_relation():
         )
         is None
     )
+
+
+def test_local_handoff_core_is_empty_when_elimination_succeeds():
+    speeds = (1, 3, 4, 5, 7, 11, 18)
+    order, steps, core = lrc.local_handoff_residual_core(
+        speeds,
+        delta=Fraction(1, 8),
+        max_coefficient=2,
+        max_support=4,
+    )
+
+    assert len(order) == len(speeds)
+    assert len(steps) == len(speeds) - 2
+    assert core == ()
+
+
+def test_local_handoff_core_exposes_the_wider_band_stall():
+    speeds = (1, 2, 3, 12)
+    order, steps, core = lrc.local_handoff_residual_core(
+        speeds,
+        delta=Fraction(25, 104),
+        max_coefficient=2,
+        max_support=4,
+    )
+
+    assert order == (2, 3, 0, 1)
+    assert core == (0,)
+    assert len(steps) + len(core) == len(speeds) - 2
+    assert lrc.bounded_relation_rank(
+        speeds, max_coefficient=2
+    ) >= len(steps)
+
+
+def test_a_residual_owner_can_pivot_and_repair_the_wider_band_stall():
+    speeds = (1, 2, 3, 12)
+    certificate = lrc.handoff_core_pivot_certificate(
+        speeds,
+        delta=Fraction(25, 104),
+        max_coefficient=2,
+        max_support=4,
+    )
+
+    assert certificate is not None
+    seeds, steps = certificate
+    assert seeds == (0, 3)
+    assert [target for target, _ in steps] == [1, 2]
+
+
+def test_core_pivot_is_reserved_for_a_genuine_local_stall():
+    assert lrc.handoff_core_pivot_certificate(
+        (1, 3, 4, 5, 7, 11, 18),
+        delta=Fraction(1, 8),
+        max_coefficient=2,
+        max_support=4,
+    ) is None
+
+
+@pytest.mark.parametrize(
+    ("multiple", "expected_core", "core_pivot", "handoff_pivot", "rank"),
+    [
+        (2, (), False, True, 7),
+        (6, (0,), False, True, 7),
+        (12, (4,), False, False, 6),
+    ],
+)
+def test_handoff_pivot_hierarchy_is_sharp_outside_the_first_band(
+    multiple, expected_core, core_pivot, handoff_pivot, rank
+):
+    speeds = (1, 4, 5, 6, 7, 11, 13, 8 * multiple)
+    loneliness = lrc.maximum_loneliness(speeds)
+    delta = (loneliness + Fraction(1, 8)) / 2
+
+    assert loneliness == Fraction(multiple, 8 * multiple + 1)
+    assert lrc.local_handoff_residual_core(
+        speeds,
+        delta=delta,
+        max_coefficient=2,
+        max_support=4,
+    )[2] == expected_core
+    assert (
+        lrc.handoff_core_pivot_certificate(
+            speeds,
+            delta=delta,
+            max_coefficient=2,
+            max_support=4,
+        )
+        is not None
+    ) is core_pivot
+    assert (
+        lrc.handoff_appendability_certificate(
+            speeds, delta=delta, max_coefficient=2
+        )
+        is not None
+    ) is handoff_pivot
+    assert lrc.bounded_relation_rank(
+        speeds, max_coefficient=2
+    ) == rank
 
 
 def test_local_handoff_elimination_reaches_nine_speed_survivor():
