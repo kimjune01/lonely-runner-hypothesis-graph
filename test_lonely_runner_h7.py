@@ -1106,6 +1106,30 @@ def test_third_order_boundary_sieve_handles_pair_capacity_survivor():
     )
 
 
+def test_repeated_four_blocker_cluster_need_not_have_a_bounded_relation():
+    speeds = (113, 118, 178, 257, 281, 282)
+    boundary_speed = 281
+    blockers = (113, 118, 178, 282)
+    modulus = len(speeds) + 1
+    blocked_sets = tuple(
+        lrc.boundary_event_blocked_centers(
+            blocker=blocker,
+            boundary_speed=boundary_speed,
+            modulus=modulus,
+        )
+        for blocker in blockers
+    )
+
+    assert blocked_sets[0].intersection(*blocked_sets[1:]) == {221, 224, 276}
+    assert (
+        lrc.bounded_relation_rank(
+            tuple(sorted(blockers + (boundary_speed,))),
+            max_coefficient=2,
+        )
+        == 0
+    )
+
+
 def test_handoff_seeds_append_the_eight_speed_separator():
     speeds = (1, 4, 5, 6, 7, 11, 13, 16)
     seeds = lrc.handoff_seed_pair(speeds, delta=Fraction(1, 9))

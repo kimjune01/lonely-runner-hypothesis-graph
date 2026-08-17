@@ -630,6 +630,22 @@ three but fall to higher odd truncations. Thus the general target becomes a
 uniform bound on the Bonferroni order or on the high-load event patterns,
 rather than a search for an unstructured lucky time.
 
+The most direct attempt to feed those patterns into H39 is false. Repeated
+four-way congestion does not itself force a coefficient-two relation. In the
+six-speed tuple
+
+```text
+(113,118,178,257,281,282),
+```
+
+the four blockers `(113,118,178,282)` simultaneously block boundary events
+`221,224,276` of runner `281`. Nevertheless the augmented five-speed set
+`(113,118,178,281,282)` has coefficient-two relation rank zero. The same
+failure appears across random dimensions. Hence a high moment cannot be
+replaced by the support of one repeated cluster; any algebraic extraction must
+retain the actual event indices, signed errors, or interactions among several
+clusters.
+
 The scheduling analogy is pinwheel/windows scheduling, where recurring tasks
 must receive service in every sliding window. Here the direction is dual: the
 periodic bad-window streams are fixed and one seeks a zero-load instant. The

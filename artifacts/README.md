@@ -172,3 +172,5 @@ a strong necessary incidence condition for any counterexample.
 H59 organizes all blocker overlaps into odd Bonferroni certificates. The
 third-order certificate closes sharp fixtures and almost every small scan;
 higher-dimensional survivors define the next uniform-moment problem.
+H60 kills the naive conversion of a repeated four-blocker cluster into a
+coefficient-two relation; exact event phases and signed errors must survive.

@@ -220,6 +220,10 @@ H0  selected nine-runner target is open
                                                                                                                                                                                                       +--H59  boundary-event
                                                                                                                                                                                                                moment hierarchy
                                                                                                                                                                                                                PROVED
+                                                                                                                                                                                                               |
+                                                                                                                                                                                                               +--H60  repeated cluster
+                                                                                                                                                                                                                        bounded relation
+                                                                                                                                                                                                                        KILLED
 ```
 
 ## Nodes
@@ -1291,6 +1295,16 @@ H0  selected nine-runner target is open
 - Verification: `boundary_event_blocked_centers`, `boundary_bonferroni_witness_runner`, sharp and high-dimensional survivor regressions.
 - Artifact: `artifacts/first-spectral-band-connectivity.md`.
 
+### H60 — A repeated four-blocker cluster forces a bounded relation
+
+- Mode: attempted bridge from high event load to H39
+- Hypothesis: if four runners jointly block at least three boundary events of another runner, those five speeds have a nonzero coefficient-two relation.
+- Kill: blockers `(113,118,178,282)` jointly hit events `{221,224,276}` of boundary runner `281`, but `(113,118,178,281,282)` has coefficient-two relation rank zero.
+- Lesson: repeated congestion support alone discards the signed error and event-phase data needed for algebraic structure. A valid bridge must compare several clusters or retain their exact indices.
+- Verdict: killed.
+- Verification: exact `boundary_event_blocked_centers` intersection and `bounded_relation_rank` regression.
+- Artifact: `artifacts/first-spectral-band-connectivity.md`.
+
 ## What the graph established
 
 1. The elementary measure branch recovers `1/(2n)` and dies by an exact factor-two deficit.
@@ -1353,6 +1367,7 @@ H0  selected nine-runner target is open
 58. The complete networking-style schedule consists of every runner's target-boundary events, not merely those of the reset runner. Any feasible component has such an event on its boundary, yielding an exact fixed-tuple algorithm of size `2 sum v_i`.
 59. Pairwise blocking of those events has an exact gcd-residue count. If the capacities aimed at either side of runner `v` sum below `v`, an explicit boundary witness exists; this sieve certifies most small three-speed tuples but leaves the sharp adversarial fixtures.
 60. Odd Bonferroni moments of the blocker event sets form a certified hierarchy. Order three closes the sharp divisible fixtures and nearly every completed small scan, but higher-dimensional examples require higher order; a uniform order or high-load structure theorem would prove the general case.
+61. Repeated four-way congestion does not automatically yield a coefficient-two relation: an explicit five-speed cluster co-blocks three events while having bounded-relation rank zero. Event indices or signed errors are load-bearing.
 
 ## Frontier
 
@@ -1375,6 +1390,7 @@ H0  selected nine-runner target is open
 - Primary: combine H56's unit-pair rank with relations forced by the maximal nonunit kernel classes. The target is to cover the remaining `n-2-[P-d]` rank without assuming that relation contraction preserves the reset obstruction.
 - Primary: strengthen H58 from summed pair capacities to overlap-aware event ownership. Two blockers that hit the same `v` events waste capacity; quantify this by exact pairwise intersections before returning to a raw union bound.
 - Primary: prove a uniform H59 truncation bound from the arithmetic form of the event sets, or show that survival to order `2h+1` forces an `h`-way gcd/relation cluster usable by H39. Do not assume order three remains sufficient past the tested range.
+- Primary: after H60, retain signed event errors `e_u=u(Nj+1)-mNv` when comparing repeated clusters. Test relations among error differences across two event indices, not among the blocker speeds from one cluster alone.
 - Primary: turn H39 plus the ambient margin into a uniform contradiction, using determinant bounds for coefficient-two nullspaces rather than enumerating patterns separately for every `n`.
 - Secondary: if stronger auditability is desired, make the published sieve proof-producing or independently reimplement its three levels.
 - Historical: the local H21 37-prime scan and p=47 branch certificates remain useful cross-checks, but no longer block the nine-runner theorem.
