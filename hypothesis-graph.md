@@ -246,6 +246,16 @@ H0  selected nine-runner target is open
                                                                                                                                                                                                                                                                      owner to a handoff
                                                                                                                                                                                                                                                                      seed pair
                                                                                                                                                                                                                                                                      KILLED
+                                                                                                                                                                                                                                                                     |
+                                                                                                                                                                                                                                                                     +--H66  quotient all
+                                                                                                                                                                                                                                                                              circuits by local
+                                                                                                                                                                                                                                                                              handoff rows
+                                                                                                                                                                                                                                                                              PROVED
+                                                                                                                                                                                                                                                                              |
+                                                                                                                                                                                                                                                                              +--H67  residual core
+                                                                                                                                                                                                                                                                                       has size at
+                                                                                                                                                                                                                                                                                       most one
+                                                                                                                                                                                                                                                                                       SELECTED
 ```
 
 ## Nodes
@@ -1390,6 +1400,34 @@ H0  selected nine-runner target is open
 - Verification: `handoff_core_pivot_certificate` and the `r=2,6,12` hierarchy regressions.
 - Artifact: `artifacts/first-spectral-band-connectivity.md`.
 
+### H66 — Back-substitution isolates the exact global circuit quotient
+
+- Mode: proved linear-algebraic reduction
+- Construction: order the H64 local rows by their distinct latest first owner and back-substitute them from every coefficient-two circuit. Each canonical residual is supported only on the two initial seeds and the unresolved core `C`.
+- Exact identity: the local rows have rank `n-2-|C|`. If `Q` is the residual circuit space, then
+
+  ```text
+  dim Q = rank R_2(v) - (n-2-|C|).
+  ```
+
+  Therefore H39 is equivalent to `dim Q>=|C|`. This removes every scheduling-order choice from the repair step.
+- Example: for `(1,4,5,6,7,11,13,96)` the local rank is `5`, `C={7}`, and `Q` is one-dimensional. Its normalized residual is `1-(1/7)7=0`, obtained by combining bounded original circuits even though the quotient coefficient denominator is `7`.
+- Stronger example: `(1,2,3,12)` has local rank `1`, one residual owner, and a two-dimensional quotient, recovering full relation rank `3`.
+- Limitation: this is an exact reformulation, not yet a lower bound on `dim Q`. Quotient coefficients may grow during elimination even though every original circuit has coefficients at most two.
+- Verdict: proved.
+- Verification: `handoff_circuit_quotient_basis`, support/rank identities, and scan receipt columns `band_edge_core_size` and `circuit_quotient_rank`.
+- Artifact: `artifacts/first-spectral-band-connectivity.md`.
+
+### H67 — A subcritical handoff cover has at most one residual owner
+
+- Mode: weakened, operational successor to H47
+- Hypothesis: under lower-runner induction, every strict primitive first-band cover has `|C|<=1` for the H64 best cyclic rotation.
+- Why useful: H64 then gives coefficient-two rank at least `n-3`, and H66 reduces every missing repair to a three-coordinate quotient. This does not itself prove H39, but replaces an unbounded adversarial core by one scalar circuit obligation.
+- Exact evidence: all 55 completed first-band survivors have `C=empty`. At widths just below the lower-dimensional threshold, a complete five-speed height-`30` scan found 24 strict covers with core histogram `{0:16,1:8}`; a six-speed height-`22` scan found 22 covers, all with empty core. Three structured two-outlier scans found 17, 11, and 9 eligible covers through seven speeds, again with no core larger than one. The dilation family in H65 has core size at most one for `2<=r<=15`.
+- Kill condition: a subcritical cover with two unresolved owners in every cyclic rotation. A strict first-band example kills the stated hypothesis; a wider example only kills the exploratory broad form.
+- Verdict: selected for testing; no proof yet.
+- Artifact: `artifacts/first-spectral-band-connectivity.md`.
+
 ## What the graph established
 
 1. The elementary measure branch recovers `1/(2n)` and dies by an exact factor-two deficit.
@@ -1458,6 +1496,8 @@ H0  selected nine-runner target is open
 64. Temporal-spanner dismountability suggests a precise recursion for the handoff branch: peel a locally certified runner, or classify the nondismountable residue as an extremally matched, shifted core. All 55 completed first-band survivors peel completely; a wider explicit tuple stalls, confirming that the first-band cutoff cannot be dropped.
 65. Residual-core accounting makes that recursion exact without importing temporal reachability. If `C` owners remain unresolved, the local rows already have independent rank `n-2-|C|`; induction guarantees that every runner appears throughout the subcritical first-band sweep. Thus only genuine arithmetic row failures, not missing owners, can populate a hypothetical core.
 66. Promoting a residual owner to a new handoff pivot repairs small stalls but fails at eight speeds. The family `(1,4,5,6,7,11,13,8r)` separates three levels above the sharp first-band edge: local peeling, handoff-selected appendability, and full coefficient-two rank. The first two eventually fail; the rank target survives.
+67. Back-substitution removes the algorithm from the remaining question. Modulo the independent local rows, every bounded circuit is supported on the two seeds plus the residual core, and H39 is exactly the inequality `dim Q>=|C|` for that quotient circuit space.
+68. No exact subcritical scan has produced two residual owners. The weakened H67 target `|C|<=1` would reduce any remaining repair to a three-coordinate quotient, but it does not by itself supply the last circuit.
 
 ## Frontier
 
@@ -1465,6 +1505,8 @@ H0  selected nine-runner target is open
 - Primary: prove the H63 nondismountable-core classification. First show that failure of every H47 local row forces the entry and exit extrema to be matchings; then test whether the induced cyclic label matrix is shifted-matching or falls into the composite reset/kernel branch. Do not import temporal reachability as a black box.
 - Primary: use H64 rather than the informal temporal vocabulary. Bound the residual core `C` directly from the band-edge endpoint labels `q m+/-2`; empty `C` proves H39, while `|C|=1` reduces the remaining orbit to a three-dimensional ambient pattern. Any claimed matching structure must be stated as an exact condition on these labels.
 - Primary: H65 shows that more elaborate rerooting rules are not the invariant. For the strict first band, compare the span of all coefficient-two circuits with the triangular handoff rows and prove that any residual core contributes an independent global circuit, regardless of whether a handoff order discovers it.
+- Primary: prove or kill H67. Two failed owners must lie in disjoint first-occurrence segments of every best rotation; retain their band-edge endpoint labels and test whether subtracting the two failures yields either one H47 row or a nonzero quotient circuit in H66.
+- Primary: lower-bound `dim Q` directly. For `|C|=1`, back-substitution leaves three integer speeds; seek a band-edge inequality that bounds their primitive determinant strongly enough to force one original coefficient-two circuit outside the local span.
 - Primary: replace H23 by a height-sensitive gap theorem, or formulate a lift-tree invariant that distinguishes fixed ordinary integers from spurious profinite survivor branches.
 - Primary: combine H27's upper-gap constraints with finite-checking/volume bounds; seek a complementary lemma controlling cuts with at least half the runners above them.
 - Primary: for the finite H28 normal vectors, formulate and test a concrete relative-subtorus descent; do not use the phrase “compatible sign pattern” without the transformation and preserved invariant.

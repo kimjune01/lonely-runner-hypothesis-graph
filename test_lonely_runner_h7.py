@@ -1404,6 +1404,66 @@ def test_handoff_pivot_hierarchy_is_sharp_outside_the_first_band(
     ) == rank
 
 
+def test_circuit_quotient_eliminates_every_resolved_handoff_coordinate():
+    speeds = (1, 4, 5, 6, 7, 11, 13, 96)
+    delta = Fraction(193, 1552)
+    order, core, local_rows, quotient = lrc.handoff_circuit_quotient_basis(
+        speeds,
+        delta=delta,
+        max_coefficient=2,
+        max_support=4,
+    )
+
+    assert order == (0, 7, 4, 3, 2, 1, 6, 5)
+    assert core == (4,)
+    assert len(local_rows) == 5
+    assert len(quotient) == 1
+    free = set(order[:2]) | set(core)
+    assert all(
+        not coefficient or index in free
+        for row in quotient
+        for index, coefficient in enumerate(row)
+    )
+    assert len(local_rows) + len(quotient) == lrc.bounded_relation_rank(
+        speeds, max_coefficient=2
+    )
+
+
+def test_circuit_quotient_dimension_can_exceed_the_core_repair_need():
+    speeds = (1, 2, 3, 12)
+    order, core, local_rows, quotient = lrc.handoff_circuit_quotient_basis(
+        speeds,
+        delta=Fraction(25, 104),
+        max_coefficient=2,
+        max_support=4,
+    )
+
+    assert order == (2, 3, 0, 1)
+    assert core == (0,)
+    assert len(local_rows) == 1
+    assert len(quotient) == 2
+
+
+def test_circuit_quotient_identity_replays_on_three_speed_first_band():
+    for speeds, _ in lrc.first_band_survivors(runner_count=3, height=30):
+        order, core, local_rows, quotient = lrc.handoff_circuit_quotient_basis(
+            speeds,
+            delta=Fraction(2, 7),
+            max_coefficient=2,
+            max_support=4,
+        )
+        free = set(order[:2]) | set(core)
+
+        assert all(
+            not coefficient or index in free
+            for row in quotient
+            for index, coefficient in enumerate(row)
+        )
+        assert len(local_rows) + len(quotient) == lrc.bounded_relation_rank(
+            speeds, max_coefficient=2
+        )
+
+
 def test_local_handoff_elimination_reaches_nine_speed_survivor():
     speeds = (2, 5, 6, 8, 9, 11, 13, 14, 17)
     certificate = lrc.local_handoff_elimination_certificate(
@@ -1629,6 +1689,8 @@ def test_first_band_scan_cli_emits_replayable_receipt():
     assert "handoff_order_eliminates" in lines[0]
     assert "local_handoff_eliminates" in lines[0]
     assert "band_edge_local_handoff_eliminates" in lines[0]
+    assert "band_edge_core_size" in lines[0]
+    assert "circuit_quotient_rank" in lines[0]
     assert "parameter_norm_squared_cutoff" in lines[0]
     assert any("1,2,6\t2/7" in line for line in lines[1:])
 

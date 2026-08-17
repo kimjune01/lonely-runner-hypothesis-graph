@@ -22,6 +22,7 @@ def main() -> None:
         "\ttwo_seed_appendable\thandoff_seeds\thandoff_seed_appendable"
         "\thandoff_cycle_appendable\thandoff_order_eliminates"
         "\tlocal_handoff_eliminates\tband_edge_local_handoff_eliminates"
+        "\tband_edge_core_size\tcircuit_quotient_rank"
         "\tpositive_tree\tambient_maximum"
         "\tambient_margin\tparameter_norm_squared_cutoff"
     )
@@ -72,12 +73,16 @@ def main() -> None:
             max_coefficient=args.coefficient,
             max_support=4,
         )
-        band_edge_local_handoff = lrc.local_handoff_elimination_certificate(
+        band_order, band_steps, band_core = lrc.local_handoff_residual_core(
             speeds,
             delta=Fraction(2, 2 * args.runners + 1),
             max_coefficient=args.coefficient,
             max_support=4,
         )
+        band_edge_local_handoff = (
+            len(band_order) == len(speeds) and not band_core
+        )
+        circuit_quotient_rank = rank - len(band_steps)
         tree = lrc.positive_triangular_relation_tree(
             speeds, max_coefficient=args.coefficient
         )
@@ -108,7 +113,8 @@ def main() -> None:
             f"\t{'yes' if handoff_cycle is not None else 'no'}"
             f"\t{'yes' if handoff_order is not None else 'no'}"
             f"\t{'yes' if local_handoff is not None else 'no'}"
-            f"\t{'yes' if band_edge_local_handoff is not None else 'no'}"
+            f"\t{'yes' if band_edge_local_handoff else 'no'}"
+            f"\t{len(band_core)}\t{circuit_quotient_rank}"
             f"\t{'yes' if tree is not None else 'no'}"
             f"\t{ambient}\t{margin}"
             f"\t{cutoff}"

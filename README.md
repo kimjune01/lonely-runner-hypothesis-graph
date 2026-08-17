@@ -69,4 +69,7 @@ while the weaker H44 appendability ordering still proves the desired rank.
 An exact periodic-window sweep additionally tests cyclic rotations of the
 singleton-owner sequence as geometrically selected bounded elimination orders.
 The completed scan now reaches nine speeds; its sharper local certificate uses
-the preceding new owner and at most two earlier owners per relation.
+the preceding new owner and at most two earlier owners per relation. It also
+reports the residual handoff-core size at the normalized band edge and the
+rank of the full coefficient-two circuit space modulo those independent local
+rows.

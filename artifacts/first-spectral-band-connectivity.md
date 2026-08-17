@@ -284,6 +284,55 @@ warning: scheduling geometry can select useful relations, but the theorem must
 control the span of all circuits rather than certify one particular greedy or
 rerooted order.
 
+### The order-independent circuit quotient
+
+Let `C` be the residual owner set from H64. Back-substitute the triangular
+local rows from every coefficient-two circuit, starting at the latest first
+owner. The local pivot coordinates vanish one by one and are never
+reintroduced. Every residual circuit is therefore supported on only
+
+```text
+the two initial seeds union C.
+```
+
+If `Q` denotes the span of these canonical residuals, exact rank accounting
+gives
+
+```text
+dim Q = rank R_2(v) - (n-2-|C|).
+```
+
+Consequently the desired H39 rank is equivalent to `dim Q>=|C|`. This is H66:
+it removes the failed owner-selection algorithm from the statement while
+preserving the phase-selected independent rows already proved.
+
+For `(1,4,5,6,7,11,13,96)`, the five local rows leave seeds `(1,96)` and core
+speed `7`. All bounded circuits reduce to a one-dimensional quotient with
+normalized row
+
+```text
+1 - (1/7) 7 = 0.
+```
+
+The denominator illustrates the remaining difficulty: bounded original
+circuits can acquire large rational coefficients after elimination. H66 is an
+exact reduction, not a bound on the quotient.
+
+A weaker structural target now becomes visible. If `|C|<=1`, local geometry
+already gives rank `n-3` and every missing repair lives on three coordinates.
+No tested subcritical cover has a larger core. At widths just below `1/n`, the
+exact exploratory scans gave
+
+```text
+n=5, height 30: 24 covers, core histogram {0:16, 1:8}
+n=6, height 22: 22 covers, core histogram {0:22}
+```
+
+Structured two-outlier searches through seven speeds and the H65 dilation
+family through `r=15` likewise had core size at most one. This motivates H67,
+but a three-coordinate quotient still needs one global circuit before H39
+follows.
+
 The sharper H47 audit requires every elimination row to contain the immediately
 preceding new owner and at most two additional owners drawn from the intervening
 handoff segment or the two initial seeds. All 229 rows in the 55 certificates

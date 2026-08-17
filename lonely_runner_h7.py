@@ -1667,6 +1667,54 @@ def handoff_core_pivot_certificate(
     return None
 
 
+def handoff_circuit_quotient_basis(
+    speeds: tuple[int, ...],
+    *,
+    delta: Fraction,
+    max_coefficient: int,
+    max_support: int,
+) -> tuple[
+    tuple[int, ...],
+    tuple[int, ...],
+    tuple[tuple[int, ...], ...],
+    tuple[tuple[Fraction, ...], ...],
+]:
+    """Reduce every bounded circuit modulo the triangular handoff rows.
+
+    The local rows pivot on distinct resolved owners in first-occurrence
+    order.  Back substitution therefore leaves canonical quotient rows
+    supported only on the two seeds and the residual core.  Their rank is the
+    exact order-independent gain available beyond local handoff elimination.
+    """
+    order, steps, core = local_handoff_residual_core(
+        speeds,
+        delta=delta,
+        max_coefficient=max_coefficient,
+        max_support=max_support,
+    )
+    if len(order) != len(speeds):
+        raise ValueError("every runner must occur in the singleton-owner word")
+    local_rows = tuple(row for _, row in steps)
+    residuals: list[tuple[Fraction, ...]] = []
+    for relation in bounded_relations(
+        speeds, max_coefficient=max_coefficient
+    ):
+        residual = [Fraction(coefficient) for coefficient in relation]
+        for target, row in reversed(steps):
+            if not residual[target]:
+                continue
+            scale = residual[target] / row[target]
+            residual = [
+                entry - scale * coefficient
+                for entry, coefficient in zip(residual, row)
+            ]
+        if any(residual):
+            residuals.append(tuple(residual))
+    quotient_map = _rational_row_basis(tuple(residuals), width=len(speeds))
+    quotient = tuple(tuple(quotient_map[pivot]) for pivot in sorted(quotient_map))
+    return order, core, local_rows, quotient
+
+
 def bounded_relation_pattern(
     speeds: tuple[int, ...], *, max_coefficient: int
 ) -> tuple[tuple[int, ...], ...]:
