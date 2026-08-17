@@ -286,6 +286,11 @@ H0  selected nine-runner target is open
                                                                                                                                                                                                                                                                                                                                              palettes give an
                                                                                                                                                                                                                                                                                                                                              explicit lonely time
                                                                                                                                                                                                                                                                                                                                              PROVED
+                                                                                                                                                                                                                                                                                                                                             |
+                                                                                                                                                                                                                                                                                                                                             +--H74  solve the zero-residue
+                                                                                                                                                                                                                                                                                                                                                      quotient, then sweep
+                                                                                                                                                                                                                                                                                                                                                      reset phases
+                                                                                                                                                                                                                                                                                                                                                      PROVED SUBCASE
 ```
 
 ## Nodes
@@ -1595,6 +1600,30 @@ H0  selected nine-runner target is open
 - Verification: `small_residue_palette_witness`, including arbitrary non-geometric, exact-grid-miss, and zero-residue regressions.
 - Artifact: `artifacts/first-spectral-band-connectivity.md`.
 
+### H74 — Solve the divisible quotient block, then sweep reset phases
+
+- Mode: proved inductive capacity theorem for multiple forced zero residues
+- Statement: put `N=n+1`, let `D` be the nonempty set of speeds divisible by `N`, and suppose `d=|D|<n`. For every remaining speed set `g_i=gcd(v_i,N)` and define
+
+  ```text
+  c(g_i)=2  if g_i=1,
+          =g_i if g_i>1.
+  ```
+
+  Assuming LRC for the `d` quotient speeds `{v_i/N:i in D}`, the full tuple satisfies LRC whenever
+
+  ```text
+  sum_{i notin D} c(g_i) < N.
+  ```
+- Proof: choose a phase `x` where every quotient runner has distance at least `1/(d+1)>=1/N`, and test `t_k=(k+x)/N` for `k mod N`. Every divisible runner has phase `(v_i/N)x` and remains safe for all `k`. A nondivisible runner with gcd `g` visits the step-`g` residue lattice, each point with multiplicity `g`. Its bad arc has open length two: it contains at most two lattice points for `g=1`, and at most one for `g>=2`. Thus it blocks at most `c(g)` reset classes. The displayed strict capacity bound leaves a candidate.
+- Minimal-counterexample use: if all speeds were `N`-divisible, primitiveness would fail; hence `d<n` and lower-runner induction supplies the quotient phase. No prime theorem is involved.
+- Half-divisible corollary: if every nondivisible speed has `gcd(v_i,N)<=2`, then every one blocks at most two phases. Therefore `d>=ceil(n/2)` implies `2(n-d)<n+1=N` and proves the tuple safe.
+- Relation to H51: H51 handles one largest divisible runner by exploiting a common blocked reset and is much sharper when `d=1`. H74 handles the opposite regime—many divisible runners—by synchronizing their quotient solution before counting the remaining blockers.
+- Limitation: the middle range with few divisible runners and a capacity sum at least `N` still needs overlap or handoff structure; equality in the union bound is not declared blocked.
+- Verdict: proved inductively.
+- Verification: `divisible_block_phase_sweep_capacity`, `divisible_block_phase_sweep_witness`, exact shifted-lattice capacity checks, and mixed composite fixtures.
+- Artifact: `artifacts/first-spectral-band-connectivity.md`.
+
 ## What the graph established
 
 1. The elementary measure branch recovers `1/(2n)` and dies by an exact factor-two deficit.
@@ -1671,6 +1700,7 @@ H0  selected nine-runner target is open
 72. H72 removes both equal-size and consecutive-block assumptions. Arbitrary multiplier blocks `A_j` synchronize at `a/(M-1)` whenever the exact fixed-phase grid meets `[1/(n+1),1/(m+1)]`; if `n>m`, this is automatic beyond the explicit scale `1+ceil((m+1)(n+1)/(n-m))`.
 73. H73 identifies the invariant behind H72: any arbitrary tuple compressed modulo `q` into the nonzero signed palette `+-[1,m]` is safe when the `q`-grid meets `[1/(n+1),1/(m+1)]`. For `m<n`, a simple explicit lower bound on `q` makes that intersection automatic.
 74. At the canonical modulus `q=n+1`, H73 gives the exact top-level dichotomy: a tuple with no zero residue is solved at `t=1/(n+1)`, so every hypothetical counterexample necessarily enters H49 with an `(n+1)`-divisible reset runner.
+75. H74 solves the many-zero-residue branch: first make the divisible quotients lonely by induction, then sweep that phase through all `n+1` resets. A nondivisible gcd-`g` runner blocks at most two phases for `g=1` and at most `g` for `g>1`; a total capacity below `n+1` proves LRC.
 
 ## Frontier
 
@@ -1686,6 +1716,7 @@ H0  selected nine-runner target is open
 - Proved family: use H71 as the equality model for mixed factor groups. Any counterexample built from several geometric copies of a canonical block must break the common-scale fixed point—for example through unequal block shapes or non-geometric transitions—rather than merely separating the blocks.
 - Proved extension: H72 also removes unequal and internally nonfactor block shapes at sufficiently large common scale. The live grouped-speed obstruction is now a small-scale transition or a sparse normalized block system with total count `n<=m`; test short-period points there before returning to handoff casework.
 - Proved modular abstraction: use H73 before any prime-specific lifting. A hypothetical counterexample must avoid every modulus whose nonzero signed residue radius `m<n` is small enough relative to `q`; zero residues and wide palettes are the exact remaining branches.
+- Proved reset subcase: use H74 when several speeds vanish modulo `n+1`. In a minimal counterexample fewer than half the runners can be divisible whenever all other gcd strata are at most two; more generally the weighted capacity `sum c(g)` must be at least `n+1`.
 - Primary: replace H23 by a height-sensitive gap theorem, or formulate a lift-tree invariant that distinguishes fixed ordinary integers from spurious profinite survivor branches.
 - Primary: combine H27's upper-gap constraints with finite-checking/volume bounds; seek a complementary lemma controlling cuts with at least half the runners above them.
 - Primary: for the finite H28 normal vectors, formulate and test a concrete relative-subtorus descent; do not use the phrase “compatible sign pattern” without the transformation and preserved invariant.

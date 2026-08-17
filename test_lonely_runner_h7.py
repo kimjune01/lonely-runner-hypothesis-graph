@@ -934,6 +934,61 @@ def test_largest_divisible_reset_block_sets_match_direct_arithmetic():
             assert blocked == direct
 
 
+@pytest.mark.parametrize(
+    ("speeds", "expected_capacity"),
+    [
+        ((1, 5, 6, 12, 18), 4),
+        ((1, 2, 3, 7, 14, 21), 6),
+        ((1, 2, 3, 8, 16, 24, 32), 6),
+    ],
+)
+def test_divisible_block_phase_sweep_beats_its_blocker_capacity(
+    speeds, expected_capacity
+):
+    modulus = len(speeds) + 1
+
+    assert lrc.divisible_block_phase_sweep_capacity(speeds) == expected_capacity
+    assert expected_capacity < modulus
+    witness = lrc.divisible_block_phase_sweep_witness(speeds)
+    assert witness is not None
+    assert all(
+        lrc.fractional_distance(speed * witness) >= Fraction(1, modulus)
+        for speed in speeds
+    )
+
+
+def test_half_divisible_gcd_two_corollary_is_exactly_in_capacity_range():
+    speeds = (1, 2, 3, 8, 16, 24, 32)
+    modulus = len(speeds) + 1
+    divisible_count = sum(speed % modulus == 0 for speed in speeds)
+
+    assert divisible_count == math.ceil(len(speeds) / 2)
+    assert all(
+        math.gcd(speed, modulus) <= 2
+        for speed in speeds
+        if speed % modulus
+    )
+    assert lrc.divisible_block_phase_sweep_capacity(speeds) < modulus
+
+
+def test_phase_sweep_gcd_capacity_bounds_every_shift_exactly():
+    for modulus in range(4, 10):
+        for speed in range(1, 3 * modulus):
+            if speed % modulus == 0:
+                continue
+            divisor = math.gcd(speed, modulus)
+            capacity = 2 if divisor == 1 else divisor
+            for phase in (Fraction(1, 7), Fraction(2, 5), Fraction(5, 8)):
+                blocked = sum(
+                    lrc.fractional_distance(
+                        speed * Fraction(reset + phase, modulus)
+                    )
+                    < Fraction(1, modulus)
+                    for reset in range(modulus)
+                )
+                assert blocked <= capacity
+
+
 def test_all_largest_runner_boundaries_can_work_after_fixed_reset_is_blocked():
     speeds = (1, 3, 4, 5, 18)
 

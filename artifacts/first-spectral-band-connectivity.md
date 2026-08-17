@@ -635,6 +635,44 @@ merely one favorable factor case. The remaining problem is to exploit that
 forced zero residue by moving off the reset grid without letting the other
 signed residue classes cover every backoff candidate.
 
+### Synchronize the zero-residue block before sweeping
+
+The same reduction handles many divisible speeds rather than only one. Put
+`N=n+1`, let `D` contain the `d` speeds divisible by `N`, and apply the
+lower-runner LRC case to their quotients. Choose `x` with
+
+```text
+||(v_i/N)x||>=1/(d+1)>=1/N       for every i in D.
+```
+
+At all `N` candidate times `t_k=(k+x)/N`, every divisible runner stays safe.
+For a remaining speed `v`, let `g=gcd(v,N)`. As `k` varies, `kv mod N` runs
+through the step-`g` lattice and each lattice point occurs `g` times. Badness
+is membership in an open arc of length two after translation by `vx`.
+Therefore the number of blocked reset classes is at most
+
+```text
+c(g)=2 for g=1,       c(g)=g for g>1.
+```
+
+This proves H74:
+
+```text
+sum_{v notin D} c(gcd(v,N)) < N  ==>  ML(v_1,...,v_n)>=1/N.
+```
+
+In a primitive minimal counterexample, `d<n`, so the quotient phase is
+available by induction. In particular, if every nondivisible gcd is at most
+two, then `d>=ceil(n/2)` gives capacity `2(n-d)<n+1` and proves the tuple.
+
+The theorem complements H51. A single largest divisible runner supplies a
+special tiny offset whose blocked sets share reset zero, allowing a much
+sharper overlap count. H74 instead handles a large divisible block by solving
+that block first. The unresolved middle branch has too few zero residues for
+H74's raw capacity and too much height/gcd structure for H51's unique-largest
+description; that is where event handoffs or overlap-aware counting remain
+necessary.
+
 The sharper H47 audit requires every elimination row to contain the immediately
 preceding new owner and at most two additional owners drawn from the intervening
 handoff segment or the two initial seeds. All 229 rows in the 55 certificates

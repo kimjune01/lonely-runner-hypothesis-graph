@@ -567,6 +567,48 @@ def largest_divisible_reset_blocked_indices(
     return tuple(sorted(blocked))
 
 
+def divisible_block_phase_sweep_capacity(speeds: tuple[int, ...]) -> int | None:
+    """Union-bound capacity after synchronizing all ``(n+1)``-divisible speeds.
+
+    A remaining unit speed blocks at most two reset classes.  A speed in gcd
+    stratum ``g>1`` blocks at most ``g`` classes, because an open interval of
+    length two contains at most one point of the step-``g`` residue lattice.
+    """
+    if not speeds or any(speed <= 0 for speed in speeds):
+        raise ValueError("speeds must be a nonempty tuple of positive integers")
+    if len(set(speeds)) != len(speeds):
+        raise ValueError("speeds must be distinct")
+    modulus = len(speeds) + 1
+    if not any(speed % modulus == 0 for speed in speeds):
+        return None
+    return sum(
+        2 if (divisor := gcd(speed, modulus)) == 1 else divisor
+        for speed in speeds
+        if speed % modulus
+    )
+
+
+def divisible_block_phase_sweep_witness(
+    speeds: tuple[int, ...],
+) -> Fraction | None:
+    """Use a lonely quotient phase and sweep all reset residue classes."""
+    capacity = divisible_block_phase_sweep_capacity(speeds)
+    modulus = len(speeds) + 1
+    if capacity is None or capacity >= modulus:
+        return None
+
+    quotients = tuple(speed // modulus for speed in speeds if speed % modulus == 0)
+    phase = lrc_boundary_event_witness(quotients)
+    if phase is None:
+        return None
+    threshold = Fraction(1, modulus)
+    for reset in range(modulus):
+        time = (reset + phase) / modulus
+        if all(fractional_distance(speed * time) >= threshold for speed in speeds):
+            return time
+    return None
+
+
 def minimum_unique_divisible_reset_blockers(modulus: int) -> int:
     """Return the exact number of slower residue classes needed to block resets.
 
