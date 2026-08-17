@@ -2,7 +2,7 @@
 
 Date: 2026-08-17
 Status: LRC known through twelve relative speeds; nine-runner case independently replayed; general conjecture remains open; no novelty claimed
-Method: [The Proof Manual](/the-proof-manual) recorded using the replay contract from [The Hypothesis Graph](/the-hypothesis-graph-semantic-memory-methodeutics)
+Method: [The Proof Manual](https://june.kim/the-proof-manual) recorded using the replay contract from [The Hypothesis Graph](https://june.kim/the-hypothesis-graph-semantic-memory-methodeutics)
 
 ## Target
 
