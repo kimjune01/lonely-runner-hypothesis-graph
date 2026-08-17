@@ -127,14 +127,31 @@ H0  selected nine-runner target is open
                                                                                            |       coefficient-2 patterns
                                                                                            |       VERIFIED EXACTLY
                                                                                            |
-                                                                                           +--H37  H33 base case n=3
-                                                                                           |       COMPLETE under finite
-                                                                                           |       checking bound
+                                                                                           +--H37  counterexample-rank
+                                                                                           |       base case n=3
+                                                                                           |       COMPLETE
                                                                                            |
                                                                                            +--H38  four-speed first-band
-                                                                                                   candidates have all
-                                                                                                   pairwise gcd <=2
-                                                                                                   PROVED FROM FAN--SUN
+                                                                                           |       candidates have all
+                                                                                           |       pairwise gcd <=2
+                                                                                           |       PROVED FROM FAN--SUN
+                                                                                           |
+                                                                                           +--H39  counterexample-only
+                                                                                           |       coefficient-2 rank
+                                                                                           |       SELECTED
+                                                                                           |
+                                                                                           +--H40  H39 at n=4
+                                                                                           |       COMPLETE finite audit
+                                                                                           |
+                                                                                           +--H41  every counterexample
+                                                                                           |       at n>=18 has a
+                                                                                           |       coefficient-1 relation
+                                                                                           |       PROVED BY RIESZ PRODUCT
+                                                                                           |
+                                                                                           +--H42  two-element maximal
+                                                                                                   coefficient-2
+                                                                                                   dissociated seed
+                                                                                                   TESTING
 ```
 
 ## Nodes
@@ -930,7 +947,7 @@ H0  selected nine-runner target is open
 - Replay: `uv run classify_four_patterns.py --exact` (several minutes).
 - Artifact: `artifacts/first-spectral-band-connectivity.md`.
 
-### H37 — H33 holds completely for three speeds
+### H37 — The counterexample-relevant rank statement holds for three speeds
 
 - Mode: published finite-checking theorem plus exhaustive exact replay
 - Published input: under the lower-runner induction hypothesis, Malikiosis--Santos--Schymura show that a primitive `n`-speed counterexample must have
@@ -946,7 +963,7 @@ H0  selected nine-runner target is open
   ```
 
   Every one has coefficient-two relation rank at least `1=n-2`.
-- Verdict: H33 is proved for `n=3`; this is a complete conditional finite check, not a bounded-height sample. The induction premise is already known for two speeds.
+- Verdict: the counterexample-only version H39 is completely checked for `n=3`; this is not a proof of broad H33 for every first-band tuple, because the published sum bound applies to LRC counterexamples rather than all tuples with `ML<=2/7`.
 - Verification: `test_complete_three_speed_first_band_check_under_published_sum_bound`.
 - Artifact: `artifacts/first-spectral-band-connectivity.md`.
 
@@ -955,7 +972,52 @@ H0  selected nine-runner target is open
 - Mode: specialize the published four-speed spectrum theorem
 - Fan--Sun theorem: if a primitive four-speed tuple has a pair with gcd greater than `3`, then `ML>=1/4`. The same holds for gcd `3`, except for `(1,2,3,12k)`, whose value is `3k/(12k+1)`.
 - First-band consequence: `2/9<1/4`, and `3k/(12k+1)>2/9` for every positive integer `k`. Hence every tuple with `ML<=2/9` has all pairwise gcds at most `2`.
-- Verdict: proved. Combined with the published sum bound `1000`, this sharply defines the remaining finite domain for a complete four-speed H33 audit.
+- Verdict: proved. Combined with the published sum bound `1000`, this sharply defines the finite domain relevant to a hypothetical four-speed LRC counterexample. The sum bound does not bound every tuple in the wider first spectral band.
+- Artifact: `artifacts/first-spectral-band-connectivity.md`.
+
+### H39 — Minimal counterexamples have coefficient-two relation rank at least `n-2`
+
+- Mode: restrict H33 to exactly the quantifier needed by general-case induction
+- Hypothesis: if `v` is a primitive minimal LRC counterexample with `n` speeds, then the rational span of relations `a dot v=0` with `a_i in {-2,-1,0,1,2}` has rank at least `n-2`.
+- Difference from H33: H33 asserts the rank conclusion for every tuple with `ML<=2/(2n+1)`. H39 asserts it only for hypothetical LRC counterexamples, which satisfy the stronger inequality `ML<1/(n+1)`. The published finite-checking bound is valid for H39's domain but cannot by itself prove H33's wider quantifier.
+- Why sufficient: under minimal-counterexample induction, H39 places the cyclic orbit inside a proper subtorus of dimension at most two. H35 supplies a strict ambient margin, and geodesic covering reduces the remaining parameter pairs to a finite residue.
+- Verdict: selected as the load-bearing general-case hypothesis. It is proved for `n=3,4` by H37 and H40 and survives all larger bounded scans.
+- Kill condition: a bounded-runner counterexample whose coefficient-two relation rank is at most `n-3`.
+- Artifact: `artifacts/first-spectral-band-connectivity.md`.
+
+### H40 — H39 holds completely for four speeds
+
+- Mode: exact exhaustive audit of the published counterexample domain
+- Domain: every strictly increasing positive quadruple with sum at most `1000`; grid witnesses safely reject most tuples, nonprimitive tuples scale to smaller ones, and Fan--Sun removes unresolved tuples with pairwise gcd at least `3`.
+- Exact receipt: `1,705,044,764` quadruples enumerated; `1,705,042,194` rejected by explicit grid witnesses; `1,473` unresolved tuples were nonprimitive; `1,091` were rejected at exact critical times; six first-band survivors remained, all with coefficient-two relation rank `2=n-2`; zero rank failures.
+- Verdict: complete. This proves the counterexample-relevant rank implication for `n=4`; it does not assert that the six survivors are counterexamples (the known four-speed LRC theorem rules that out).
+- Replay: compile `verify_h33_n4.cpp` and run `/tmp/verify_h33_n4 1000 0 1`.
+- Artifact: `artifacts/h33-n4-counterexample-domain.md`.
+
+### H41 — Every counterexample with `n>=18` has a coefficient-one relation
+
+- Mode: dissociated Riesz product, following Bedert's Lemma 4.1 with constants retained
+- Statement: if `n>=18` and `v` is an LRC counterexample, some nonzero `epsilon in {-1,0,1}^n` satisfies `epsilon dot v=0`.
+- Proof: if no such relation exists, the Riesz product `R(t)=product_i(1-cos(2 pi v_i t))` and every one-factor deletion have integral `1`. The bad intervals at `delta=ML(v)` cover the circle, so integration gives
+
+  ```text
+  1 <= n(1-cos(2 pi delta)).
+  ```
+
+  But `delta<1/(n+1)`, `1-cos x<=x^2/2`, and `pi^2<10` make the right side strictly less than `20n/(n+1)^2<=1` for `n>=18`, a contradiction.
+- Consequence: H39's first independent relation is proved with coefficient bound `1`, uniformly and without primes. The missing step is to iterate the argument until the relation rank reaches `n-2`.
+- Verdict: proved.
+- Artifact: `artifacts/riesz-unit-relation.md`.
+
+### H42 — Minimal counterexamples have a two-element maximal coefficient-two dissociated seed
+
+- Mode: stronger operational form of H39, proposed by the relation-lattice audit
+- Hypothesis: every primitive minimal LRC counterexample has some inclusion-maximal subset `S` of at most two speeds with no nonzero relation having every coefficient in `{-2,-1,0,1,2}`.
+- Star consequence: for every target `j` outside `S`, maximality supplies an exact coefficient-two relation supported on `S union {j}`. Its target coefficient is nonzero. One relation per target is independent because the matrix on the nonseed coordinates is diagonal with nonzero diagonal. Therefore the relation rank is at least `n-|S|>=n-2`, proving H39.
+- Evidence: all 42 primitive first-band survivors in the completed scans for `3<=n<=7` have such a seed set. The complete four-speed counterexample-domain survivors all pass. The generic tuple `(5,7,11)` requires three seeds, so the certificate is discriminating.
+- Caution: H42 is strictly stronger than H39. Independent short relations arranged in a long chain need not all be generated from a single pair; counterexample minimality would have to exclude that geometry.
+- Verdict: testing, not selected as a theorem.
+- Kill condition: a possible minimal counterexample, or a compelling first-band family, for which every maximal coefficient-two dissociated subset has size at least three.
 - Artifact: `artifacts/first-spectral-band-connectivity.md`.
 
 ## What the graph established
@@ -997,8 +1059,12 @@ H0  selected nine-runner target is open
 35. Exact rational cell optimization gives that sharp pattern ambient loneliness `1/4`, a strict `1/20` margin; flat-torus geodesic covering then reduces the pattern to finitely many parameter pairs.
 36. Giri--Kravitz Lemma 3.3 makes the strict ambient margin automatic under induction: every proper two-dimensional ambient torus has loneliness at least `1/n`.
 37. Independently, all 123 admissible four-coordinate coefficient-two symmetry classes were classified exactly; their minimum ambient loneliness is `1/4`.
-38. The published linearly-exponential finite-checking bound reduces the three-speed H33 case to sum at most `36`; exhaustive exact replay proves the base case and leaves precisely five survivors.
-39. Fan--Sun removes every four-speed first-band tuple having a pairwise gcd at least `3`; the remaining complete H33 domain has sum at most `1000` and all pairwise gcds at most `2`.
+38. The published linearly-exponential finite-checking bound reduces the three-speed counterexample domain to sum at most `36`; exhaustive exact replay proves the counterexample-relevant rank implication there.
+39. Fan--Sun removes every four-speed first-band tuple having a pairwise gcd at least `3`; any hypothetical four-speed counterexample therefore has sum at most `1000` and all pairwise gcds at most `2`.
+40. The broader H33 quantifier and the counterexample-only H39 quantifier are now separated. The published sum bound supports H39, not all of H33.
+41. A complete exact audit of `1,705,044,764` four-speed tuples proves H39 for `n=4`: only six first-band survivors remain and all have coefficient-two rank `2`.
+42. A dissociated Riesz product proves uniformly that every hypothetical counterexample with `n>=18` has a coefficient-one subset-sum relation. This sharply improves H28's first relation but does not yet provide rank `n-2`.
+43. A two-element inclusion-maximal coefficient-two dissociated seed would imply H39 by independent star relations. All 42 scanned first-band survivors pass this stronger H42 test, while a generic control fails it.
 
 ## Frontier
 
@@ -1007,8 +1073,10 @@ H0  selected nine-runner target is open
 - Primary: combine H27's upper-gap constraints with finite-checking/volume bounds; seek a complementary lemma controlling cuts with at least half the runners above them.
 - Primary: for the finite H28 normal vectors, formulate and test a concrete relative-subtorus descent; do not use the phrase “compatible sign pattern” without the transformation and preserved invariant.
 - Primary: prove or kill H33. Combine a connected-cluster Fourier argument with the strict first-band gap to force bounded-relation codimension at least `n-2`.
-- Primary: prove or kill H33. Once H33 holds, Lemma 3.3 supplies the strict ambient margin; exact pattern optimization and geodesic covering reduce each fixed `n` to finite parameter checks.
-- Primary: make the H33-to-finite-check reduction uniform in `n`, using determinant bounds for coefficient-two nullspaces rather than enumerating patterns individually.
+- Primary: prove or kill H39 uniformly. It is the weaker statement actually sufficient for the general induction; H33 remains a useful stronger spectrum hypothesis.
+- Primary: iterate H41 on relation clusters or a quotient without treating sums of unrelated relations as bridges; the target is `n-2` independent coefficient-two rows.
+- Primary: try to kill H42 directly by imposing that no pair dominates the coefficient-two relation closure, beginning with exact five-speed first-band search. Do not infer H42 merely from high relation rank.
+- Primary: turn H39 plus the ambient margin into a uniform contradiction, using determinant bounds for coefficient-two nullspaces rather than enumerating patterns separately for every `n`.
 - Secondary: if stronger auditability is desired, make the published sieve proof-producing or independently reimplement its three levels.
 - Historical: the local H21 37-prime scan and p=47 branch certificates remain useful cross-checks, but no longer block the nine-runner theorem.
 - Secondary: retain H19's one-gap exchange fixtures as boundary tests for any proposed H20 lemma.

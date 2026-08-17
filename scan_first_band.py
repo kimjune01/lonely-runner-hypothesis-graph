@@ -18,7 +18,8 @@ def main() -> None:
 
     print(
         "runners\theight\tspeeds\tmaximum_loneliness\trelation_rank"
-        "\tcomponents\tpositive_seeds\tpositive_tree\tambient_maximum"
+        "\tcomponents\tpositive_seeds\tsigned_dissociated_seeds"
+        "\tpositive_tree\tambient_maximum"
         "\tambient_margin\tparameter_norm_squared_cutoff"
     )
     for speeds, loneliness in lrc.first_band_survivors(
@@ -32,6 +33,9 @@ def main() -> None:
             speeds, max_coefficient=args.coefficient
         )
         seeds, _ = lrc.positive_generation_certificate(
+            speeds, max_coefficient=args.coefficient
+        )
+        signed_seeds, _ = lrc.bounded_dissociated_generation_certificate(
             speeds, max_coefficient=args.coefficient
         )
         tree = lrc.positive_triangular_relation_tree(
@@ -58,7 +62,8 @@ def main() -> None:
         print(
             f"{args.runners}\t{args.height}\t{','.join(map(str, speeds))}"
             f"\t{loneliness}\t{rank}\t{component_text}\t{len(seeds)}"
-            f"\t{'yes' if tree is not None else 'no'}\t{ambient}\t{margin}"
+            f"\t{len(signed_seeds)}\t{'yes' if tree is not None else 'no'}"
+            f"\t{ambient}\t{margin}"
             f"\t{cutoff}"
         )
 

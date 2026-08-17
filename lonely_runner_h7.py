@@ -158,6 +158,20 @@ def fourier_relation_bound(runner_count: int, *, delta: Fraction) -> int:
     return int(cutoff) + 1
 
 
+def dissociated_riesz_forces_lrc(runner_count: int) -> bool:
+    """Whether the elementary dissociated Riesz bound proves LRC.
+
+    If the speeds have no nonzero relation with coefficients in ``{-1,0,1}``,
+    the Riesz product ``prod_v (1-cos(2*pi*v*t))`` gives
+    ``1 <= n(1-cos(2*pi*ML))``.  The inequalities
+    ``1-cos(x) <= x^2/2`` and ``pi^2 < 10`` contradict
+    ``ML < 1/(n+1)`` whenever ``(n+1)^2 >= 20n``.
+    """
+    if runner_count < 2:
+        raise ValueError("runner_count must be at least two")
+    return (runner_count + 1) ** 2 >= 20 * runner_count
+
+
 def find_bounded_relation(
     speeds: tuple[int, ...], *, max_coefficient: int
 ) -> tuple[int, ...] | None:
@@ -496,6 +510,69 @@ def bounded_relation_rank(speeds: tuple[int, ...], *, max_coefficient: int) -> i
     relations = bounded_relations(speeds, max_coefficient=max_coefficient)
     basis = _rational_row_basis(relations, width=len(speeds))
     return len(basis)
+
+
+def _bounded_dissociated(
+    speeds: tuple[int, ...], indices: tuple[int, ...], *, max_coefficient: int
+) -> bool:
+    coefficients = range(-max_coefficient, max_coefficient + 1)
+    return not any(
+        any(relation)
+        and not sum(
+            coefficient * speeds[index]
+            for coefficient, index in zip(relation, indices)
+        )
+        for relation in product(coefficients, repeat=len(indices))
+    )
+
+
+def bounded_dissociated_generation_certificate(
+    speeds: tuple[int, ...], *, max_coefficient: int
+) -> tuple[tuple[int, ...], tuple[tuple[int, tuple[int, ...]], ...]]:
+    """Find a smallest maximal bounded-dissociated seed set.
+
+    For every nonseed target, maximality supplies a relation supported only on
+    the seeds and that target. These star relations are automatically linearly
+    independent because each has its own nonzero target coordinate.
+    """
+    if not speeds or any(speed <= 0 for speed in speeds):
+        raise ValueError("speeds must be a nonempty tuple of positive integers")
+    if max_coefficient < 1:
+        raise ValueError("max_coefficient must be positive")
+    coefficients = range(-max_coefficient, max_coefficient + 1)
+    for size in range(1, len(speeds) + 1):
+        for seeds in combinations(range(len(speeds)), size):
+            if not _bounded_dissociated(
+                speeds, seeds, max_coefficient=max_coefficient
+            ):
+                continue
+            relations = []
+            maximal = True
+            for target in range(len(speeds)):
+                if target in seeds:
+                    continue
+                support = seeds + (target,)
+                supported_relation = None
+                for local in product(coefficients, repeat=len(support)):
+                    if not any(local) or not local[-1]:
+                        continue
+                    if sum(
+                        coefficient * speeds[index]
+                        for coefficient, index in zip(local, support)
+                    ):
+                        continue
+                    full = [0] * len(speeds)
+                    for coefficient, index in zip(local, support):
+                        full[index] = coefficient
+                    supported_relation = tuple(full)
+                    break
+                if supported_relation is None:
+                    maximal = False
+                    break
+                relations.append((target, supported_relation))
+            if maximal:
+                return seeds, tuple(relations)
+    raise RuntimeError("the full speed tuple should always be maximal dissociated")
 
 
 def bounded_relation_pattern(

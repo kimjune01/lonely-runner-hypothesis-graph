@@ -46,10 +46,22 @@ The current general-case branch proves height-sensitive grid recovery, a
 multi-fast-runner gap lemma, and an explicit bounded Fourier relation theorem.
 The surviving first-spectral-band bounded-rank hypothesis is summarized in
 [`artifacts/first-spectral-band-connectivity.md`](artifacts/first-spectral-band-connectivity.md).
-Its three-speed case is now completely checked under the published sum bound
-`36`. The four-coordinate two-torus audit replays with
+Its counterexample-relevant version is completely checked for three and four
+speeds under the published finite bounds. The four-coordinate two-torus audit
+replays with
 
 ```bash
 uv run classify_four_patterns.py
 uv run classify_four_patterns.py --exact  # several minutes
 ```
+
+The complete four-speed counterexample-domain rank audit replays with:
+
+```bash
+clang++ -O3 -std=c++20 verify_h33_n4.cpp -o /tmp/verify_h33_n4
+/tmp/verify_h33_n4 1000 0 1
+```
+
+The bounded first-band scanner now reports both positive-generation and
+signed-dissociated seed counts. The latter operationalizes H42, a stronger
+two-seed route to the selected counterexample-rank hypothesis H39.

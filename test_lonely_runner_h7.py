@@ -369,6 +369,12 @@ def test_failed_threshold_has_relation_within_fourier_bound(speeds, delta):
     assert sum(coefficient * speed for coefficient, speed in zip(relation, speeds)) == 0
 
 
+def test_dissociated_riesz_argument_crosses_lrc_threshold_at_eighteen():
+    assert not lrc.dissociated_riesz_forces_lrc(17)
+    assert lrc.dissociated_riesz_forces_lrc(18)
+    assert all(lrc.dissociated_riesz_forces_lrc(n) for n in range(18, 200))
+
+
 @pytest.mark.parametrize("speeds", [(1, 2), (1, 2, 3), (1, 2, 3, 4)])
 def test_tight_tuple_relation_is_within_fourier_bound(speeds):
     delta = Fraction(1, len(speeds) + 1)
@@ -528,6 +534,44 @@ def test_generic_tuple_can_have_more_than_two_relation_parameters():
     assert lrc.bounded_relation_rank(speeds, max_coefficient=2) < len(speeds) - 2
 
 
+@pytest.mark.parametrize(
+    "speeds",
+    [
+        (1, 2, 6),
+        (1, 3, 4, 5, 18),
+        (2, 5, 6, 8, 10, 11),
+        (2, 6, 7, 8, 10, 13, 14),
+        (1, 3, 4, 5, 7, 13, 18),
+        (3, 4, 7, 11),
+    ],
+)
+def test_first_band_fixtures_have_two_signed_dissociated_seeds(speeds):
+    seeds, relations = lrc.bounded_dissociated_generation_certificate(
+        speeds, max_coefficient=2
+    )
+
+    assert len(seeds) <= 2
+    assert len(relations) == len(speeds) - len(seeds)
+    for target, relation in relations:
+        assert relation[target] != 0
+        assert all(
+            coefficient == 0
+            for index, coefficient in enumerate(relation)
+            if index not in seeds and index != target
+        )
+        assert sum(
+            coefficient * speed for coefficient, speed in zip(relation, speeds)
+        ) == 0
+
+
+def test_generic_tuple_can_require_three_dissociated_seeds():
+    seeds, relations = lrc.bounded_dissociated_generation_certificate(
+        (5, 7, 11), max_coefficient=2
+    )
+    assert seeds == (0, 1, 2)
+    assert relations == ()
+
+
 def test_two_parameter_pattern_reconstructs_common_nullspace():
     speeds = (1, 2, 7)
     pattern = lrc.bounded_relation_pattern(speeds, max_coefficient=2)
@@ -667,6 +711,7 @@ def test_first_band_scan_cli_emits_replayable_receipt():
     lines = result.stdout.splitlines()
     assert lines[0].startswith("runners\theight\tspeeds\tmaximum_loneliness")
     assert "ambient_maximum" in lines[0]
+    assert "signed_dissociated_seeds" in lines[0]
     assert "parameter_norm_squared_cutoff" in lines[0]
     assert any("1,2,6\t2/7" in line for line in lines[1:])
 
@@ -698,6 +743,48 @@ def test_complete_three_speed_first_band_check_under_published_sum_bound():
         lrc.bounded_relation_rank(speeds, max_coefficient=2) >= 1
         for speeds, _ in survivors
     )
+
+
+def test_four_speed_h33_cpp_verifier_matches_small_exact_domain(tmp_path):
+    compiler = shutil.which("clang++") or shutil.which("g++")
+    if compiler is None:
+        pytest.skip("a C++20 compiler is required for the exhaustive verifier")
+    source = Path(__file__).with_name("verify_h33_n4.cpp")
+    executable = tmp_path / "verify_h33_n4"
+    subprocess.run(
+        [compiler, "-O3", "-std=c++20", str(source), "-o", str(executable)],
+        check=True,
+    )
+    result = subprocess.run(
+        [str(executable), "60", "0", "1"],
+        check=True,
+        capture_output=True,
+        text=True,
+    )
+
+    assert "VERIFIED bound=60 shard=0/1" in result.stdout
+    assert "first_band=6 rank_failures=0" in result.stdout
+    for speeds in [
+        "1,2,3,4",
+        "1,2,3,8",
+        "1,3,4,5",
+        "1,3,4,7",
+        "1,4,5,6",
+        "3,4,7,11",
+    ]:
+        assert f"SURVIVOR {speeds}" in result.stdout
+
+    complete = subprocess.run(
+        [str(executable), "1000", "0", "1"],
+        check=True,
+        capture_output=True,
+        text=True,
+    )
+    assert (
+        "VERIFIED bound=1000 shard=0/1 enumerated=1705044764 "
+        "grid_rejected=1705042194 nonprimitive=1473 gcd_excluded=0 "
+        "exact_rejected=1091 first_band=6 rank_failures=0"
+    ) in complete.stdout
 
 
 def test_early_first_band_predicate_matches_exact_maximum():

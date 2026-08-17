@@ -114,3 +114,26 @@ matches the authors' receipt.
 This is an independent execution of pinned source, not an independently
 generated formal certificate. Its semantic scope, provenance, exact integer
 contradiction, and remaining trust assumptions are documented in the audit.
+
+## General-case bounded-relation branch
+
+[`first-spectral-band-connectivity.md`](first-spectral-band-connectivity.md)
+records the surviving coefficient-two rank hypotheses, the exact two-torus
+descent, and the distinction between broad first-band H33 and the
+counterexample-only H39 needed by induction.
+
+[`h33-n4-counterexample-domain.md`](h33-n4-counterexample-domain.md) records
+the complete four-speed H39 replay. The C++ verifier enumerates
+`1,705,044,764` tuples under the published counterexample sum bound and finds
+zero coefficient-two rank failures. This is exhaustive replay, not a formal
+proof certificate, and its counterexample-only quantifier is load-bearing.
+
+[`riesz-unit-relation.md`](riesz-unit-relation.md) gives a short analytic proof
+that every hypothetical counterexample with at least eighteen speeds has a
+coefficient-one subset-sum relation. It is uniform and non-prime, but proves
+only the first independent relation rather than H39's target rank `n-2`.
+
+The first-band artifact also records H42, a stronger two-seed certificate.
+An inclusion-maximal coefficient-two dissociated seed of size at most two
+would imply H39 by independent star relations. All 42 completed first-band
+scan survivors pass; H42 remains a deliberately falsifiable hypothesis.
