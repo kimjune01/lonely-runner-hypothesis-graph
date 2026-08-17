@@ -1523,6 +1523,14 @@ def test_low_coefficient_one_rank_keeps_a_riesz_load_floor(
     assert normalized_ratio >= Fraction(1, 3)
 
 
+def test_dense_dependency_block_kills_reciprocal_riesz_load_floor():
+    speeds = tuple(range(1, 18))
+
+    assert lrc.riesz_cover_ratio(speeds) == Fraction(139, 7285)
+    assert len(speeds) * lrc.riesz_cover_ratio(speeds) == Fraction(2363, 7285)
+    assert Fraction(2363, 7285) < Fraction(1, 3)
+
+
 def test_local_handoff_elimination_reaches_nine_speed_survivor():
     speeds = (2, 5, 6, 8, 9, 11, 13, 14, 17)
     certificate = lrc.local_handoff_elimination_certificate(

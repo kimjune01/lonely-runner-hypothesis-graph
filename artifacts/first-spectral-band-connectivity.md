@@ -456,9 +456,31 @@ Exact primitive scans under the rank antecedent found the following minima:
 Fibonacci, tribonacci, and cumulative dependency chains through ten speeds did
 not kill the conjectured `1/3` constant. Fibonacci was the most adverse,
 reaching `90/167`; random three-seed signed subset-sum constructions reached
-`20/49` at eight speeds and `27/62` at nine. These experiments calibrate H70;
-they do not establish it. A counterexample is any low-rank tuple with
-`n rho(v)<1/3`.
+`20/49` at eight speeds and `27/62` at nine. Dense consecutive blocks do kill
+it, however. For `B=(1,2,...,17)`, exact convolution gives
+
+```text
+rho(B)=139/7285,       17 rho(B)=2363/7285<1/3.
+```
+
+This becomes a literal codimension-three counterexample, not merely a block
+whose internal rank is too high. Set `M=1009` and concatenate `B`, `MB`, and
+`M^2B`. The inequality `M^2>(M+1)sum(B)` makes every coefficient-one zero sum
+split blockwise. Each block has relation rank `16`, so the union has rank
+`48=51-3`. The Riesz constant terms also factor blockwise, including after one
+deletion, and therefore
+
+```text
+rho(B union MB union M^2B)=rho(B)/3,
+51 rho(B union MB union M^2B)=17 rho(B)<1/3.
+```
+
+The killer deliberately lies outside the target band: `M=1 mod 18`, so at
+`t=1/18` all three blocks reproduce the phases of `B`, giving maximum
+loneliness at least `1/18>2/103`. H70 is therefore killed while H69 survives.
+The lesson is sharp: relation rank alone is not the relevant networking-style
+dependency budget. A successor must retain the strict first-band geometry that
+couples otherwise independent dense loads.
 
 The sharper H47 audit requires every elimination row to contain the immediately
 preceding new owner and at most two additional owners drawn from the intervening

@@ -858,13 +858,20 @@ def riesz_constant_term(speeds: tuple[int, ...]) -> Fraction:
     """Return the exact constant term of ``prod(1-cos(2*pi*v*t))``."""
     if any(speed <= 0 for speed in speeds):
         raise ValueError("speeds must be positive integers")
-    total = Fraction()
-    for signs in product((-1, 0, 1), repeat=len(speeds)):
-        if sum(sign * speed for sign, speed in zip(signs, speeds)):
-            continue
-        support = sum(sign != 0 for sign in signs)
-        total += Fraction((-1) ** support, 2**support)
-    return total
+    coefficients = {0: Fraction(1)}
+    for speed in speeds:
+        updated: dict[int, Fraction] = {}
+        for frequency, coefficient in coefficients.items():
+            updated[frequency] = updated.get(frequency, Fraction()) + coefficient
+            side = -coefficient / 2
+            updated[frequency - speed] = (
+                updated.get(frequency - speed, Fraction()) + side
+            )
+            updated[frequency + speed] = (
+                updated.get(frequency + speed, Fraction()) + side
+            )
+        coefficients = updated
+    return coefficients.get(0, Fraction())
 
 
 def riesz_cover_ratio(speeds: tuple[int, ...]) -> Fraction:
