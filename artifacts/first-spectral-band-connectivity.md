@@ -1438,6 +1438,50 @@ ambient classification.
 The remaining frontier is H33 itself and a uniform-in-`n` treatment of the
 finite small-parameter residue after the margin descent.
 
+## Component routing instead of a frozen quotient optimum
+
+The load-balancing analogy gives a sharper reset experiment. Put `N=n+1` and
+divide every `N`-divisible speed by `N`. Freezing this quotient block at its
+own maximizing phase is false as an induction rule: for `(1,3,4)`, the sole
+quotient is maximized at `x=1/2`, but none of the four reset slots
+`(k+x)/4` is an LRC witness.
+
+The repair preserves maneuvering room. Let
+
+```text
+beta=2/(2n+1)
+S={x : min_{N|v_i} ||(v_i/N)x|| >= beta}.
+```
+
+Start at a quotient-maximizing phase and move through its connected component
+of `S`. Each nondivisible runner is then a sliding blocker on the `N` reset
+slots. The exact router splits the component at every blocker entry and exit
+and checks one point from every resulting closed cell. It finds `t=4/7` for
+`(1,3,4)` and `t=9/28` for the rank-zero tuple `(1,4,11)`.
+
+This motivates H77: whenever the coefficient-two rank is below `n-1`, some
+maximizing component contains a free reset slot at the final width `1/N`.
+Complete primitive scans give:
+
+```text
+(n,height)   targeted   rank-deficient   routing failures
+(3,50)          8790             8784                  0
+(4,25)          7480             6749                  0
+(5,15)          1695               93                  0
+```
+
+Replay one box with
+`uv run scan_component_routing.py --runners N --height H`. The experiment is
+non-prime and exact.
+
+The next proof target is an augmenting-path theorem. Sweep blocker endpoints
+in order. If no reset slot opens, the changing assignments contain an
+alternating cycle. One must use the synchronized arithmetic endpoints to turn
+that cycle into an additional coefficient-two speed relation. A generic
+minimum-cost circular-arc cover statement is insufficient: its proposed
+cost-at-most-one subcover would merely restate that a strict open cover is
+impossible, and general circular-arc matrices also have integrality gaps.
+
 ## Complete three-speed base case
 
 The 2025 finite-checking theorem of Malikiosis--Santos--Schymura gives a much

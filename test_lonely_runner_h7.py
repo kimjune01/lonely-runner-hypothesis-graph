@@ -957,6 +957,34 @@ def test_divisible_block_phase_sweep_beats_its_blocker_capacity(
     )
 
 
+def test_first_band_component_router_may_move_off_the_quotient_optimum():
+    speeds = (1, 3, 4)
+    witness = lrc.first_band_component_routing_witness(speeds)
+
+    assert witness is not None
+    assert lrc.fractional_distance(4 * witness) < Fraction(1, 2)
+    assert all(
+        lrc.fractional_distance(speed * witness) >= Fraction(1, 4)
+        for speed in speeds
+    )
+
+
+def test_first_band_component_router_handles_rank_deficient_reset_tuple():
+    speeds = (1, 4, 11)
+    witness = lrc.first_band_component_routing_witness(speeds)
+
+    assert lrc.bounded_relation_rank(speeds, max_coefficient=2) == 0
+    assert witness is not None
+    assert all(
+        lrc.fractional_distance(speed * witness) >= Fraction(1, 4)
+        for speed in speeds
+    )
+
+
+def test_first_band_component_router_requires_a_divisible_speed():
+    assert lrc.first_band_component_routing_witness((1, 2, 3)) is None
+
+
 def test_half_divisible_gcd_two_corollary_is_exactly_in_capacity_range():
     speeds = (1, 2, 3, 8, 16, 24, 32)
     modulus = len(speeds) + 1

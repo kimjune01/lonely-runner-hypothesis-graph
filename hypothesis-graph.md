@@ -1669,6 +1669,66 @@ H0  selected nine-runner target is open
 - Verification: `bounded_full_rank_height_bound` and exact full-rank fixtures.
 - Artifact: `artifacts/first-spectral-band-connectivity.md`.
 
+### H77 — First-band component routing for rank-deficient reset tuples
+
+- Mode: selected non-prime successor to the networking/load-balancing analogy
+- Setup: put `N=n+1`, let `D={v_i/N:N|v_i}`, and set the routing reserve
+
+  ```text
+  beta=2/(2n+1).
+  ```
+
+  Start at a phase maximizing `min_{u in D} ||ux||`. Let `I` be a connected
+  component containing such a maximizer of
+
+  ```text
+  {x in R/Z : min_{u in D} ||ux|| >= beta}.
+  ```
+
+  As `x` moves in `I`, the nondivisible runners act as sliding blockers on the
+  reset slots `t_k=(k+x)/N`.
+- Hypothesis: if the coefficient-two relation rank is below `n-1`, some
+  `x in I` and `k mod N` satisfy
+
+  ```text
+  ||v_i(k+x)/N|| >= 1/N  for every i.
+  ```
+- Why this is sharper than freezing induction: requiring the quotient block to
+  remain at its exact lower-dimensional optimum is false already for
+  `(1,3,4)`. Its quotient phase must move from `1/2`; the component router finds
+  `t=4/7`. The first-band reserve preserves more slack than the final `1/N`
+  target without overconstraining the extension.
+- Counterexample relevance: H73 puts every hypothetical counterexample in the
+  divisible-speed branch. H77 would eliminate every rank-deficient branch by
+  an explicit augmenting-phase witness. The remaining full-rank branch enters
+  H76's cofactor height reduction. This is not yet a uniform proof because the
+  full-rank finite residue remains dimension-dependent.
+- Exact evidence: complete primitive height scans found zero routing failures
+  among rank-deficient divisible tuples:
+
+  ```text
+  (n,height)   targeted   rank-deficient   failures
+  (3,50)          8790             8784          0
+  (4,25)          7480             6749          0
+  (5,15)          1695               93          0
+  ```
+
+  The rank-zero negative control `(1,4,11)` routes at `t=9/28` even though it
+  lies outside the first band. The full-rank boundary fixtures `(1,3,4)`,
+  `(1,3,4,5,18)`, and `(1,4,5,6,7,11)` also route after phase augmentation.
+- Suggested proof path: order all blocker entry/exit events in `I` and run a
+  deficit-round-robin sweep over the `N` reset slots. If no slot becomes free,
+  extract an alternating event cycle. The missing theorem is that such a cycle
+  yields one new coefficient-two row; generic circular-arc integrality is
+  false, so the proof must retain the synchronized arithmetic endpoints.
+- Kill condition: a primitive tuple containing an `N`-divisible speed, with
+  coefficient-two rank below `n-1`, for which every maximizing quotient
+  component keeps all `N` reset slots blocked at the `1/N` target.
+- Verdict: selected for testing; unproved.
+- Verification: `first_band_component_routing_witness`, exact fixtures, and
+  `scan_component_routing.py`.
+- Artifact: `artifacts/first-spectral-band-connectivity.md`.
+
 ## What the graph established
 
 1. The elementary measure branch recovers `1/(2n)` and dies by an exact factor-two deficit.
@@ -1748,6 +1808,7 @@ H0  selected nine-runner target is open
 75. H74 solves the many-zero-residue branch: first make the divisible quotients lonely by induction, then sweep that phase through all `n+1` resets. A nondivisible gcd-`g` runner blocks at most two phases for `g=1` and at most `g` for `g>1`; a total capacity below `n+1` proves LRC.
 76. Equality covers disprove a broad forced-overlap claim, and `(1,4,11)` shows that their partitions do not force bounded rank outside the first band. Inside the completed first-band scans, however, every tuple with an `(n+1)` multiple has full coefficient-two rank; this is the selected H75 reset invariant.
 77. H76 converts that full rank into height: cofactors and Hadamard give `max v_i<=ceil((4(n-1))^((n-1)/2))`. Thus H75 would make the exhaustive residual far smaller, though not eliminate it uniformly.
+78. Freezing the divisible quotient block at its exact inductive optimum is too rigid even for `(1,3,4)`. H77 replaces the frozen phase by an augmenting sweep inside its first-band-safe component; every rank-deficient divisible tuple in three completed height boxes routes successfully, leaving a precise alternating-event-cycle theorem to prove.
 
 ## Frontier
 
@@ -1766,6 +1827,7 @@ H0  selected nine-runner target is open
 - Proved reset subcase: use H74 when several speeds vanish modulo `n+1`. In a minimal counterexample fewer than half the runners can be divisible whenever all other gcd strata are at most two; more generally the weighted capacity `sum c(g)` must be at least `n+1`.
 - Primary reset invariant: prove or kill H75. A full H74 phase cover at the first-band width must be analyzed as a moving partition of two-point and subgroup-coset blockers; the fixed partition alone is insufficient because `(1,4,11)` kills it outside the band.
 - Proved consequence: if H75 holds, use H76's cofactor height bound before any general finite-checking bound. Do not mistake the smaller finite domain for a proof across arbitrary `n`.
+- Primary component router: prove or kill H77. Sweep the quotient-safe component in exact endpoint order and interpret a persistent full reset cover as an alternating blocker cycle. The desired output is one new coefficient-two relation, not a generic circular-arc LP claim; arbitrary circular-arc matrices have integrality gaps.
 - Primary: replace H23 by a height-sensitive gap theorem, or formulate a lift-tree invariant that distinguishes fixed ordinary integers from spurious profinite survivor branches.
 - Primary: combine H27's upper-gap constraints with finite-checking/volume bounds; seek a complementary lemma controlling cuts with at least half the runners above them.
 - Primary: for the finite H28 normal vectors, formulate and test a concrete relative-subtorus descent; do not use the phrase “compatible sign pattern” without the transformation and preserved invariant.

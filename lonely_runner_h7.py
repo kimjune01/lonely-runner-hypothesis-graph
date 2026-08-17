@@ -609,6 +609,112 @@ def divisible_block_phase_sweep_witness(
     return None
 
 
+def _safe_phase_components(
+    speeds: tuple[int, ...], *, threshold: Fraction
+) -> tuple[tuple[Fraction, Fraction], ...]:
+    """Closed components where every periodic phase avoids its bad windows."""
+    endpoints = {Fraction(0), Fraction(1)}
+    for speed in speeds:
+        for center in range(speed + 1):
+            for direction in (-1, 1):
+                phase = (Fraction(center) + direction * threshold) / speed
+                if 0 <= phase <= 1:
+                    endpoints.add(phase)
+    ordered = sorted(endpoints)
+    components: list[tuple[Fraction, Fraction]] = []
+    for left, right in zip(ordered, ordered[1:]):
+        midpoint = (left + right) / 2
+        if not all(
+            fractional_distance(speed * midpoint) >= threshold
+            for speed in speeds
+        ):
+            continue
+        if components and components[-1][1] == left:
+            components[-1] = components[-1][0], right
+        else:
+            components.append((left, right))
+    return tuple(components)
+
+
+def first_band_component_routing_witness(
+    speeds: tuple[int, ...],
+) -> Fraction | None:
+    """Route a reset slot while moving inside an inductive safe component.
+
+    Put ``N=n+1`` and divide every ``N``-divisible speed by ``N``.  Start at
+    any phase maximizing the quotient block's loneliness, then allow that
+    phase to move within its component where the block remains safe at the
+    first-band width ``2/(2n+1)``.  The other runners define sliding blockers
+    on the ``N`` reset slots.  Return an exact LRC witness if one slot becomes
+    free in such a component.
+
+    This is a diagnostic for the component-routing hypothesis, not a general
+    LRC decision procedure: returning ``None`` does not certify failure.
+    """
+    if not speeds or any(speed <= 0 for speed in speeds):
+        raise ValueError("speeds must be a nonempty tuple of positive integers")
+    if len(set(speeds)) != len(speeds):
+        raise ValueError("speeds must be distinct")
+
+    runner_count = len(speeds)
+    modulus = runner_count + 1
+    quotients = tuple(
+        speed // modulus for speed in speeds if speed % modulus == 0
+    )
+    if not quotients:
+        return None
+
+    reserve = Fraction(2, 2 * runner_count + 1)
+    target = Fraction(1, modulus)
+    quotient_maximum = maximum_loneliness(quotients)
+    maximizing_phases = tuple(
+        phase
+        for phase in set(_critical_times(quotients))
+        if min(
+            fractional_distance(quotient * phase) for quotient in quotients
+        )
+        == quotient_maximum
+    )
+    components = tuple(
+        component
+        for component in _safe_phase_components(
+            quotients, threshold=reserve
+        )
+        if any(
+            component[0] <= phase <= component[1]
+            for phase in maximizing_phases
+        )
+    )
+
+    for left, right in components:
+        endpoints = {left, right}
+        for speed in speeds:
+            for reset in range(modulus):
+                for center in range(speed + 1):
+                    for direction in (-1, 1):
+                        phase = Fraction(
+                            modulus * center + direction - speed * reset,
+                            speed,
+                        )
+                        if left <= phase <= right:
+                            endpoints.add(phase)
+        ordered = sorted(endpoints)
+        candidates = set(ordered)
+        candidates.update(
+            (first + second) / 2
+            for first, second in zip(ordered, ordered[1:])
+        )
+        for phase in sorted(candidates):
+            for reset in range(modulus):
+                time = (reset + phase) / modulus
+                if all(
+                    fractional_distance(speed * time) >= target
+                    for speed in speeds
+                ):
+                    return time
+    return None
+
+
 def minimum_unique_divisible_reset_blockers(modulus: int) -> int:
     """Return the exact number of slower residue classes needed to block resets.
 
