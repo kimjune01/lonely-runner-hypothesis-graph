@@ -144,3 +144,6 @@ every runner owns a singleton-load window, making the cyclic handoff graph
 connected; some cyclic first-occurrence order eliminates all 55 survivors.
 H47 localizes every elimination step to the preceding new owner and at most
 two owners from the intervening handoff segment or the two initial seeds.
+At the exact first-band edge, the same sweep passes all 55 survivors and gives
+endpoint labels `q m +/- 2`. The strict subset motivates H48: all 14 tuples
+strictly below the edge have full coefficient-two relation rank `n-1`.

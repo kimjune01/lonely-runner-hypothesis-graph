@@ -58,6 +58,134 @@ def periodic_bad_window_cells(
     )
 
 
+def bad_window_boundary_events(
+    speeds: tuple[int, ...], *, delta: Fraction
+) -> tuple[tuple[Fraction, tuple[tuple[int, str, int, int], ...]], ...]:
+    """Return exact enter/exit events as ``v_i t = center + side*delta``."""
+    if not speeds or any(speed <= 0 for speed in speeds):
+        raise ValueError("speeds must be a nonempty tuple of positive integers")
+    delta = Fraction(delta)
+    if not 0 < delta < Fraction(1, 2):
+        raise ValueError("delta must lie strictly between zero and one half")
+
+    by_time: dict[Fraction, list[tuple[int, str, int, int]]] = {}
+    for runner, speed in enumerate(speeds):
+        for center in range(speed + 1):
+            for side, kind in ((-1, "enter"), (1, "exit")):
+                time = (Fraction(center) + side * delta) / speed
+                if not 0 < time < 1:
+                    continue
+                by_time.setdefault(time, []).append((runner, kind, center, side))
+    return tuple(
+        (time, tuple(sorted(events))) for time, events in sorted(by_time.items())
+    )
+
+
+def strict_band_edge_grid_cover_certificate(
+    speeds: tuple[int, ...],
+) -> tuple[int, ...] | None:
+    """Witness the necessary strict cover on the ``1/(2n+1)`` time grid.
+
+    At band width ``2/(2n+1)``, a runner is strictly bad at ``k/(2n+1)``
+    exactly when ``k*v_i`` is congruent to ``0`` or ``+-1``.  A hypothetical
+    LRC counterexample satisfies this stronger-than-first-band condition.
+    """
+    if not speeds or any(speed <= 0 for speed in speeds):
+        raise ValueError("speeds must be a nonempty tuple of positive integers")
+    modulus = 2 * len(speeds) + 1
+    witnesses: list[int] = []
+    for time in range(modulus):
+        witness = next(
+            (
+                runner
+                for runner, speed in enumerate(speeds)
+                if min((time * speed) % modulus, (-time * speed) % modulus) <= 1
+            ),
+            None,
+        )
+        if witness is None:
+            return None
+        witnesses.append(witness)
+    return tuple(witnesses)
+
+
+def band_edge_grid_cell_intervals(
+    speeds: tuple[int, ...], *, grid_cell: int
+) -> tuple[tuple[int, int, Fraction, Fraction], ...]:
+    """Normalize one first-band grid cell to integer-radius-two intervals.
+
+    Write ``q=2n+1`` and ``t=(k+x)/q``.  Runner ``i`` is bad at band width
+    ``2/q`` exactly when ``|v_i*x-r|<2`` for some integer
+    ``r == -k*v_i (mod q)``.  Returned endpoints are not clipped to ``[0,1]``.
+    """
+    if not speeds or any(speed <= 0 for speed in speeds):
+        raise ValueError("speeds must be a nonempty tuple of positive integers")
+    modulus = 2 * len(speeds) + 1
+    grid_cell %= modulus
+    intervals: list[tuple[int, int, Fraction, Fraction]] = []
+    for runner, speed in enumerate(speeds):
+        residue = (-grid_cell * speed) % modulus
+        for center in range(-1, speed + 2):
+            if center % modulus != residue:
+                continue
+            intervals.append(
+                (
+                    runner,
+                    center,
+                    Fraction(center - 2, speed),
+                    Fraction(center + 2, speed),
+                )
+            )
+    return tuple(intervals)
+
+
+def strict_band_edge_cell_cover_certificate(
+    speeds: tuple[int, ...], *, grid_cell: int
+) -> tuple[tuple[int, int, Fraction, Fraction], ...] | None:
+    """Greedily certify a strict radius-two interval cover of one grid cell."""
+    intervals = band_edge_grid_cell_intervals(speeds, grid_cell=grid_cell)
+    first = max(
+        (interval for interval in intervals if interval[2] < 0 < interval[3]),
+        key=lambda interval: interval[3],
+        default=None,
+    )
+    if first is None:
+        return None
+    chain = [first]
+    reach = first[3]
+    while reach <= 1:
+        addition = max(
+            (
+                interval
+                for interval in intervals
+                if interval[2] < reach < interval[3]
+            ),
+            key=lambda interval: interval[3],
+            default=None,
+        )
+        if addition is None:
+            return None
+        chain.append(addition)
+        reach = addition[3]
+    return tuple(chain)
+
+
+def strict_band_edge_cover_certificate(
+    speeds: tuple[int, ...],
+) -> tuple[tuple[tuple[int, int, Fraction, Fraction], ...], ...] | None:
+    """Certify strict first-band coverage by one radius-two chain per cell."""
+    modulus = 2 * len(speeds) + 1
+    chains = []
+    for grid_cell in range(modulus):
+        chain = strict_band_edge_cell_cover_certificate(
+            speeds, grid_cell=grid_cell
+        )
+        if chain is None:
+            return None
+        chains.append(chain)
+    return tuple(chains)
+
+
 def handoff_seed_pair(
     speeds: tuple[int, ...], *, delta: Fraction
 ) -> tuple[int, int] | None:

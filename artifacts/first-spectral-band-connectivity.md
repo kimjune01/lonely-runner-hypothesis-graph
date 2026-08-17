@@ -194,6 +194,106 @@ new owner is linked to its predecessor plus at most two owners selected from
 the whole intervening segment and the fixed seeds. Proving that four-runner
 segment relation is the remaining target.
 
+## Strict band-edge normalization
+
+Put `q=2n+1` and sweep at the exact first-band edge
+
+```text
+beta = 2/q.
+```
+
+This is a better arithmetic normalization than the conjectured width. Every
+endpoint now has the exact label
+
+```text
+q v_i t = q m +/- 2.
+```
+
+The segment-local H47 certificate continues to pass all 55 completed scan
+survivors at this width. More importantly, a hypothetical counterexample has
+`ML(v)<1/(n+1)<beta`, so the cover is strict. Sampling at `t=k/q` gives the
+necessary modular certificate
+
+```text
+for every k mod q, some i has k v_i = 0, +1, or -1 mod q.
+```
+
+The strict condition separates the scan sharply. Exactly 14 of the 55 tuples
+lie strictly below `beta`, distributed by `n=3,...,9` as
+
+```text
+1, 2, 2, 2, 5, 1, 1.
+```
+
+Every one has full coefficient-two relation rank `n-1`. The only three tuples
+in the full scan with rank exactly `n-2` all lie on the boundary `ML=beta`:
+
+```text
+(1,5,6), (2,3,5), (3,4,7,11).
+```
+
+This motivates the stronger strict-band hypothesis
+
+```text
+ML(v) < 2/(2n+1)  implies  rank R_2(v) = n-1.
+```
+
+If true, choose `n-1` independent coefficient-two rows. Their signed maximal
+minors span the integer nullspace. After primitive normalization every speed
+is therefore at most
+
+```text
+(n-1)! 2^(n-1),
+```
+
+by the determinant expansion. This converts any hypothetical counterexample
+into a finite, explicit height search for each `n`, rather than merely a
+two-parameter family.
+
+The modular grid condition alone is not enough. For example, `(1,3,9)` covers
+all seven grid residues in the required strict modular sense, yet has
+`ML=1/2` and coefficient-two relation rank zero. At prime `q`, unit speeds can
+partition the nonzero residues into inverse pairs without forcing an additive
+relation. That prime branch is deliberately left open. The continuous handoff
+constraints between adjacent grid times are the additional input to seek.
+
+Those continuous constraints have an exact networking-style normal form.
+Write
+
+```text
+t = (k+x)/q,       0 <= x <= 1.
+```
+
+Runner `i` is bad precisely when, for some integer `r` with
+`r=-k v_i (mod q)`,
+
+```text
+|v_i x-r| < 2.
+```
+
+Thus each grid cell is covered by open intervals
+
+```text
+((r-2)/v_i, (r+2)/v_i).
+```
+
+Strict continuous coverage is equivalent to a chain beginning with
+`r in {-1,0,1}`, ending with `v_i-r in {-1,0,1}`, and having strict overlap
+at every handoff. For consecutive labels `(v_i,r)` and `(v_j,s)`, overlap is
+
+```text
+s v_i-r v_j < 2(v_i+v_j).
+```
+
+The left side is divisible by `q`, because both labels have residue
+`-k v (mod q)`. This proved reduction retains exactly what the grid-only test
+lost: a chain of determinant inequalities whose only error coefficient is
+two. On `(1,3,9)`, grid cell `k=3` has normalized intervals `[0,1/3)` and
+`(2/3,1]`, exposing the missing middle third immediately.
+
+The remaining H48 lemma is now finite and explicit: show that radius-two
+chains for every `k mod q` force `n-1` independent coefficient-two relations.
+
 The scheduling analogy is pinwheel/windows scheduling, where recurring tasks
 must receive service in every sliding window. Here the direction is dual: the
 periodic bad-window streams are fixed and one seeks a zero-load instant. The

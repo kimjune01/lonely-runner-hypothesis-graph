@@ -654,6 +654,119 @@ def test_periodic_bad_window_profile_has_exact_subtwo_average_load():
     )
 
 
+def test_bad_window_boundary_events_retain_exact_endpoint_labels():
+    speeds = (1, 2, 3)
+    delta = Fraction(1, 4)
+    events = lrc.bad_window_boundary_events(speeds, delta=delta)
+
+    simultaneous = next(event for event in events if event[0] == Fraction(1, 4))
+    assert simultaneous == (
+        Fraction(1, 4),
+        (
+            (0, "exit", 0, 1),
+            (2, "enter", 1, -1),
+        ),
+    )
+    for time, boundary_events in events:
+        for runner, _, center, side in boundary_events:
+            assert speeds[runner] * time == center + side * delta
+
+
+def test_strict_band_edge_grid_cover_has_exact_modular_witnesses():
+    speeds = (1, 2, 3)
+    witnesses = lrc.strict_band_edge_grid_cover_certificate(speeds)
+
+    assert witnesses is not None
+    modulus = 2 * len(speeds) + 1
+    assert len(witnesses) == modulus
+    assert all(
+        min((time * speeds[runner]) % modulus, (-time * speeds[runner]) % modulus)
+        <= 1
+        for time, runner in enumerate(witnesses)
+    )
+
+
+def test_band_edge_equality_need_not_give_a_strict_grid_cover():
+    speeds = (1, 3, 4, 5, 7)
+
+    assert lrc.maximum_loneliness(speeds) == Fraction(2, 11)
+    assert lrc.strict_band_edge_grid_cover_certificate(speeds) is None
+
+
+def test_strict_band_grid_cover_does_not_replace_continuous_coverage():
+    speeds = (1, 3, 9)
+
+    assert lrc.strict_band_edge_grid_cover_certificate(speeds) is not None
+    assert lrc.maximum_loneliness(speeds) == Fraction(1, 2)
+    assert lrc.bounded_relation_rank(speeds, max_coefficient=2) == 0
+
+
+def test_band_edge_grid_cell_normal_form_matches_the_continuous_windows():
+    speeds = (1, 3, 4, 5, 7)
+    modulus = 2 * len(speeds) + 1
+    delta = Fraction(2, modulus)
+    samples = (Fraction(0), Fraction(1, 7), Fraction(1, 2), Fraction(6, 7), Fraction(1))
+
+    for grid_cell in range(modulus):
+        intervals = lrc.band_edge_grid_cell_intervals(speeds, grid_cell=grid_cell)
+        for runner, center, left, right in intervals:
+            assert center % modulus == (-grid_cell * speeds[runner]) % modulus
+            assert speeds[runner] * left == center - 2
+            assert speeds[runner] * right == center + 2
+        for local_time in samples:
+            global_time = Fraction(grid_cell + local_time, modulus)
+            original = {
+                runner
+                for runner, speed in enumerate(speeds)
+                if lrc.fractional_distance(speed * global_time) < delta
+            }
+            normalized = {
+                runner
+                for runner, _, left, right in intervals
+                if left < local_time < right
+            }
+            assert normalized == original
+
+
+def test_band_edge_cell_cover_certificate_is_a_strict_interval_chain():
+    speeds = (1, 2, 3)
+
+    for grid_cell in range(7):
+        chain = lrc.strict_band_edge_cell_cover_certificate(
+            speeds, grid_cell=grid_cell
+        )
+        assert chain is not None
+        assert chain[0][2] < 0 < chain[0][3]
+        assert chain[-1][3] > 1
+        assert all(second[2] < first[3] for first, second in zip(chain, chain[1:]))
+
+
+def test_modular_endpoint_cover_can_fail_between_grid_samples():
+    speeds = (1, 3, 9)
+
+    assert lrc.strict_band_edge_grid_cover_certificate(speeds) is not None
+    assert lrc.strict_band_edge_cell_cover_certificate(speeds, grid_cell=3) is None
+
+
+@pytest.mark.parametrize(
+    "speeds",
+    [
+        (1, 2, 3),
+        (1, 3, 4, 7),
+        (1, 3, 4, 5, 9),
+        (1, 5, 6, 11, 16, 17),
+    ],
+)
+def test_strict_first_band_fixtures_have_cell_chains_and_full_relation_rank(speeds):
+    runner_count = len(speeds)
+
+    assert lrc.maximum_loneliness(speeds) < Fraction(2, 2 * runner_count + 1)
+    certificate = lrc.strict_band_edge_cover_certificate(speeds)
+    assert certificate is not None
+    assert len(certificate) == 2 * runner_count + 1
+    assert lrc.bounded_relation_rank(speeds, max_coefficient=2) == runner_count - 1
+
+
 def test_handoff_seeds_append_the_eight_speed_separator():
     speeds = (1, 4, 5, 6, 7, 11, 13, 16)
     seeds = lrc.handoff_seed_pair(speeds, delta=Fraction(1, 9))
@@ -743,6 +856,27 @@ def test_local_handoff_elimination_reaches_nine_speed_survivor():
     assert certificate is not None
     _, steps = certificate
     assert len(steps) == 7
+
+
+@pytest.mark.parametrize(
+    "speeds",
+    [
+        (1, 3, 4, 5, 7),
+        (1, 4, 5, 6, 7, 11, 13, 16),
+        (2, 5, 6, 8, 9, 11, 13, 14, 17),
+    ],
+)
+def test_local_handoff_elimination_survives_at_exact_first_band_edge(speeds):
+    runner_count = len(speeds)
+    certificate = lrc.local_handoff_elimination_certificate(
+        speeds,
+        delta=Fraction(2, 2 * runner_count + 1),
+        max_coefficient=2,
+        max_support=4,
+    )
+
+    assert certificate is not None
+    assert len(certificate[1]) == runner_count - 2
 
 
 def test_local_handoff_rows_use_only_segment_owners_or_initial_seeds():
@@ -935,6 +1069,7 @@ def test_first_band_scan_cli_emits_replayable_receipt():
     assert "handoff_cycle_appendable" in lines[0]
     assert "handoff_order_eliminates" in lines[0]
     assert "local_handoff_eliminates" in lines[0]
+    assert "band_edge_local_handoff_eliminates" in lines[0]
     assert "parameter_norm_squared_cutoff" in lines[0]
     assert any("1,2,6\t2/7" in line for line in lines[1:])
 

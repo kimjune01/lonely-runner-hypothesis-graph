@@ -172,6 +172,10 @@ H0  selected nine-runner target is open
                                                                                            +--H47  segment-local four-owner
                                                                                                    handoff elimination
                                                                                                    SELECTED FOR TESTING
+                                                                                                   |
+                                                                                                   +--H48  strict first-band
+                                                                                                            full relation rank
+                                                                                                            SELECTED FOR TESTING
 ```
 
 ## Nodes
@@ -1104,6 +1108,21 @@ H0  selected nine-runner target is open
 - Verification: `local_handoff_elimination_certificate`, its segment-support and sharp-support regressions, and scan column `local_handoff_eliminates`.
 - Artifact: `artifacts/first-spectral-band-connectivity.md`.
 
+### H48 — Strictly below the first band, coefficient-two relation rank is full
+
+- Mode: strict-band strengthening of H39, suggested by band-edge endpoint labels
+- Hypothesis: if `ML(v)<2/(2n+1)`, then `rank R_2(v)=n-1`.
+- Consequence: `n-1` independent coefficient-two rows determine a primitive speed vector up to sign. The maximal-minor formula and determinant expansion give `max(v_i)<=(n-1)! 2^(n-1)`. Thus a hypothetical counterexample has an explicit finite height bound derived from sharp relations, not the much larger quantitative-Kronecker bound.
+- Exact normalization: with `q=2n+1` and `delta=2/q`, every handoff endpoint satisfies `q v_i t=q m+/-2`. A hypothetical counterexample is a strict cover at this width, and its grid samples satisfy: for every `k mod q`, some `i` has `k v_i` congruent to `0,+1,-1 mod q`.
+- Proved cell reduction: on `t=(k+x)/q`, every bad window is `|v_i x-r|<2` with `r=-k v_i (mod q)`. Strict coverage is equivalent to an overlapping interval chain from a label `r in {-1,0,1}` to one with `v_i-r in {-1,0,1}`. Adjacent labels obey `s v_i-r v_j<2(v_i+v_j)`, and the left side is divisible by `q`.
+- Evidence: exactly 14 of the 55 completed first-band survivors are strict, distributed by `n=3,...,9` as `1,2,2,2,5,1,1`; all 14 have rank `n-1`. The H47 band-edge sweep also succeeds on all 55.
+- Boundary sharpness: the three rank-`n-2` scan tuples `(1,5,6)`, `(2,3,5)`, and `(3,4,7,11)` all have `ML=2/(2n+1)`. Strictness cannot simply be dropped.
+- Caveat: the modular grid cover alone does not force short additive relations: `(1,3,9)` passes it for `q=7` but has `ML=1/2` and coefficient-two rank zero. Prime `q` remains intentionally open. The missing input is continuous coverage between adjacent grid samples.
+- Verdict: selected for testing, not proved.
+- Kill condition: a primitive tuple strictly below the first-band edge with coefficient-two relation rank at most `n-2`.
+- Verification: `strict_band_edge_grid_cover_certificate`, `band_edge_grid_cell_intervals`, `strict_band_edge_cover_certificate`, exact endpoint-event tests, the scan's `band_edge_local_handoff_eliminates` column, and bounded-relation rank.
+- Artifact: `artifacts/first-spectral-band-connectivity.md`.
+
 ## What the graph established
 
 1. The elementary measure branch recovers `1/(2n)` and dies by an exact factor-two deficit.
@@ -1154,6 +1173,7 @@ H0  selected nine-runner target is open
 46. Exact sliding-window sweeps form a cyclic first-occurrence order from singleton owners. Some rotation is a complete bounded elimination order for all 55 survivors; the original 49 also pass three slack full-cover widths.
 47. Lower-runner induction proves that every runner in a minimal counterexample owns an open singleton-load window; consequently the handoff transition graph is connected.
 48. Every one of 229 tested elimination steps localizes to the preceding new owner plus at most two earlier owners with coefficient bound two. Both coefficient two and support four are sharp in the scan.
+49. Moving the sweep to the exact band edge labels every endpoint by `q m+/-2`. All 55 retain segment-local elimination there, while all 14 strict survivors have full relation rank `n-1`; the rank-`n-2` obstructions live exactly on the boundary.
 
 ## Frontier
 
@@ -1168,6 +1188,7 @@ H0  selected nine-runner target is open
 - Primary: prove or kill H44. Analyze the nondismountable core left when coefficient-two appendability stalls; every crossing relation then contains at least two unresolved speeds.
 - Primary: prove or kill H45. In a hypothetical full cover, analyze the overload blocks separating singleton-owner cells and derive either a zero-load escape or a bounded relation involving the successive owners.
 - Primary: prove or kill H47. Analyze the entire handoff segment between successive first-time owners; select at most two old owners whose endpoint events reduce the segment's large labels to one coefficient-two relation.
+- Primary: prove or kill H48 in its exact cell-chain form. Convert the divisible overlap determinants of the radius-two chains into one more independent coefficient-two speed relation at each rank-deficient stage.
 - Primary: turn H39 plus the ambient margin into a uniform contradiction, using determinant bounds for coefficient-two nullspaces rather than enumerating patterns separately for every `n`.
 - Secondary: if stronger auditability is desired, make the published sieve proof-producing or independently reimplement its three levels.
 - Historical: the local H21 37-prime scan and p=47 branch certificates remain useful cross-checks, but no longer block the nine-runner theorem.
