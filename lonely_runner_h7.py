@@ -606,6 +606,68 @@ def bounded_dissociated_generation_certificate(
     raise RuntimeError("the full speed tuple should always be maximal dissociated")
 
 
+def bounded_appendability_certificate(
+    speeds: tuple[int, ...], *, max_coefficient: int, seed_count: int = 2
+) -> tuple[tuple[int, ...], tuple[tuple[int, tuple[int, ...]], ...]] | None:
+    """Find a bounded-relation elimination ordering from fixed-size seeds.
+
+    A target is appendable when an exact bounded relation uses that target and
+    only already available coordinates. Appendability is monotone as the
+    available set grows, so greedily adding any available target cannot spoil
+    a certificate for a chosen seed set.
+    """
+    if not speeds or any(speed <= 0 for speed in speeds):
+        raise ValueError("speeds must be a nonempty tuple of positive integers")
+    if max_coefficient < 1:
+        raise ValueError("max_coefficient must be positive")
+    if not 1 <= seed_count <= len(speeds):
+        raise ValueError("seed_count must be between one and the number of speeds")
+
+    relations = tuple(
+        sorted(
+            bounded_relations(speeds, max_coefficient=max_coefficient),
+            key=lambda row: (
+                sum(coefficient != 0 for coefficient in row),
+                sum(abs(coefficient) for coefficient in row),
+                row,
+            ),
+        )
+    )
+    for seeds in combinations(range(len(speeds)), seed_count):
+        available = set(seeds)
+        steps: list[tuple[int, tuple[int, ...]]] = []
+        while len(available) < len(speeds):
+            addition = None
+            for target in range(len(speeds)):
+                if target in available:
+                    continue
+                relation = next(
+                    (
+                        row
+                        for row in relations
+                        if row[target]
+                        and all(
+                            not coefficient
+                            or index in available
+                            or index == target
+                            for index, coefficient in enumerate(row)
+                        )
+                    ),
+                    None,
+                )
+                if relation is not None:
+                    addition = target, relation
+                    break
+            if addition is None:
+                break
+            target, relation = addition
+            available.add(target)
+            steps.append((target, relation))
+        if len(available) == len(speeds):
+            return seeds, tuple(steps)
+    return None
+
+
 def bounded_relation_pattern(
     speeds: tuple[int, ...], *, max_coefficient: int
 ) -> tuple[tuple[int, ...], ...]:

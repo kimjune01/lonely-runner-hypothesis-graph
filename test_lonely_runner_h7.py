@@ -582,6 +582,58 @@ def test_generic_tuple_can_require_three_dissociated_seeds():
     assert relations == ()
 
 
+def test_signed_appendability_is_strictly_weaker_than_direct_two_seed_generation():
+    speeds = (1, 2, 3, 5, 8, 13, 21, 34)
+    direct_seeds, _ = lrc.bounded_dissociated_generation_certificate(
+        speeds, max_coefficient=2
+    )
+    certificate = lrc.bounded_appendability_certificate(
+        speeds, max_coefficient=2, seed_count=2
+    )
+
+    assert len(direct_seeds) == 3
+    assert certificate is not None
+    seeds, steps = certificate
+    assert seeds == (0, 1)
+    assert len(steps) == len(speeds) - 2
+    available = set(seeds)
+    for target, relation in steps:
+        assert relation[target] != 0
+        assert all(
+            coefficient == 0
+            for index, coefficient in enumerate(relation)
+            if index not in available and index != target
+        )
+        assert sum(c * v for c, v in zip(relation, speeds)) == 0
+        available.add(target)
+
+
+def test_coefficient_one_dissociated_triple_is_not_two_seed_appendable():
+    assert (
+        lrc.bounded_appendability_certificate(
+            (5, 7, 11), max_coefficient=2, seed_count=2
+        )
+        is None
+    )
+
+
+def test_eight_speed_first_band_tuple_separates_h42_from_appendability():
+    speeds = (1, 4, 5, 6, 7, 11, 13, 16)
+    assert lrc.maximum_loneliness(speeds) == Fraction(2, 17)
+    direct_seeds, _ = lrc.bounded_dissociated_generation_certificate(
+        speeds, max_coefficient=2
+    )
+    certificate = lrc.bounded_appendability_certificate(
+        speeds, max_coefficient=2, seed_count=2
+    )
+
+    assert direct_seeds == (0, 1, 5)
+    assert certificate is not None
+    seeds, steps = certificate
+    assert seeds == (0, 1)
+    assert [target for target, _ in steps] == [2, 3, 4, 5, 6, 7]
+
+
 def test_two_parameter_pattern_reconstructs_common_nullspace():
     speeds = (1, 2, 7)
     pattern = lrc.bounded_relation_pattern(speeds, max_coefficient=2)
@@ -722,6 +774,7 @@ def test_first_band_scan_cli_emits_replayable_receipt():
     assert lines[0].startswith("runners\theight\tspeeds\tmaximum_loneliness")
     assert "ambient_maximum" in lines[0]
     assert "signed_dissociated_seeds" in lines[0]
+    assert "two_seed_appendable" in lines[0]
     assert "parameter_norm_squared_cutoff" in lines[0]
     assert any("1,2,6\t2/7" in line for line in lines[1:])
 

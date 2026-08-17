@@ -62,6 +62,7 @@ clang++ -O3 -std=c++20 verify_h33_n4.cpp -o /tmp/verify_h33_n4
 /tmp/verify_h33_n4 1000 0 1
 ```
 
-The bounded first-band scanner now reports both positive-generation and
-signed-dissociated seed counts. The latter operationalizes H42, a stronger
-two-seed route to the selected counterexample-rank hypothesis H39.
+The bounded first-band scanner now reports positive-generation,
+signed-dissociated seed, and two-seed appendability certificates. The
+eight-speed scan separates the last two: direct H42-style generation fails,
+while the weaker H44 appendability ordering still proves the desired rank.

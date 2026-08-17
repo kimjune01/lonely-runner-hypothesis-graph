@@ -154,8 +154,12 @@ H0  selected nine-runner target is open
                                                                                            |       TESTING
                                                                                            |
                                                                                            +--H43  iterate unmodified
-                                                                                                   Riesz product
-                                                                                                   KILLED EXACTLY
+                                                                                           |       Riesz product
+                                                                                           |       KILLED EXACTLY
+                                                                                           |
+                                                                                           +--H44  two-seed bounded
+                                                                                                   appendability ordering
+                                                                                                   SELECTED FOR TESTING
 ```
 
 ## Nodes
@@ -898,7 +902,7 @@ H0  selected nine-runner target is open
 - Mode: bounded Freiman dimension / relative-subtorus reduction
 - Hypothesis: if `ML(v)<=2/(2n+1)`, the rational span of all relations `a dot v=0` with `a_i in {-2,-1,0,1,2}` has rank at least `n-2`.
 - Equivalent consequence: `v` lies in a rational linear subspace of dimension at most two defined by coefficient-two normals. For fixed `n` there are only finitely many such subspaces.
-- Trial: exact rational row reduction found rank at least `n-2` for all `42` first-band survivors across the five complete scan ranges. It includes both H32 counterexamples; for `(2,5,6,8,10,11)`, signed elimination gives `6=2*5-2*2`.
+- Trial: exact rational row reduction found rank at least `n-2` for all `49` first-band survivors across the six complete scan ranges through eight speeds. It includes both H32 counterexamples; for `(2,5,6,8,10,11)`, signed elimination gives `6=2*5-2*2`.
 - Why it matters: every hypothetical counterexample lies below the first-band ceiling. Proving H33 would reduce it to a 1-dimensional subtorus inside one of finitely many 2-dimensional rational subtori, precisely the objects whose relative spectra Jain--Kravitz show are explicitly computable by finite calculation.
 - Verdict: survives complete bounded scans; not proved.
 - Kill condition: a first-band tuple whose bounded relation rank is at most `n-3`.
@@ -1018,9 +1022,10 @@ H0  selected nine-runner target is open
 - Mode: stronger operational form of H39, proposed by the relation-lattice audit
 - Hypothesis: every primitive minimal LRC counterexample has some inclusion-maximal subset `S` of at most two speeds with no nonzero relation having every coefficient in `{-2,-1,0,1,2}`.
 - Star consequence: for every target `j` outside `S`, maximality supplies an exact coefficient-two relation supported on `S union {j}`. Its target coefficient is nonzero. One relation per target is independent because the matrix on the nonseed coordinates is diagonal with nonzero diagonal. Therefore the relation rank is at least `n-|S|>=n-2`, proving H39.
-- Evidence: all 42 primitive first-band survivors in the completed scans for `3<=n<=7` have such a seed set. The complete four-speed counterexample-domain survivors all pass. The generic tuple `(5,7,11)` requires three seeds, so the certificate is discriminating.
+- Evidence: all 42 primitive first-band survivors in the completed scans for `3<=n<=7` have such a seed set. The complete four-speed counterexample-domain survivors all pass.
+- Broad-form obstruction: `(1,4,5,6,7,11,13,16)` has `ML=2/17` but requires three direct seeds. Thus the analogous statement for every first-band tuple is false at eight speeds.
 - Caution: H42 is strictly stronger than H39. Independent short relations arranged in a long chain need not all be generated from a single pair; counterexample minimality would have to exclude that geometry.
-- Verdict: testing, not selected as a theorem.
+- Verdict: the broad first-band form is killed; the narrower minimal-counterexample hypothesis remains open but is superseded experimentally by H44.
 - Kill condition: a possible minimal counterexample, or a compelling first-band family, for which every maximal coefficient-two dissociated subset has size at least three.
 - Artifact: `artifacts/first-spectral-band-connectivity.md`.
 
@@ -1033,6 +1038,20 @@ H0  selected nine-runner target is open
 - Verdict: killed. A viable successor must annihilate known circuit terms by reweighting, or contract short circuits using minimal-counterexample structure.
 - Verification: `riesz_constant_term`, `riesz_cover_ratio`, and their exact regression tests.
 - Artifact: `artifacts/riesz-unit-relation.md`.
+
+### H44 — Minimal counterexamples admit a two-seed bounded appendability ordering
+
+- Mode: temporal-spanner-inspired weakening of H42
+- Definition: a target speed is coefficient-two appendable to an available set `S` when an exact relation `c_j v_j + sum_(i in S) c_i v_i=0` has every coefficient in `{-2,-1,0,1,2}` and `c_j` nonzero.
+- Hypothesis: every primitive minimal LRC counterexample has two seed speeds from which all remaining speeds can be appended successively.
+- Rank consequence: order one chosen relation per appended target. Restricted to target columns, the relation matrix is triangular with nonzero diagonal, so its `n-2` rows are independent. Hence H44 implies H39.
+- Strict weakening: the eight-term Fibonacci chain needs three direct H42 seeds but is H44-appendable from `(1,2)`. The first-band tuple `(1,4,5,6,7,11,13,16)` likewise kills broad H42 while appending from `(1,4)` via `5=1+4`, `6=1+5`, `7=1+6`, `11=4+7`, `13=6+7`, and `16=5+11`.
+- Evidence: all 49 primitive first-band survivors in the completed scans through `n=8` pass; a dissociated control `(5,7,11)` fails.
+- Stalled-core consequence: if closure from every seed pair stops, every coefficient-two relation crossing from the available set contains at least two unresolved coordinates. This gives an exact nondismountable core for the complementary branch.
+- Verdict: selected for testing, not proved.
+- Kill condition: a possible minimal counterexample, or a structured first-band family, with no two-seed appendability ordering.
+- Verification: `bounded_appendability_certificate`, scan column `two_seed_appendable`, and exact separator regressions.
+- Artifact: `artifacts/first-spectral-band-connectivity.md`.
 
 ## What the graph established
 
@@ -1068,7 +1087,7 @@ H0  selected nine-runner target is open
 30. Quantitative Kronecker plus induction proves a coarse height—and hence coarse connected-relation—bound throughout the first band.
 31. Every scanned first-band tuple admits a positive triangular coefficient-two relation tree, making the desired sign pattern operational.
 32. Positive generation from two earlier seeds is false at six speeds; `(2,5,6,8,10,11)` is the first exact obstruction.
-33. The invariant surviving that kill is relation rank: coefficient-two relations span rank at least `n-2` on all 42 scanned survivors, reducing the speed family to at most two parameters.
+33. The invariant surviving that kill is relation rank: coefficient-two relations span rank at least `n-2` on all 49 scanned survivors, reducing the speed family to at most two parameters.
 34. Full bounded-relation rank is false: `(3,4,7,11)` sharply requires a two-dimensional ambient subtorus.
 35. Exact rational cell optimization gives that sharp pattern ambient loneliness `1/4`, a strict `1/20` margin; flat-torus geodesic covering then reduces the pattern to finitely many parameter pairs.
 36. Giri--Kravitz Lemma 3.3 makes the strict ambient margin automatic under induction: every proper two-dimensional ambient torus has loneliness at least `1/n`.
@@ -1078,8 +1097,9 @@ H0  selected nine-runner target is open
 40. The broader H33 quantifier and the counterexample-only H39 quantifier are now separated. The published sum bound supports H39, not all of H33.
 41. A complete exact audit of `1,705,044,764` four-speed tuples proves H39 for `n=4`: only six first-band survivors remain and all have coefficient-two rank `2`.
 42. A dissociated Riesz product proves uniformly that every hypothetical counterexample with `n>=18` has a coefficient-one subset-sum relation. This sharply improves H28's first relation but does not yet provide rank `n-2`.
-43. A two-element inclusion-maximal coefficient-two dissociated seed would imply H39 by independent star relations. All 42 scanned first-band survivors pass this stronger H42 test, while a generic control fails it.
+43. A two-element inclusion-maximal coefficient-two dissociated seed would imply H39 by independent star relations. The first 42 scanned survivors pass, but an eight-speed first-band tuple kills the broad H42 form by requiring three direct seeds.
 44. Exact Riesz constant terms kill blind iteration: the circuit `(1,2,3)` lowers the normalized cover ratio from `1/3` to `1/4`, and the unmodified product excludes none of the 42 scanned survivors.
+45. Two-seed bounded appendability repairs H42's chain defect while retaining the rank implication. All 49 scanned survivors through eight speeds pass, including the exact H42 separator.
 
 ## Frontier
 
@@ -1091,7 +1111,7 @@ H0  selected nine-runner target is open
 - Primary: prove or kill H39 uniformly. It is the weaker statement actually sufficient for the general induction; H33 remains a useful stronger spectrum hypothesis.
 - Primary: iterate H41 on relation clusters or a quotient without treating sums of unrelated relations as bridges; the target is `n-2` independent coefficient-two rows.
 - Primary: formulate a relation-annihilating dual polynomial whose constant term ignores the known circuit lattice, and test it first on `(1,2,3)` and the 42 scan survivors.
-- Primary: try to kill H42 directly by imposing that no pair dominates the coefficient-two relation closure, beginning with exact five-speed first-band search. Do not infer H42 merely from high relation rank.
+- Primary: prove or kill H44. Analyze the nondismountable core left when coefficient-two appendability stalls; every crossing relation then contains at least two unresolved speeds.
 - Primary: turn H39 plus the ambient margin into a uniform contradiction, using determinant bounds for coefficient-two nullspaces rather than enumerating patterns separately for every `n`.
 - Secondary: if stronger auditability is desired, make the published sieve proof-producing or independently reimplement its three levels.
 - Historical: the local H21 37-prime scan and p=47 branch certificates remain useful cross-checks, but no longer block the nine-runner theorem.

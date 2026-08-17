@@ -135,7 +135,7 @@ only the first independent relation rather than H39's target rank `n-2`. The
 same artifact records an exact constant-term audit that kills blind iteration
 of the unmodified product after a relation is found.
 
-The first-band artifact also records H42, a stronger two-seed certificate.
-An inclusion-maximal coefficient-two dissociated seed of size at most two
-would imply H39 by independent star relations. All 42 completed first-band
-scan survivors pass; H42 remains a deliberately falsifiable hypothesis.
+The first-band artifact also records two distinct two-seed certificates.
+Direct H42 generation is false on an eight-speed first-band tuple. The weaker
+H44 appendability ordering still implies H39 by triangular relations and
+passes all 49 completed first-band scan survivors through eight speeds.
