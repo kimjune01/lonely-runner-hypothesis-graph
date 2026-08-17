@@ -28,6 +28,34 @@ def fractional_distance(value: Fraction | int) -> Fraction:
     return min(residue, 1 - residue)
 
 
+def small_residue_palette_witness(
+    speeds: tuple[int, ...], *, modulus: int
+) -> Fraction | None:
+    """Return an LRC witness from a small signed residue palette.
+
+    If every speed is congruent modulo ``q`` to one of ``+-1,...,+-m``, then
+    a grid phase ``a/q`` in ``[1/(n+1), 1/(m+1)]`` is lonely for all speeds.
+    This returns the first such phase, or ``None`` when a zero residue occurs
+    or the integer grid misses that interval.
+    """
+    if not speeds or any(speed <= 0 for speed in speeds):
+        raise ValueError("speeds must be a nonempty tuple of positive integers")
+    if len(set(speeds)) != len(speeds):
+        raise ValueError("speeds must be distinct")
+    if modulus < 2:
+        raise ValueError("modulus must be at least two")
+
+    residues = tuple(speed % modulus for speed in speeds)
+    if any(residue == 0 for residue in residues):
+        return None
+    palette_radius = max(min(residue, modulus - residue) for residue in residues)
+    runner_count = len(speeds)
+    numerator = (modulus + runner_count) // (runner_count + 1)
+    if numerator > modulus // (palette_radius + 1):
+        return None
+    return Fraction(numerator, modulus)
+
+
 def periodic_bad_window_cells(
     speeds: tuple[int, ...], *, delta: Fraction
 ) -> tuple[tuple[Fraction, Fraction, tuple[int, ...]], ...]:

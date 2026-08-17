@@ -1638,6 +1638,46 @@ def test_sparse_multiplier_blocks_expose_fixed_phase_limit():
     ) is None
 
 
+@pytest.mark.parametrize(
+    ("speeds", "modulus", "expected_time"),
+    [
+        ((1, 2, 7, 8), 6, Fraction(1, 3)),
+        (
+            (1, 4, 7, 82, 125, 167, 203, 286, 327),
+            40,
+            Fraction(1, 10),
+        ),
+    ],
+)
+def test_small_signed_residue_palette_gives_an_lrc_witness(
+    speeds, modulus, expected_time
+):
+    time = lrc.small_residue_palette_witness(speeds, modulus=modulus)
+
+    assert time == expected_time
+    assert min(
+        lrc.fractional_distance(speed * time) for speed in speeds
+    ) >= Fraction(1, len(speeds) + 1)
+
+
+def test_small_residue_palette_rejects_zero_and_grid_misses():
+    assert lrc.small_residue_palette_witness(
+        (1, 2, 3, 4, 5, 12, 13), modulus=11
+    ) is None
+    assert lrc.small_residue_palette_witness((1, 2, 6, 7), modulus=6) is None
+
+
+def test_n_plus_one_grid_reduces_every_counterexample_to_reset_branch():
+    speeds = (1, 2, 3)
+
+    assert lrc.small_residue_palette_witness(
+        speeds, modulus=len(speeds) + 1
+    ) == Fraction(1, len(speeds) + 1)
+    assert lrc.small_residue_palette_witness(
+        (1, 2, 4), modulus=4
+    ) is None
+
+
 def test_local_handoff_elimination_reaches_nine_speed_survivor():
     speeds = (2, 5, 6, 8, 9, 11, 13, 14, 17)
     certificate = lrc.local_handoff_elimination_certificate(

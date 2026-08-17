@@ -579,6 +579,62 @@ the groups on a common timeframe. The remaining adversarial cases are small
 inter-group scales, or sparse groups with `n<=m`, where the first safe phase
 cell is too narrow and a different periodic point is required.
 
+### The underlying invariant is a signed residue palette
+
+Geometric scaling is only one way to create the congruence used above. Let
+`v_1,...,v_n` be arbitrary distinct positive speeds and suppose that modulo
+some `q>=2` every speed has a nonzero signed representative in
+`{+-1,...,+-m}`. If
+
+```text
+ceil(q/(n+1)) <= floor(q/(m+1)),
+```
+
+choose `a` between the two sides and put `t=a/q`. For every speed,
+
+```text
+||v_i t|| = ||r_i t|| >= t >= 1/(n+1),       1<=|r_i|<=m.
+```
+
+The middle inequality is again the first canonical safe cell, because
+`t<=1/(m+1)`. This proves H73. When `m<n`, interval length makes the grid
+condition automatic for
+
+```text
+q >= ceil((m+1)(n+1)/(n-m)).
+```
+
+For example, the unrelated-looking speeds
+
+```text
+(1,4,7,82,125,167,203,286,327)
+```
+
+reduce modulo `40` to positive residues at most `7`; `t=4/40=1/10` is an
+exact nine-speed witness. No geometric decomposition is needed.
+
+A zero residue is a real boundary of this method, since that runner is at an
+integer at every `q`-grid time. A nonzero palette can also be too wide for the
+grid: `(1,2,3,4,5,12,13)` modulo `11` has signed radius `5`, but the interval
+from `11/8` to `11/6` contains no integer. Both are certificate misses, not
+counterexamples. H73 turns the user's networking-style load compression into
+a precise adversarial rule: a sufficiently narrow modular address space
+forces a collision-free service time.
+
+At the canonical choice `q=n+1`, this becomes the exact first case split for
+the general conjecture. If no speed is zero modulo `n+1`, every signed residue
+has magnitude at most `floor((n+1)/2)<n`, and `a=1` gives
+
+```text
+t=1/(n+1),       ||v_i t||>=1/(n+1) for every i.
+```
+
+Consequently every hypothetical counterexample contains an `(n+1)`-divisible
+speed. The reset/backoff program H49--H56 is therefore exhaustive: it is not
+merely one favorable factor case. The remaining problem is to exploit that
+forced zero residue by moving off the reset grid without letting the other
+signed residue classes cover every backoff candidate.
+
 The sharper H47 audit requires every elimination row to contain the immediately
 preceding new owner and at most two additional owners drawn from the intervening
 handoff segment or the two initial seeds. All 229 rows in the 55 certificates

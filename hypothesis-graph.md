@@ -281,6 +281,11 @@ H0  selected nine-runner target is open
                                                                                                                                                                                                                                                                                                                                     multiplier blocks
                                                                                                                                                                                                                                                                                                                                     synchronize eventually
                                                                                                                                                                                                                                                                                                                                     PROVED
+                                                                                                                                                                                                                                                                                                                                    |
+                                                                                                                                                                                                                                                                                                                                    +--H73  small signed residue
+                                                                                                                                                                                                                                                                                                                                             palettes give an
+                                                                                                                                                                                                                                                                                                                                             explicit lonely time
+                                                                                                                                                                                                                                                                                                                                             PROVED
 ```
 
 ## Nodes
@@ -1559,6 +1564,37 @@ H0  selected nine-runner target is open
 - Verification: `geometric_multiplier_block_witness`, `geometric_multiplier_block_scale_bound`, unequal-prefix wrappers, and exact positive/miss/boundary regressions.
 - Artifact: `artifacts/first-spectral-band-connectivity.md`.
 
+### H73 — A small signed residue palette gives an explicit lonely time
+
+- Mode: proved non-prime modular compression theorem, abstracting H72 away from geometric blocks
+- Statement: let `v_1,...,v_n` be distinct positive speeds. Suppose that for some modulus `q>=2`, every speed has a nonzero signed residue of magnitude at most `m`; equivalently,
+
+  ```text
+  v_i mod q in {+-1,...,+-m}  for every i.
+  ```
+
+  If
+
+  ```text
+  ceil(q/(n+1)) <= floor(q/(m+1)),
+  ```
+
+  then the tuple satisfies LRC.
+- Witness and proof: choose an integer `a` in the displayed interval and set `t=a/q`. Congruence replaces every `v_i t` by `+-r_i t` with `1<=r_i<=m`. Since `1/(n+1)<=t<=1/(m+1)`, the first canonical safe-cell inequality gives `||r_i t||>=t>=1/(n+1)`.
+- Uniform denominator consequence: if `m<n`, the grid condition is automatic once
+
+  ```text
+  q >= ceil((m+1)(n+1)/(n-m)).
+  ```
+
+  Thus an adversary cannot compress all speeds into fewer than `n` small signed residues modulo a sufficiently large modulus while avoiding a lonely grid time.
+- Global reset corollary: for `n>=2`, take `q=n+1`. Every nonzero residue has signed magnitude at most `floor((n+1)/2)<n`, and `a=1` lies in the safe interval. Hence, if no speed is divisible by `n+1`, then `t=1/(n+1)` is already an LRC witness. Every hypothetical counterexample must contain an `(n+1)`-divisible speed. This makes H49's reset/backoff branch exhaustive rather than optional.
+- Relation to H72: take `q=M-1`. Because `M^j=1 mod q`, every speed `kM^j` has the same signed residue as its within-block multiplier `k`. H72 is therefore one structured source of H73 certificates, but H73 applies to arbitrary tuples with the same residue compression.
+- Sharp certificate failures: a zero residue makes every `q`-grid time bad for that runner; otherwise the grid interval itself can miss, as for `(1,2,3,4,5,12,13)` modulo `11`. These are failures of this certificate, not LRC counterexamples.
+- Verdict: proved.
+- Verification: `small_residue_palette_witness`, including arbitrary non-geometric, exact-grid-miss, and zero-residue regressions.
+- Artifact: `artifacts/first-spectral-band-connectivity.md`.
+
 ## What the graph established
 
 1. The elementary measure branch recovers `1/(2n)` and dies by an exact factor-two deficit.
@@ -1633,6 +1669,8 @@ H0  selected nine-runner target is open
 70. Coefficient-one rank exhibits an even sharper boundary jump. Every strict survivor through nine speeds has rank at least `n-2`; the only three deficiencies have rank `n-3` and lie exactly at `ML=2/(2n+1)`. This upgrades the preferred invariant from coefficient-two handoff rank to a strict-interior unit-circuit hypothesis.
 71. The rank-only Riesz load floor H70 is false, but its separated-block killer is itself harmless for a stronger reason. H71 synchronizes every geometric canonical block at the fixed phase `t=floor((M-1)/(m+1))/(M-1)` and proves the full LRC bound for any number of blocks.
 72. H72 removes both equal-size and consecutive-block assumptions. Arbitrary multiplier blocks `A_j` synchronize at `a/(M-1)` whenever the exact fixed-phase grid meets `[1/(n+1),1/(m+1)]`; if `n>m`, this is automatic beyond the explicit scale `1+ceil((m+1)(n+1)/(n-m))`.
+73. H73 identifies the invariant behind H72: any arbitrary tuple compressed modulo `q` into the nonzero signed palette `+-[1,m]` is safe when the `q`-grid meets `[1/(n+1),1/(m+1)]`. For `m<n`, a simple explicit lower bound on `q` makes that intersection automatic.
+74. At the canonical modulus `q=n+1`, H73 gives the exact top-level dichotomy: a tuple with no zero residue is solved at `t=1/(n+1)`, so every hypothetical counterexample necessarily enters H49 with an `(n+1)`-divisible reset runner.
 
 ## Frontier
 
@@ -1647,6 +1685,7 @@ H0  selected nine-runner target is open
 - Killed route: H70 shows that coefficient-one codimension three alone does not force a reciprocal Riesz load floor; three separated consecutive blocks violate it. A successor must use the strict first-band cover to forbid or couple such dense relation blocks.
 - Proved family: use H71 as the equality model for mixed factor groups. Any counterexample built from several geometric copies of a canonical block must break the common-scale fixed point—for example through unequal block shapes or non-geometric transitions—rather than merely separating the blocks.
 - Proved extension: H72 also removes unequal and internally nonfactor block shapes at sufficiently large common scale. The live grouped-speed obstruction is now a small-scale transition or a sparse normalized block system with total count `n<=m`; test short-period points there before returning to handoff casework.
+- Proved modular abstraction: use H73 before any prime-specific lifting. A hypothetical counterexample must avoid every modulus whose nonzero signed residue radius `m<n` is small enough relative to `q`; zero residues and wide palettes are the exact remaining branches.
 - Primary: replace H23 by a height-sensitive gap theorem, or formulate a lift-tree invariant that distinguishes fixed ordinary integers from spurious profinite survivor branches.
 - Primary: combine H27's upper-gap constraints with finite-checking/volume bounds; seek a complementary lemma controlling cuts with at least half the runners above them.
 - Primary: for the finite H28 normal vectors, formulate and test a concrete relative-subtorus descent; do not use the phrase “compatible sign pattern” without the transformation and preserved invariant.
