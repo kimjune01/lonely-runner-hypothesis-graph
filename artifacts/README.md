@@ -174,3 +174,6 @@ third-order certificate closes sharp fixtures and almost every small scan;
 higher-dimensional survivors define the next uniform-moment problem.
 H60 kills the naive conversion of a repeated four-blocker cluster into a
 coefficient-two relation; exact event phases and signed errors must survive.
+H61 retains those errors and proves a multiscale sum-difference compression.
+Kneser then forces additive growth below scale `N/6` unless the entire event
+cluster exposes a shared gcd.

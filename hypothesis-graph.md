@@ -224,6 +224,10 @@ H0  selected nine-runner target is open
                                                                                                                                                                                                                +--H60  repeated cluster
                                                                                                                                                                                                                         bounded relation
                                                                                                                                                                                                                         KILLED
+                                                                                                                                                                                                                        |
+                                                                                                                                                                                                                        +--H61  signed-error
+                                                                                                                                                                                                                                 sumset compression
+                                                                                                                                                                                                                                 PROVED
 ```
 
 ## Nodes
@@ -1305,6 +1309,19 @@ H0  selected nine-runner target is open
 - Verification: exact `boundary_event_blocked_centers` intersection and `bounded_relation_rank` regression.
 - Artifact: `artifacts/first-spectral-band-connectivity.md`.
 
+### H61 — Signed errors compress repeated events into sumset growth
+
+- Mode: proved phase-preserving replacement for H60
+- Compression: if a blocker `u` hits two events `j_1,j_2` of boundary runner `v`, their centered errors differ by `Nd_u`, where `d_u=u(j_2-j_1) mod v` has centered magnitude below `2v/N`. Thus every common blocker is bad at time `(j_2-j_1)/v` with doubled width, while `v` is reset.
+- Multiscale form: for a common event set `J`, every element of `rJ-rJ` makes every blocker bad at width `2r/N`.
+- Stabilizer lemma: if `r<=N/6`, the stabilizer order of `rJ-rJ` divides `gcd(v, all blockers)`. Otherwise its phase subgroup contains a point at distance at least `1/3`, contradicting the compressed strict width.
+- Kneser corollary: for a gcd-one cluster the stabilizer is trivial, so `|rJ-rJ|>=2r|J|-(2r-1)`.
+- Consequence: high event moments force either additive growth in a wider simultaneous bad set or a shared gcd cluster. This retains the phase information H60 discarded.
+- Limitation: a uniform upper bound on the wider simultaneous bad set is still missing.
+- Verdict: proved.
+- Verification: `boundary_event_signed_error`, `compressed_boundary_event_error`, `common_boundary_event_sum_difference_set`, and exact multiscale regressions.
+- Artifact: `artifacts/first-spectral-band-connectivity.md`.
+
 ## What the graph established
 
 1. The elementary measure branch recovers `1/(2n)` and dies by an exact factor-two deficit.
@@ -1368,6 +1385,7 @@ H0  selected nine-runner target is open
 59. Pairwise blocking of those events has an exact gcd-residue count. If the capacities aimed at either side of runner `v` sum below `v`, an explicit boundary witness exists; this sieve certifies most small three-speed tuples but leaves the sharp adversarial fixtures.
 60. Odd Bonferroni moments of the blocker event sets form a certified hierarchy. Order three closes the sharp divisible fixtures and nearly every completed small scan, but higher-dimensional examples require higher order; a uniform order or high-load structure theorem would prove the general case.
 61. Repeated four-way congestion does not automatically yield a coefficient-two relation: an explicit five-speed cluster co-blocks three events while having bounded-relation rank zero. Event indices or signed errors are load-bearing.
+62. Signed errors restore that lost information. Equal-cardinality event sums compress to wider simultaneous bad phases; below scale `N/6`, Kneser gives linear sumset growth unless the boundary runner and every blocker share a nontrivial gcd.
 
 ## Frontier
 
@@ -1391,6 +1409,7 @@ H0  selected nine-runner target is open
 - Primary: strengthen H58 from summed pair capacities to overlap-aware event ownership. Two blockers that hit the same `v` events waste capacity; quantify this by exact pairwise intersections before returning to a raw union bound.
 - Primary: prove a uniform H59 truncation bound from the arithmetic form of the event sets, or show that survival to order `2h+1` forces an `h`-way gcd/relation cluster usable by H39. Do not assume order three remains sufficient past the tested range.
 - Primary: after H60, retain signed event errors `e_u=u(Nj+1)-mNv` when comparing repeated clusters. Test relations among error differences across two event indices, not among the blocker speeds from one cluster alone.
+- Primary: close H61 by upper-bounding the wider simultaneous bad set. Combine its aperiodic growth lower bound with an exact lattice count; in the periodic branch, feed the exposed common gcd back into minimal-counterexample induction.
 - Primary: turn H39 plus the ambient margin into a uniform contradiction, using determinant bounds for coefficient-two nullspaces rather than enumerating patterns separately for every `n`.
 - Secondary: if stronger auditability is desired, make the published sieve proof-producing or independently reimplement its three levels.
 - Historical: the local H21 37-prime scan and p=47 branch certificates remain useful cross-checks, but no longer block the nine-runner theorem.

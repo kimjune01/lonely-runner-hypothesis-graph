@@ -1130,6 +1130,95 @@ def test_repeated_four_blocker_cluster_need_not_have_a_bounded_relation():
     )
 
 
+def test_repeated_boundary_blockers_compress_to_a_doubled_width_time():
+    blockers = (113, 118, 178, 282)
+    boundary_speed = 281
+    modulus = 7
+    first = 221
+    second = 224
+    difference = second - first
+
+    for blocker in blockers:
+        first_error = lrc.boundary_event_signed_error(
+            blocker=blocker,
+            boundary_speed=boundary_speed,
+            modulus=modulus,
+            center=first,
+        )
+        second_error = lrc.boundary_event_signed_error(
+            blocker=blocker,
+            boundary_speed=boundary_speed,
+            modulus=modulus,
+            center=second,
+        )
+        compressed = lrc.compressed_boundary_event_error(
+            blocker=blocker,
+            boundary_speed=boundary_speed,
+            modulus=modulus,
+            first_center=first,
+            second_center=second,
+        )
+
+        assert abs(first_error) < boundary_speed
+        assert abs(second_error) < boundary_speed
+        assert second_error - first_error == modulus * compressed
+        assert (blocker * difference - compressed) % boundary_speed == 0
+        assert abs(compressed) < Fraction(2 * boundary_speed, modulus)
+        assert (
+            lrc.fractional_distance(
+                blocker * Fraction(difference, boundary_speed)
+            )
+            < Fraction(2, modulus)
+        )
+    assert lrc.fractional_distance(
+        boundary_speed * Fraction(difference, boundary_speed)
+    ) == 0
+
+
+def test_common_event_sum_differences_obey_multiscale_compression():
+    blockers = (113, 118, 178, 282)
+    boundary_speed = 281
+    modulus = 7
+
+    first_differences = lrc.common_boundary_event_sum_difference_set(
+        blockers=blockers,
+        boundary_speed=boundary_speed,
+        modulus=modulus,
+        order=1,
+    )
+    second_differences = lrc.common_boundary_event_sum_difference_set(
+        blockers=blockers,
+        boundary_speed=boundary_speed,
+        modulus=modulus,
+        order=2,
+    )
+
+    assert first_differences == {0, 3, 52, 55, 226, 229, 278}
+    assert len(second_differences) == 19
+    assert math.gcd(boundary_speed, *blockers) == 1
+    stabilizer = {
+        shift
+        for shift in range(boundary_speed)
+        if {
+            (difference + shift) % boundary_speed
+            for difference in first_differences
+        }
+        == first_differences
+    }
+    assert stabilizer == {0}
+    common_size = 3
+    assert len(first_differences) >= 2 * common_size - 1
+    for order, differences in ((1, first_differences), (2, second_differences)):
+        assert all(
+            lrc.fractional_distance(
+                blocker * Fraction(difference, boundary_speed)
+            )
+            < Fraction(2 * order, modulus)
+            for blocker in blockers
+            for difference in differences
+        )
+
+
 def test_handoff_seeds_append_the_eight_speed_separator():
     speeds = (1, 4, 5, 6, 7, 11, 13, 16)
     seeds = lrc.handoff_seed_pair(speeds, delta=Fraction(1, 9))

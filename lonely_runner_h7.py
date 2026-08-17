@@ -170,6 +170,86 @@ def boundary_event_blocked_centers(
     )
 
 
+def boundary_event_signed_error(
+    *, blocker: int, boundary_speed: int, modulus: int, center: int
+) -> int:
+    """Return the centered integer error at a plus-side boundary event."""
+    if blocker <= 0 or boundary_speed <= 0:
+        raise ValueError("speeds must be positive")
+    if modulus < 3:
+        raise ValueError("modulus must be at least three")
+    if not 0 <= center < boundary_speed:
+        raise ValueError("center must index a boundary event")
+    event_modulus = modulus * boundary_speed
+    residue = blocker * (modulus * center + 1) % event_modulus
+    return residue if 2 * residue <= event_modulus else residue - event_modulus
+
+
+def compressed_boundary_event_error(
+    *,
+    blocker: int,
+    boundary_speed: int,
+    modulus: int,
+    first_center: int,
+    second_center: int,
+) -> int:
+    """Compress two blocked event errors to a doubled-width residue."""
+    errors = tuple(
+        boundary_event_signed_error(
+            blocker=blocker,
+            boundary_speed=boundary_speed,
+            modulus=modulus,
+            center=center,
+        )
+        for center in (first_center, second_center)
+    )
+    if any(abs(error) >= boundary_speed for error in errors):
+        raise ValueError("both boundary events must be blocked")
+    difference = errors[1] - errors[0]
+    if difference % modulus:
+        raise RuntimeError("boundary error differences must be divisible by modulus")
+    return difference // modulus
+
+
+def common_boundary_event_sum_difference_set(
+    *,
+    blockers: tuple[int, ...],
+    boundary_speed: int,
+    modulus: int,
+    order: int,
+) -> frozenset[int]:
+    """Return ``rJ-rJ`` for the common blocked-event set ``J`` modulo ``v``."""
+    if not blockers or any(blocker <= 0 for blocker in blockers):
+        raise ValueError("blockers must be positive")
+    if boundary_speed <= 0:
+        raise ValueError("boundary_speed must be positive")
+    if modulus < 3:
+        raise ValueError("modulus must be at least three")
+    if order < 1:
+        raise ValueError("order must be positive")
+    common_centers = set(range(boundary_speed))
+    for blocker in blockers:
+        common_centers.intersection_update(
+            boundary_event_blocked_centers(
+                blocker=blocker,
+                boundary_speed=boundary_speed,
+                modulus=modulus,
+            )
+        )
+    sums = {0}
+    for _ in range(order):
+        sums = {
+            (subtotal + center) % boundary_speed
+            for subtotal in sums
+            for center in common_centers
+        }
+    return frozenset(
+        (first - second) % boundary_speed
+        for first in sums
+        for second in sums
+    )
+
+
 def boundary_bonferroni_witness_runner(
     speeds: tuple[int, ...], *, order: int
 ) -> int | None:

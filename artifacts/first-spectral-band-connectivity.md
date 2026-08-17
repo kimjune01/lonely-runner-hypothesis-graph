@@ -646,6 +646,60 @@ replaced by the support of one repeated cluster; any algebraic extraction must
 retain the actual event indices, signed errors, or interactions among several
 clusters.
 
+## Signed-error compression and additive growth
+
+Retaining the indices gives an exact replacement for H60. At the plus-side
+event `j` of boundary runner `v`, define the centered signed error of blocker
+`u` by
+
+```text
+e_u(j) = u(Nj+1)-m_j Nv,       |e_u(j)|<v.
+```
+
+If `u` blocks two events `j_1,j_2`, subtraction cancels the phase-one term:
+
+```text
+e_u(j_2)-e_u(j_1)=N d_u,
+d_u = u(j_2-j_1)-v(m_2-m_1),
+|d_u|<2v/N.
+```
+
+Hence at the compressed time `(j_2-j_1)/v`, the boundary runner is exactly
+reset and every common blocker is bad at doubled width `2/N`. More generally,
+if `J` is the common event set of a blocker cluster, then for every positive
+integer `r`,
+
+```text
+rJ-rJ subset {delta mod v : ||u delta/v|| < 2r/N for every blocker u}.
+```
+
+The proof sums `r` signed errors on each side; the constant residue `u mod N`
+cancels because the two multisets have equal cardinality.
+
+For `r<=N/6`, this compression has an additive-combinatorial dichotomy. Let
+`H` be the stabilizer of `rJ-rJ` in `Z/vZ`, of order `d`. Since zero belongs
+to the difference set, `H` is contained in the displayed simultaneous bad
+set. The subgroup phases for blocker `u` have order `d/gcd(d,u)`. Any
+nontrivial cyclic phase subgroup contains an element at distance at least
+`1/3`, contradicting the strict width `2r/N<=1/3`. Therefore
+
+```text
+d divides gcd(v, every blocker).
+```
+
+If that common gcd is one, the stabilizer is trivial. Kneser's theorem then
+gives the aperiodic growth bound
+
+```text
+|rJ-rJ| >= 2r|J|-(2r-1).
+```
+
+Thus a high-order event intersection must either expand linearly inside a
+simultaneous wider bad set or expose a shared gcd cluster. This does not yet
+bound the wider bad set sharply enough for all tuples, but it replaces the
+false support-only relation claim with a phase-preserving, height-independent
+structural dichotomy.
+
 The scheduling analogy is pinwheel/windows scheduling, where recurring tasks
 must receive service in every sliding window. Here the direction is dual: the
 periodic bad-window streams are fixed and one seeks a zero-load instant. The
