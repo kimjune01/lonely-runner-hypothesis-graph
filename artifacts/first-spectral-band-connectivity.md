@@ -171,12 +171,13 @@ the pair `(2,11)`, while rotating the cycle to start `(11,8)` yields the full
 elimination order `(11,8,6,5,3,2)`. Cycling repairs that failure.
 
 This is evidence that sliding-window geometry selects both seeds and row
-order, not yet a proof that overload blocks force the required bounded
+order, not yet a proof that handoff segments force the required bounded
 arithmetic relations without future owners.
 
 The sharper H47 audit requires every elimination row to contain the immediately
-preceding new owner and at most two additional earlier owners. All 229 rows in
-the 55 certificates pass with coefficient bound two and support at most four.
+preceding new owner and at most two additional owners drawn from the intervening
+handoff segment or the two initial seeds. All 229 rows in the 55 certificates
+pass with coefficient bound two and support at most four.
 Both constants are necessary in the audit: coefficient one fails on 36 tuples,
 while support three fails on `(1,3,4,5,7,11,18)`. Its load-bearing four-term
 step is
@@ -185,9 +186,13 @@ step is
 -2*5 + 2*7 - 2*11 + 18 = 0.
 ```
 
-This local form matches the overload-block geometry more closely than H45:
-each new owner is linked to its predecessor plus at most two already-seen
-owners. Proving that local four-runner relation is the remaining target.
+This is **segment-local**, not single-block-local. In 75 of the 229 steps, old
+owners intervene between successive first-time owners; the longest observed
+segment crosses 24 singleton regions. The stronger single-overload-block
+interpretation is therefore killed. What survives is still restrictive: each
+new owner is linked to its predecessor plus at most two owners selected from
+the whole intervening segment and the fixed seeds. Proving that four-runner
+segment relation is the remaining target.
 
 The scheduling analogy is pinwheel/windows scheduling, where recurring tasks
 must receive service in every sliding window. Here the direction is dual: the

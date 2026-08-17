@@ -874,7 +874,7 @@ def local_handoff_elimination_certificate(
 ) -> tuple[
     tuple[int, ...], tuple[tuple[int, tuple[int, ...]], ...]
 ] | None:
-    """Require each handoff row to contain its predecessor and small support."""
+    """Find small predecessor relations local to handoff segments and two seeds."""
     if max_support < 2:
         raise ValueError("max_support must be at least two")
     owners = singleton_handoff_owners(speeds, delta=delta)
@@ -891,16 +891,25 @@ def local_handoff_elimination_certificate(
         )
     )
     for rotation in range(len(owners)):
+        rotated = owners[rotation:] + owners[:rotation]
         order: list[int] = []
-        for owner in owners[rotation:] + owners[:rotation]:
+        first_positions: list[int] = []
+        for position, owner in enumerate(rotated):
             if owner not in order:
                 order.append(owner)
+                first_positions.append(position)
         if len(order) != len(speeds):
             continue
-        available = set(order[:2])
+        seeds = set(order[:2])
         steps: list[tuple[int, tuple[int, ...]]] = []
         for position, target in enumerate(order[2:], 2):
             predecessor = order[position - 1]
+            segment = set(
+                rotated[
+                    first_positions[position - 1] : first_positions[position] + 1
+                ]
+            )
+            allowed = seeds | segment
             relation = next(
                 (
                     row
@@ -910,9 +919,7 @@ def local_handoff_elimination_certificate(
                     and sum(coefficient != 0 for coefficient in row)
                     <= max_support
                     and all(
-                        not coefficient
-                        or index in available
-                        or index == target
+                        not coefficient or index in allowed
                         for index, coefficient in enumerate(row)
                     )
                 ),
@@ -920,7 +927,6 @@ def local_handoff_elimination_certificate(
             )
             if relation is None:
                 break
-            available.add(target)
             steps.append((target, relation))
         else:
             return tuple(order), tuple(steps)

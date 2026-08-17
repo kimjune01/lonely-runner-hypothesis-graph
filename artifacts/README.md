@@ -143,4 +143,4 @@ The same artifact records H45 and H46: lower-runner induction proves that
 every runner owns a singleton-load window, making the cyclic handoff graph
 connected; some cyclic first-occurrence order eliminates all 55 survivors.
 H47 localizes every elimination step to the preceding new owner and at most
-two earlier owners.
+two owners from the intervening handoff segment or the two initial seeds.

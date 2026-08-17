@@ -745,6 +745,51 @@ def test_local_handoff_elimination_reaches_nine_speed_survivor():
     assert len(steps) == 7
 
 
+def test_local_handoff_rows_use_only_segment_owners_or_initial_seeds():
+    speeds = (1, 3, 4, 5, 7)
+    delta = Fraction(1, 6)
+    order, steps = lrc.local_handoff_elimination_certificate(
+        speeds,
+        delta=delta,
+        max_coefficient=2,
+        max_support=4,
+    )
+    owners = lrc.singleton_handoff_owners(speeds, delta=delta)
+    rotation = next(
+        owners[index:] + owners[:index]
+        for index in range(len(owners))
+        if tuple(dict.fromkeys(owners[index:] + owners[:index])) == order
+    )
+    first_positions = [rotation.index(owner) for owner in order]
+    seeds = set(order[:2])
+
+    for position, (_, relation) in enumerate(steps, 2):
+        segment = set(
+            rotation[first_positions[position - 1] : first_positions[position] + 1]
+        )
+        support = {
+            index for index, coefficient in enumerate(relation) if coefficient
+        }
+        assert support <= seeds | segment
+
+
+def test_segment_local_handoff_needs_the_first_band_cutoff():
+    speeds = (1, 2, 3, 12)
+    assert lrc.maximum_loneliness(speeds) == Fraction(3, 13)
+    assert lrc.bounded_appendability_certificate(
+        speeds, max_coefficient=2, seed_count=2
+    ) is not None
+    assert (
+        lrc.local_handoff_elimination_certificate(
+            speeds,
+            delta=Fraction(25, 104),
+            max_coefficient=2,
+            max_support=4,
+        )
+        is None
+    )
+
+
 def test_two_parameter_pattern_reconstructs_common_nullspace():
     speeds = (1, 2, 7)
     pattern = lrc.bounded_relation_pattern(speeds, max_coefficient=2)

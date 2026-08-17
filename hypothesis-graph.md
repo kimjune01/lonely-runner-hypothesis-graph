@@ -169,7 +169,7 @@ H0  selected nine-runner target is open
                                                                                            |       singleton-load window
                                                                                            |       PROVED BY INDUCTION
                                                                                            |
-                                                                                           +--H47  local four-owner
+                                                                                           +--H47  segment-local four-owner
                                                                                                    handoff elimination
                                                                                                    SELECTED FOR TESTING
 ```
@@ -1090,17 +1090,18 @@ H0  selected nine-runner target is open
 - Verification: `inductive_private_window_margin`, exact load-profile tests, and the proof above.
 - Artifact: `artifacts/first-spectral-band-connectivity.md`.
 
-### H47 — A local four-owner handoff order eliminates a minimal counterexample
+### H47 — A segment-local four-owner handoff order eliminates a minimal counterexample
 
-- Mode: local strengthening of H45 matched to one-dimensional overload blocks
-- Hypothesis: H45 has a successful cyclic rotation in which every new owner `j` has a relation supported on at most four runners, contains both `j` and the immediately preceding new owner, uses only owners already seen besides `j`, and has every coefficient in `{-2,-1,0,1,2}`.
-- Consequence: the rows remain triangular on their new-owner targets, so H47 proves H39. Compared with H45, it additionally localizes each step to a handoff edge plus at most two earlier owners.
+- Mode: segment-local strengthening of H45
+- Hypothesis: H45 has a successful cyclic rotation in which every new owner `j` has a relation supported on at most four runners, contains both `j` and the preceding first-time owner, draws every additional owner from the intervening handoff segment or the two initial seeds, and has every coefficient in `{-2,-1,0,1,2}`.
+- Consequence: the rows remain triangular on their new-owner targets, so H47 proves H39. Compared with H45, it localizes each step to a handoff segment plus two fixed anchors.
 - Evidence: all 229 elimination steps in the 55 completed certificates through nine speeds satisfy the rule. Coefficient one fails on 36 tuples. Support three fails on `(1,3,4,5,7,11,18)`; its necessary four-term step is `-2*5+2*7-2*11+18=0`.
-- Why promising: a transition between singleton owners is separated by a one-dimensional overload block. A four-runner certificate is compatible with combining its two boundary events; an unbounded-support relation would not be a genuinely local consequence.
-- Caveat: endpoint overlap inequalities currently give approximate relations with potentially large integer labels, not coefficient-two exact equalities. This arithmetic upgrade is the missing lemma.
+- Killed strengthening: consecutive first-time owners need not be consecutive singleton handoffs. This fails on 75 of 229 steps; the longest observed segment crosses 24 singleton regions. A proof cannot use only one overload block.
+- Why promising: despite arbitrarily repeated old owners, the certificate selects at most two of them. An unbounded-support dependence on the whole segment is unnecessary throughout the scan.
+- Caveat: endpoint overlap inequalities currently give approximate relations with potentially large integer labels, not coefficient-two exact equalities. Selecting two old owners and making that arithmetic upgrade are the missing steps.
 - Verdict: selected for testing, not proved.
 - Kill condition: a possible minimal counterexample for which every cyclic handoff order needs coefficient above two, support above four, a future owner, or omission of the immediate predecessor.
-- Verification: `local_handoff_elimination_certificate`, its sharp support regression, and scan column `local_handoff_eliminates`.
+- Verification: `local_handoff_elimination_certificate`, its segment-support and sharp-support regressions, and scan column `local_handoff_eliminates`.
 - Artifact: `artifacts/first-spectral-band-connectivity.md`.
 
 ## What the graph established
@@ -1166,7 +1167,7 @@ H0  selected nine-runner target is open
 - Primary: formulate a relation-annihilating dual polynomial whose constant term ignores the known circuit lattice, and test it first on `(1,2,3)` and the 42 scan survivors.
 - Primary: prove or kill H44. Analyze the nondismountable core left when coefficient-two appendability stalls; every crossing relation then contains at least two unresolved speeds.
 - Primary: prove or kill H45. In a hypothetical full cover, analyze the overload blocks separating singleton-owner cells and derive either a zero-load escape or a bounded relation involving the successive owners.
-- Primary: prove or kill H47. Combine the two boundary events of an overload block and determine what first-band/minimality input can reduce their large endpoint labels to a coefficient-two relation on at most four seen owners.
+- Primary: prove or kill H47. Analyze the entire handoff segment between successive first-time owners; select at most two old owners whose endpoint events reduce the segment's large labels to one coefficient-two relation.
 - Primary: turn H39 plus the ambient margin into a uniform contradiction, using determinant bounds for coefficient-two nullspaces rather than enumerating patterns separately for every `n`.
 - Secondary: if stronger auditability is desired, make the published sieve proof-producing or independently reimplement its three levels.
 - Historical: the local H21 37-prime scan and p=47 branch certificates remain useful cross-checks, but no longer block the nine-runner theorem.
