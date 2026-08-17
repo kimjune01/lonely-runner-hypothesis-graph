@@ -131,7 +131,9 @@ proof certificate, and its counterexample-only quantifier is load-bearing.
 [`riesz-unit-relation.md`](riesz-unit-relation.md) gives a short analytic proof
 that every hypothetical counterexample with at least eighteen speeds has a
 coefficient-one subset-sum relation. It is uniform and non-prime, but proves
-only the first independent relation rather than H39's target rank `n-2`.
+only the first independent relation rather than H39's target rank `n-2`. The
+same artifact records an exact constant-term audit that kills blind iteration
+of the unmodified product after a relation is found.
 
 The first-band artifact also records H42, a stronger two-seed certificate.
 An inclusion-maximal coefficient-two dissociated seed of size at most two

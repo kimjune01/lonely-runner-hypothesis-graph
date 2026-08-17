@@ -58,6 +58,34 @@ sharp coefficient alphabet `{-1,0,1}` and requires neither primes nor a finite
 height reduction. The next problem is to quotient or cluster this Riesz
 argument without losing control of the remaining runners.
 
+## Exact obstruction to naive iteration
+
+The implementation now evaluates the constant term exactly by enumerating
+`epsilon in {-1,0,1}^n` with weight `(-1/2)^support(epsilon)`. It also records
+the normalized cover ratio
+
+```text
+integral R / sum_i integral R_without_i.
+```
+
+For a coefficient-one dissociated triple this ratio is `1/3`. The first
+three-term circuit changes it sharply:
+
+```text
+V=(1,2,3),       integral R=3/4,       cover ratio=1/4.
+```
+
+The two signed copies of `1+2-3=0` each contribute `-1/8`. Thus one known
+short relation is already large enough to erase the small gap used in the
+theorem. Exact replay on all 42 completed first-band scan survivors gives no
+additional contradiction from the unmodified product: every normalized ratio
+lies below `1-cos(2*pi/(n+1))`.
+
+This kills blind deletion or quotient iteration of the same Riesz product. A
+surviving analytic route must construct weights that annihilate already known
+circuits, or combine a short-circuit contraction with minimality. The exact
+constant-term evaluator is a test oracle for either proposal.
+
 ## Source
 
 The dissociated Riesz-product mechanism is Lemma 4.1 of Benjamin Bedert,

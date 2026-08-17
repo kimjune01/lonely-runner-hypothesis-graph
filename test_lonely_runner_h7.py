@@ -375,6 +375,16 @@ def test_dissociated_riesz_argument_crosses_lrc_threshold_at_eighteen():
     assert all(lrc.dissociated_riesz_forces_lrc(n) for n in range(18, 200))
 
 
+def test_riesz_constant_term_is_one_for_coefficient_one_dissociated_tuple():
+    assert lrc.riesz_constant_term((5, 7, 11)) == 1
+    assert lrc.riesz_cover_ratio((5, 7, 11)) == Fraction(1, 3)
+
+
+def test_single_three_term_circuit_has_exact_riesz_obstruction():
+    assert lrc.riesz_constant_term((1, 2, 3)) == Fraction(3, 4)
+    assert lrc.riesz_cover_ratio((1, 2, 3)) == Fraction(1, 4)
+
+
 @pytest.mark.parametrize("speeds", [(1, 2), (1, 2, 3), (1, 2, 3, 4)])
 def test_tight_tuple_relation_is_within_fourier_bound(speeds):
     delta = Fraction(1, len(speeds) + 1)

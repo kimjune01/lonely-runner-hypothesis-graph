@@ -149,9 +149,13 @@ H0  selected nine-runner target is open
                                                                                            |       PROVED BY RIESZ PRODUCT
                                                                                            |
                                                                                            +--H42  two-element maximal
-                                                                                                   coefficient-2
-                                                                                                   dissociated seed
-                                                                                                   TESTING
+                                                                                           |       coefficient-2
+                                                                                           |       dissociated seed
+                                                                                           |       TESTING
+                                                                                           |
+                                                                                           +--H43  iterate unmodified
+                                                                                                   Riesz product
+                                                                                                   KILLED EXACTLY
 ```
 
 ## Nodes
@@ -1020,6 +1024,16 @@ H0  selected nine-runner target is open
 - Kill condition: a possible minimal counterexample, or a compelling first-band family, for which every maximal coefficient-two dissociated subset has size at least three.
 - Artifact: `artifacts/first-spectral-band-connectivity.md`.
 
+### H43 — The unmodified Riesz product can be iterated after finding one relation
+
+- Mode: exact constant-term audit
+- Proposal: after H41 finds one short relation, reuse `product_i(1-cos(2*pi*v_i*t))` and its one-factor deletions to force another.
+- Obstruction: the circuit `(1,2,3)` has Riesz integral `3/4` and normalized cover ratio `1/4`, rather than the dissociated value `1/3`. The two signed Fourier terms for `1+2-3=0` each contribute `-1/8`, already larger than H41's asymptotic gap.
+- Scan: none of the 42 completed first-band survivors has normalized ratio large enough to contradict `ML<1/(n+1)` using the unmodified product.
+- Verdict: killed. A viable successor must annihilate known circuit terms by reweighting, or contract short circuits using minimal-counterexample structure.
+- Verification: `riesz_constant_term`, `riesz_cover_ratio`, and their exact regression tests.
+- Artifact: `artifacts/riesz-unit-relation.md`.
+
 ## What the graph established
 
 1. The elementary measure branch recovers `1/(2n)` and dies by an exact factor-two deficit.
@@ -1065,6 +1079,7 @@ H0  selected nine-runner target is open
 41. A complete exact audit of `1,705,044,764` four-speed tuples proves H39 for `n=4`: only six first-band survivors remain and all have coefficient-two rank `2`.
 42. A dissociated Riesz product proves uniformly that every hypothetical counterexample with `n>=18` has a coefficient-one subset-sum relation. This sharply improves H28's first relation but does not yet provide rank `n-2`.
 43. A two-element inclusion-maximal coefficient-two dissociated seed would imply H39 by independent star relations. All 42 scanned first-band survivors pass this stronger H42 test, while a generic control fails it.
+44. Exact Riesz constant terms kill blind iteration: the circuit `(1,2,3)` lowers the normalized cover ratio from `1/3` to `1/4`, and the unmodified product excludes none of the 42 scanned survivors.
 
 ## Frontier
 
@@ -1075,6 +1090,7 @@ H0  selected nine-runner target is open
 - Primary: prove or kill H33. Combine a connected-cluster Fourier argument with the strict first-band gap to force bounded-relation codimension at least `n-2`.
 - Primary: prove or kill H39 uniformly. It is the weaker statement actually sufficient for the general induction; H33 remains a useful stronger spectrum hypothesis.
 - Primary: iterate H41 on relation clusters or a quotient without treating sums of unrelated relations as bridges; the target is `n-2` independent coefficient-two rows.
+- Primary: formulate a relation-annihilating dual polynomial whose constant term ignores the known circuit lattice, and test it first on `(1,2,3)` and the 42 scan survivors.
 - Primary: try to kill H42 directly by imposing that no pair dominates the coefficient-two relation closure, beginning with exact five-speed first-band search. Do not infer H42 merely from high relation rank.
 - Primary: turn H39 plus the ambient margin into a uniform contradiction, using determinant bounds for coefficient-two nullspaces rather than enumerating patterns separately for every `n`.
 - Secondary: if stronger auditability is desired, make the published sieve proof-producing or independently reimplement its three levels.

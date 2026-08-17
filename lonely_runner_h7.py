@@ -172,6 +172,37 @@ def dissociated_riesz_forces_lrc(runner_count: int) -> bool:
     return (runner_count + 1) ** 2 >= 20 * runner_count
 
 
+def riesz_constant_term(speeds: tuple[int, ...]) -> Fraction:
+    """Return the exact constant term of ``prod(1-cos(2*pi*v*t))``."""
+    if any(speed <= 0 for speed in speeds):
+        raise ValueError("speeds must be positive integers")
+    total = Fraction()
+    for signs in product((-1, 0, 1), repeat=len(speeds)):
+        if sum(sign * speed for sign, speed in zip(signs, speeds)):
+            continue
+        support = sum(sign != 0 for sign in signs)
+        total += Fraction((-1) ** support, 2**support)
+    return total
+
+
+def riesz_cover_ratio(speeds: tuple[int, ...]) -> Fraction:
+    """Normalize a Riesz constant term by all one-factor deletions.
+
+    A bad-arc cover at width ``delta`` requires this ratio to be at most
+    ``1-cos(2*pi*delta)``.  Exact ratios expose how short relations weaken the
+    dissociated-product argument before any transcendental comparison.
+    """
+    if not speeds or any(speed <= 0 for speed in speeds):
+        raise ValueError("speeds must be a nonempty tuple of positive integers")
+    denominator = sum(
+        riesz_constant_term(speeds[:index] + speeds[index + 1 :])
+        for index in range(len(speeds))
+    )
+    if not denominator:
+        raise ZeroDivisionError("all one-factor deletion integrals vanish")
+    return riesz_constant_term(speeds) / denominator
+
+
 def find_bounded_relation(
     speeds: tuple[int, ...], *, max_coefficient: int
 ) -> tuple[int, ...] | None:
