@@ -386,6 +386,71 @@ accelerated speed is divisible by `n+1` for `n<=500` and multiplier at most
 first band, all at the boundary, and none entered its strict interior. These
 searches are falsification evidence, not a completeness theorem.
 
+## Proved reset-counting subcase
+
+The reset formulation yields a genuine theorem with no fast-ratio assumption.
+Let `N=n+1`, suppose the largest speed `w` is divisible by `N`, and assume
+
+```text
+gcd(v_i,N) <= 2       for every v_i < w.
+```
+
+Then the Lonely Runner bound holds. Consider the `N` candidate times
+
+```text
+t_k = (k+1/w)/N,       k=0,...,N-1.
+```
+
+The largest runner satisfies
+
+```text
+||w t_k|| = 1/N
+```
+
+at every candidate. For a slower runner `v`, put `y=v/w`, so `0<y<1`.
+It is bad at `t_k` exactly when
+
+```text
+distance(kv+y, N Z) < 1.
+```
+
+If `gcd(v,N)=1`, exactly two values of `k` are bad: the solutions of
+`kv=0,-1 mod N`. If `gcd(v,N)=2`, exactly the two solutions of `kv=0 mod N`
+are bad. In either case the bad set has size two and contains `k=0`.
+There are only `n-1=N-2` slower runners, so their union has size at most
+
+```text
+1+(N-2)=N-1.
+```
+
+Some candidate remains, proving the theorem.
+
+The gcd restriction can be removed from the *description* of these candidates.
+For every slower `v`, its exact blocked set is
+
+```text
+{0,-v^{-1}} mod N                 if gcd(v,N)=1,
+{k mod N : kv=0 mod N}            if gcd(v,N)>1.
+```
+
+Indeed, `kv` runs through multiples of `d=gcd(v,N)`. For `d>1`, only residue
+zero can lie within distance one after adding `0<y<1`; hence the bad set is
+the multiplication kernel, of size `d`. Therefore the reset/backoff method
+succeeds exactly when the union of these explicit sets is not all of `Z/NZ`.
+This is an exact certificate, not a union-bound estimate.
+
+For example, `(1,3,5,7,12)` has a gcd-three stratum but kernel overlap leaves
+`k=3` unblocked, giving the witness `t=37/72`. Conversely, the sharp tuple
+`(1,3,4,5,18)` blocks all six candidates. The sharp seven-speed tuple
+`(1,4,5,6,7,11,16)` blocks all eight. In both sharp examples the slower unit
+residues already exhaust every unit modulo `N`; this identifies saturation of
+the unit classes as one concrete adversarial mechanism.
+
+Thus a remaining primitive H49 tuple must have an `N`-divisible speed below
+the maximum, or make the exact reset-block union equal all of `Z/NZ`. The next
+step is not another capacity estimate: it must either vary the backoff offset
+or use interval handoffs between these fully blocked reset candidates.
+
 The scheduling analogy is pinwheel/windows scheduling, where recurring tasks
 must receive service in every sliding window. Here the direction is dual: the
 periodic bad-window streams are fixed and one seeks a zero-load instant. The

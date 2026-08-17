@@ -279,6 +279,61 @@ def inductive_private_window_margin(runner_count: int) -> Fraction:
     return Fraction(1, runner_count) - Fraction(1, runner_count + 1)
 
 
+def largest_divisible_reset_blocked_indices(
+    speeds: tuple[int, ...],
+) -> tuple[int, ...] | None:
+    """Return reset indices blocked by slower runners, exactly.
+
+    Let ``N=n+1``, ``w=max(speeds)``, and suppose ``N`` divides ``w``.  At
+    ``t_k=(k+1/w)/N``, a slower unit ``v`` blocks ``k=0`` and
+    ``k=-v^{-1} mod N``.  A nonunit ``v`` blocks precisely the kernel of
+    multiplication by ``v`` modulo ``N``.  Return ``None`` when ``w`` is not
+    divisible by ``N``.
+    """
+    if not speeds or any(speed <= 0 for speed in speeds):
+        raise ValueError("speeds must be a nonempty tuple of positive integers")
+    if len(set(speeds)) != len(speeds):
+        raise ValueError("speeds must be distinct")
+    modulus = len(speeds) + 1
+    largest = max(speeds)
+    slower = tuple(speed for speed in speeds if speed != largest)
+    if largest % modulus:
+        return None
+
+    blocked: set[int] = set()
+    for speed in slower:
+        if gcd(speed, modulus) == 1:
+            blocked.update((0, -pow(speed, -1, modulus) % modulus))
+        else:
+            blocked.update(
+                reset
+                for reset in range(modulus)
+                if reset * speed % modulus == 0
+            )
+    return tuple(sorted(blocked))
+
+
+def largest_divisible_reset_witness(
+    speeds: tuple[int, ...],
+) -> Fraction | None:
+    """Return an unblocked exact reset-backoff witness, when one exists."""
+    blocked = largest_divisible_reset_blocked_indices(speeds)
+    if blocked is None:
+        return None
+
+    modulus = len(speeds) + 1
+    largest = max(speeds)
+    delta = Fraction(1, modulus)
+    offset = Fraction(1, modulus * largest)
+    for reset in range(modulus):
+        if reset in blocked:
+            continue
+        time = Fraction(reset, modulus) + offset
+        if all(fractional_distance(speed * time) >= delta for speed in speeds):
+            return time
+    return None
+
+
 def _critical_times(speeds: tuple[int, ...]):
     """Yield every possible lower-envelope maximum time in [0,1].
 

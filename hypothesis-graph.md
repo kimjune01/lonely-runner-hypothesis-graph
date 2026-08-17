@@ -180,6 +180,14 @@ H0  selected nine-runner target is open
                                                                                                             +--H49  divisible-speed
                                                                                                                      first-band barrier
                                                                                                                      SELECTED; SUFFICIENT
+                                                                                                                     |
+                                                                                                                     +--H50  largest divisible
+                                                                                                                              reset counting
+                                                                                                                              PROVED
+                                                                                                                              |
+                                                                                                                              +--H51  exact reset-kernel
+                                                                                                                                       certificate
+                                                                                                                                       PROVED
 ```
 
 ## Nodes
@@ -1145,6 +1153,27 @@ H0  selected nine-runner target is open
 - Verification: targeted exact scans, the strict-divisibility regressions, `lrc_grid_cell_intervals`, `strict_lrc_cell_cover_certificate`, and `maximum_loneliness`.
 - Artifact: `artifacts/first-spectral-band-connectivity.md`.
 
+### H50 — Reset counting handles a largest divisible speed with small gcd strata
+
+- Mode: proved non-prime subcase of the reset/backoff program
+- Statement: put `N=n+1`. If the largest speed `w` is divisible by `N` and every slower speed satisfies `gcd(v_i,N)<=2`, then `ML(v)>=1/N`.
+- Proof: test `t_k=(k+1/w)/N` for `k mod N`. The largest runner is exactly `1/N` from an integer. Writing `y=v/w in (0,1)`, a slower runner is bad precisely when `distance(kv+y,NZ)<1`. If `gcd(v,N)=1`, its two bad indices solve `kv=0,-1 mod N`; if the gcd is two, its two bad indices solve `kv=0 mod N`. Every bad-index set has size two and contains zero. The `N-2` slower runners therefore block at most `1+(N-2)=N-1` candidates.
+- Consequence: an unresolved primitive H49 tuple must have an `N`-divisible speed below the maximum or another speed in a gcd stratum at least three. This isolates the genuinely mixed-factor case.
+- Sharp boundary fixture: `(1,3,4,5,18)` is outside the theorem because `gcd(3,6)=3`; all six reset candidates are blocked, and its maximum is the first-band edge `2/11`.
+- Verdict: proved.
+- Verification: `largest_divisible_reset_witness` and exact witness regressions at moderate speed ratios.
+- Artifact: `artifacts/first-spectral-band-connectivity.md`.
+
+### H51 — Exact reset-kernel certificate removes the gcd cutoff
+
+- Mode: proved arithmetic characterization of the reset/backoff candidates
+- Statement: put `N=n+1`, let the largest speed `w` be divisible by `N`, and test `t_k=(k+1/w)/N`. A slower speed `v` blocks exactly `{0,-v^{-1}}` when `gcd(v,N)=1`, and exactly the kernel `{k:kv=0 mod N}` otherwise. Hence an unblocked reset index is an explicit LRC witness.
+- Proof: write `y=v/w in (0,1)`. Badness is `distance(kv+y,NZ)<1`. Unit residues zero and minus one are the only possibilities. If `d=gcd(v,N)>1`, the residues are multiples of `d`, and only zero can qualify because `d-y>1`.
+- Consequence: H50 is the union-bound corollary. Higher gcd strata can help through kernel overlap: `(1,3,5,7,12)` leaves `k=3` unblocked and yields `t=37/72`. The sharp fixtures `(1,3,4,5,18)` and `(1,4,5,6,7,11,16)` instead block every reset candidate and saturate all unit residue classes.
+- Verdict: proved exact certificate; not a proof when its union is all of `Z/NZ`.
+- Verification: `largest_divisible_reset_blocked_indices`, direct-arithmetic exhaustive regressions through six speeds, and exact witness tests.
+- Artifact: `artifacts/first-spectral-band-connectivity.md`.
+
 ## What the graph established
 
 1. The elementary measure branch recovers `1/(2n)` and dies by an exact factor-two deficit.
@@ -1197,6 +1226,8 @@ H0  selected nine-runner target is open
 48. Every one of 229 tested elimination steps localizes to the preceding new owner plus at most two earlier owners with coefficient bound two. Both coefficient two and support four are sharp in the scan.
 49. Moving the sweep to the exact band edge labels every endpoint by `q m+/-2`. All 55 retain segment-local elimination there, while all 14 strict survivors have full relation rank `n-1`; the rank-`n-2` obstructions live exactly on the boundary.
 50. Every strict primitive survivor avoids multiples of `n+1`. The resulting H49 barrier would prove the full conjecture after gcd normalization; its unnormalized form is killed by `(4,8,12)`, while the primitive form survives 2,875,130 targeted tuples and is sharp on the band boundary.
+51. Exact reset counting proves LRC when the largest speed is an `n+1` multiple and every slower speed has gcd at most two with `n+1`. Any remaining divisible-speed obstruction is genuinely mixed: the divisible runner is not largest or a gcd-at-least-three stratum is present.
+52. The reset bad sets are now characterized for every gcd stratum: units block two indices and nonunits block multiplication kernels. Kernel overlap proves new mixed cases, while sharp fixtures fully cover the reset indices and saturate the unit residue classes.
 
 ## Frontier
 
@@ -1213,6 +1244,7 @@ H0  selected nine-runner target is open
 - Primary: prove or kill H47. Analyze the entire handoff segment between successive first-time owners; select at most two old owners whose endpoint events reduce the segment's large labels to one coefficient-two relation.
 - Primary: prove or kill H48 in its exact cell-chain form. Convert the divisible overlap determinants of the radius-two chains into one more independent coefficient-two speed relation at each rank-deficient stage.
 - Primary: prove or kill H49. The fast divisible-runner case follows from induction and slack; in the moderate case, show that the `N` radius-one reset chains cannot coexist with primitive gcd one. Do not weaken this back to the endpoint-only modular cover.
+- Primary: extend H51 beyond fully blocked reset unions. Vary the backoff offset or use the radius-one interval handoff chains between reset candidates; sharp fixtures show that fixed-offset counting alone is exhausted.
 - Primary: turn H39 plus the ambient margin into a uniform contradiction, using determinant bounds for coefficient-two nullspaces rather than enumerating patterns separately for every `n`.
 - Secondary: if stronger auditability is desired, make the published sieve proof-producing or independently reimplement its three levels.
 - Historical: the local H21 37-prime scan and p=47 branch certificates remain useful cross-checks, but no longer block the nine-runner theorem.

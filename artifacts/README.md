@@ -150,3 +150,8 @@ strictly below the edge have full coefficient-two relation rank `n-1`.
 The same strict/interior split yields H49, a direct sufficient target: in a
 primitive tuple, an `n+1`-divisible speed should force loneliness at least
 `2/(2n+1)`. The unnormalized form is false by dilation.
+H50 proves the associated LRC bound when the divisible speed is largest and
+all remaining gcd strata modulo `n+1` have size at most two.
+H51 exactly characterizes every slower runner's blocked reset indices as a
+two-point unit set or a multiplication kernel. This proves additional mixed
+gcd cases by overlap and isolates the fully blocked sharp fixtures.

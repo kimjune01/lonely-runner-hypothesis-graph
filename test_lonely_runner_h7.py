@@ -865,6 +865,75 @@ def test_divisible_speed_barrier_survives_small_three_speed_search():
         assert lrc.maximum_loneliness(speeds) >= edge
 
 
+@pytest.mark.parametrize(
+    "speeds",
+    [
+        (1, 2, 4),
+        (1, 2, 5, 7, 12),
+        (1, 2, 3, 5, 7, 13, 16),
+    ],
+)
+def test_largest_divisible_reset_witness_handles_moderate_speed_ratios(speeds):
+    runner_count = len(speeds)
+    modulus = runner_count + 1
+    largest = max(speeds)
+
+    assert largest % modulus == 0
+    assert all(
+        math.gcd(speed, modulus) <= 2
+        for speed in speeds
+        if speed != largest
+    )
+    witness = lrc.largest_divisible_reset_witness(speeds)
+    assert witness is not None
+    assert all(
+        lrc.fractional_distance(speed * witness) >= Fraction(1, modulus)
+        for speed in speeds
+    )
+
+
+def test_largest_divisible_reset_witness_can_exploit_gcd_stratum_overlap():
+    speeds = (1, 3, 5, 7, 12)
+
+    assert math.gcd(3, 6) == 3
+    witness = lrc.largest_divisible_reset_witness(speeds)
+    assert witness is not None
+    assert all(
+        lrc.fractional_distance(speed * witness) >= Fraction(1, 6)
+        for speed in speeds
+    )
+
+
+def test_largest_divisible_reset_witness_records_a_fully_blocked_fixture():
+    speeds = (1, 3, 4, 5, 18)
+
+    assert math.gcd(3, 6) == 3
+    assert lrc.largest_divisible_reset_blocked_indices(speeds) == tuple(range(6))
+    assert lrc.largest_divisible_reset_witness(speeds) is None
+
+
+def test_largest_divisible_reset_block_sets_match_direct_arithmetic():
+    for runner_count in range(3, 7):
+        modulus = runner_count + 1
+        largest = 2 * modulus
+        for slower in itertools.combinations(range(1, largest), runner_count - 1):
+            speeds = slower + (largest,)
+            blocked = lrc.largest_divisible_reset_blocked_indices(speeds)
+            offset = Fraction(1, modulus * largest)
+            direct = tuple(
+                reset
+                for reset in range(modulus)
+                if any(
+                    lrc.fractional_distance(
+                        speed * (Fraction(reset, modulus) + offset)
+                    )
+                    < Fraction(1, modulus)
+                    for speed in slower
+                )
+            )
+            assert blocked == direct
+
+
 def test_handoff_seeds_append_the_eight_speed_separator():
     speeds = (1, 4, 5, 6, 7, 11, 13, 16)
     seeds = lrc.handoff_seed_pair(speeds, delta=Fraction(1, 9))
