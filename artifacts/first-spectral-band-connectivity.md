@@ -61,14 +61,14 @@ parameters left after elimination.
 
 Complete primitive scans used the first-band cutoff `2/(2n+1)`:
 
-| speeds `n` | height | primitive first-band tuples | rank below `n-2` | missing positive tree | direct signed seeds above 2 | two-seed appendability failures |
-|---:|---:|---:|---:|---:|---:|---:|
-| 3 | 100 | 5 | 0 | 0 | 0 | 0 |
-| 4 | 35 | 6 | 0 | 0 | 0 | 0 |
-| 5 | 30 | 8 | 0 | 0 | 0 | 0 |
-| 6 | 22 | 10 | 0 | 0 | 0 | 0 |
-| 7 | 20 | 13 | 0 | 0 | 0 | 0 |
-| 8 | 18 | 7 | 0 | 0 | 1 | 0 |
+| speeds `n` | height | primitive first-band tuples | rank below `n-2` | missing positive tree | direct signed seeds above 2 | two-seed appendability failures | handoff-seed failures |
+|---:|---:|---:|---:|---:|---:|---:|---:|
+| 3 | 100 | 5 | 0 | 0 | 0 | 0 | 0 |
+| 4 | 35 | 6 | 0 | 0 | 0 | 0 | 0 |
+| 5 | 30 | 8 | 0 | 0 | 0 | 0 | 0 |
+| 6 | 22 | 10 | 0 | 0 | 0 | 0 | 0 |
+| 7 | 20 | 13 | 0 | 0 | 0 | 0 | 0 |
+| 8 | 18 | 7 | 0 | 0 | 1 | 0 | 0 |
 
 Thus all `49` survivors have coefficient-two relation rank at least `n-2`.
 They also have a spanning tree of indecomposable relations that can each be
@@ -123,6 +123,34 @@ Each relation uses one new target and only previously available speeds, so
 the six rows are triangular and independent. All 49 completed scan survivors
 are two-seed appendable. An eight-term Fibonacci chain likewise fails direct
 two-seed generation but passes appendability from `(1,2)`.
+
+## Sliding-window handoff seeds
+
+At the LRC width `delta=1/(n+1)`, let
+
+```text
+L(t) = number of i with ||v_i t|| < delta.
+```
+
+Each runner contributes bad-window measure `2 delta`, so the exact average
+load is `2n/(n+1)<2`. Hence some open cell in the circular endpoint
+arrangement has load at most one. The sweep records every constant-load cell
+exactly. Starting at the common reset and moving forward, take the first two
+distinct runners that individually own a singleton-load cell. H45 proposes
+that these canonical handoff owners seed an H44 appendability ordering in a
+minimal counterexample.
+
+The rule passes all 49 completed first-band survivors, even though they have
+zero-load gaps at the conjectured width and therefore are not counterexamples.
+For the eight-speed H42 separator the handoff pair is `(1,16)`; that pair
+coefficient-two-appends all six remaining speeds. This is evidence for a
+geometric seed-selection rule, not yet a proof that a full-cover handoff cycle
+must generate bounded relations.
+
+The scheduling analogy is pinwheel/windows scheduling, where recurring tasks
+must receive service in every sliding window. Here the direction is dual: the
+periodic bad-window streams are fixed and one seeks a zero-load instant. The
+analogy motivates the sweep but is not used as a theorem.
 
 The stronger claim `rank R_2(v)=n-1` is already false. The four-speed survivor
 
@@ -363,3 +391,5 @@ outside the counterexample sum bound open.
 - Romanos Diogenes Malikiosis, Francisco Santos, and Matthias Schymura,
   [*Linearly-exponential checking is enough for the Lonely Runner Conjecture
   and some of its variants*](https://arxiv.org/abs/2411.06903).
+- Tobias Jacobs and Salvatore Longo, [*A New Perspective on the Windows
+  Scheduling Problem*](https://arxiv.org/abs/1410.7237) (analogy only).

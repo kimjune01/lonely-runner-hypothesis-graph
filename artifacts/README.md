@@ -139,3 +139,6 @@ The first-band artifact also records two distinct two-seed certificates.
 Direct H42 generation is false on an eight-speed first-band tuple. The weaker
 H44 appendability ordering still implies H39 by triangular relations and
 passes all 49 completed first-band scan survivors through eight speeds.
+The same artifact records H45: an exact sliding-window sweep chooses the first
+two singleton-load owners after reset, and this canonical pair appends all 49
+survivors at the conjectured LRC width.

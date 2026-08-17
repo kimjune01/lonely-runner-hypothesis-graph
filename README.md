@@ -66,3 +66,5 @@ The bounded first-band scanner now reports positive-generation,
 signed-dissociated seed, and two-seed appendability certificates. The
 eight-speed scan separates the last two: direct H42-style generation fails,
 while the weaker H44 appendability ordering still proves the desired rank.
+An exact periodic-window sweep additionally reports whether the first two
+singleton-load handoff owners provide a canonical H44 seed pair.

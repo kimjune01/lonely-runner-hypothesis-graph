@@ -28,6 +28,50 @@ def fractional_distance(value: Fraction | int) -> Fraction:
     return min(residue, 1 - residue)
 
 
+def periodic_bad_window_cells(
+    speeds: tuple[int, ...], *, delta: Fraction
+) -> tuple[tuple[Fraction, Fraction, tuple[int, ...]], ...]:
+    """Partition one reset cycle into exact constant-load open cells."""
+    if not speeds or any(speed <= 0 for speed in speeds):
+        raise ValueError("speeds must be a nonempty tuple of positive integers")
+    delta = Fraction(delta)
+    if not 0 < delta < Fraction(1, 2):
+        raise ValueError("delta must lie strictly between zero and one half")
+
+    endpoints = {Fraction(0), Fraction(1)}
+    for speed in speeds:
+        for center in range(speed):
+            endpoints.add(((Fraction(center) - delta) / speed) % 1)
+            endpoints.add(((Fraction(center) + delta) / speed) % 1)
+    ordered = sorted(endpoints)
+    return tuple(
+        (
+            left,
+            right,
+            tuple(
+                index
+                for index, speed in enumerate(speeds)
+                if fractional_distance(speed * ((left + right) / 2)) < delta
+            ),
+        )
+        for left, right in zip(ordered, ordered[1:])
+    )
+
+
+def handoff_seed_pair(
+    speeds: tuple[int, ...], *, delta: Fraction
+) -> tuple[int, int] | None:
+    """First two distinct singleton-load owners encountered after reset."""
+    owners: list[int] = []
+    for _, _, active in periodic_bad_window_cells(speeds, delta=delta):
+        if len(active) != 1 or active[0] in owners:
+            continue
+        owners.append(active[0])
+        if len(owners) == 2:
+            return owners[0], owners[1]
+    return None
+
+
 def _critical_times(speeds: tuple[int, ...]):
     """Yield every possible lower-envelope maximum time in [0,1].
 
@@ -634,38 +678,80 @@ def bounded_appendability_certificate(
         )
     )
     for seeds in combinations(range(len(speeds)), seed_count):
-        available = set(seeds)
-        steps: list[tuple[int, tuple[int, ...]]] = []
-        while len(available) < len(speeds):
-            addition = None
-            for target in range(len(speeds)):
-                if target in available:
-                    continue
-                relation = next(
-                    (
-                        row
-                        for row in relations
-                        if row[target]
-                        and all(
-                            not coefficient
-                            or index in available
-                            or index == target
-                            for index, coefficient in enumerate(row)
-                        )
-                    ),
-                    None,
-                )
-                if relation is not None:
-                    addition = target, relation
-                    break
-            if addition is None:
-                break
-            target, relation = addition
-            available.add(target)
-            steps.append((target, relation))
-        if len(available) == len(speeds):
-            return seeds, tuple(steps)
+        steps = _bounded_appendability_steps(
+            speeds, seeds=seeds, relations=relations
+        )
+        if steps is not None:
+            return seeds, steps
     return None
+
+
+def _bounded_appendability_steps(
+    speeds: tuple[int, ...],
+    *,
+    seeds: tuple[int, ...],
+    relations: tuple[tuple[int, ...], ...],
+) -> tuple[tuple[int, tuple[int, ...]], ...] | None:
+    available = set(seeds)
+    steps: list[tuple[int, tuple[int, ...]]] = []
+    while len(available) < len(speeds):
+        addition = None
+        for target in range(len(speeds)):
+            if target in available:
+                continue
+            relation = next(
+                (
+                    row
+                    for row in relations
+                    if row[target]
+                    and all(
+                        not coefficient
+                        or index in available
+                        or index == target
+                        for index, coefficient in enumerate(row)
+                    )
+                ),
+                None,
+            )
+            if relation is not None:
+                addition = target, relation
+                break
+        if addition is None:
+            return None
+        target, relation = addition
+        available.add(target)
+        steps.append((target, relation))
+    return tuple(steps)
+
+
+def bounded_appendability_from_seeds(
+    speeds: tuple[int, ...],
+    *,
+    seeds: tuple[int, ...],
+    max_coefficient: int,
+) -> tuple[tuple[int, tuple[int, ...]], ...] | None:
+    """Try the bounded appendability closure from a specified seed set."""
+    if not speeds or any(speed <= 0 for speed in speeds):
+        raise ValueError("speeds must be a nonempty tuple of positive integers")
+    if max_coefficient < 1:
+        raise ValueError("max_coefficient must be positive")
+    if not seeds or len(set(seeds)) != len(seeds):
+        raise ValueError("seeds must be distinct indices")
+    if any(index < 0 or index >= len(speeds) for index in seeds):
+        raise ValueError("seed index out of range")
+    relations = tuple(
+        sorted(
+            bounded_relations(speeds, max_coefficient=max_coefficient),
+            key=lambda row: (
+                sum(coefficient != 0 for coefficient in row),
+                sum(abs(coefficient) for coefficient in row),
+                row,
+            ),
+        )
+    )
+    return _bounded_appendability_steps(
+        speeds, seeds=seeds, relations=relations
+    )
 
 
 def bounded_relation_pattern(

@@ -158,7 +158,11 @@ H0  selected nine-runner target is open
                                                                                            |       KILLED EXACTLY
                                                                                            |
                                                                                            +--H44  two-seed bounded
-                                                                                                   appendability ordering
+                                                                                           |       appendability ordering
+                                                                                           |       SELECTED FOR TESTING
+                                                                                           |
+                                                                                           +--H45  sliding-window handoff
+                                                                                                   owners seed H44
                                                                                                    SELECTED FOR TESTING
 ```
 
@@ -1053,6 +1057,20 @@ H0  selected nine-runner target is open
 - Verification: `bounded_appendability_certificate`, scan column `two_seed_appendable`, and exact separator regressions.
 - Artifact: `artifacts/first-spectral-band-connectivity.md`.
 
+### H45 — Sliding-window handoff owners seed the appendability ordering
+
+- Mode: canonical geometric seed selection for H44, motivated by windows scheduling and augmenting-path load balancing
+- Load identity: at `delta=1/(n+1)`, the bad-window load `L(t)=#{i: ||v_i t||<delta}` has exact mean `2n/(n+1)<2`. Therefore some constant-load cell has load at most one.
+- Rule: sweep the exact rational bad-window endpoint arrangement forward from the common reset. Record the first two distinct runners that individually own singleton-load cells; call them the handoff seeds.
+- Hypothesis: in every primitive minimal LRC counterexample, two distinct handoff owners occur and their pair coefficient-two-appends every remaining speed.
+- Consequence: H45 supplies a canonical seed pair for H44, whose triangular relation certificate proves H39.
+- Evidence: the conjectured-width rule passes all 49 completed first-band survivors through eight speeds. On `(1,4,5,6,7,11,13,16)`, the handoff pair `(1,16)` appends the entire tuple even though direct H42 generation requires three seeds.
+- Caveat: the mean-load identity guarantees a singleton cell, not two distinct owners or bounded arithmetic relations. Those are the new mathematical claims.
+- Verdict: selected for testing, not proved.
+- Kill condition: a possible minimal counterexample with fewer than two distinct singleton owners, or whose first two owners fail H44 closure.
+- Verification: `periodic_bad_window_cells`, `handoff_seed_pair`, `bounded_appendability_from_seeds`, and scan column `handoff_seed_appendable`.
+- Artifact: `artifacts/first-spectral-band-connectivity.md`.
+
 ## What the graph established
 
 1. The elementary measure branch recovers `1/(2n)` and dies by an exact factor-two deficit.
@@ -1100,6 +1118,7 @@ H0  selected nine-runner target is open
 43. A two-element inclusion-maximal coefficient-two dissociated seed would imply H39 by independent star relations. The first 42 scanned survivors pass, but an eight-speed first-band tuple kills the broad H42 form by requiring three direct seeds.
 44. Exact Riesz constant terms kill blind iteration: the circuit `(1,2,3)` lowers the normalized cover ratio from `1/3` to `1/4`, and the unmodified product excludes none of the 42 scanned survivors.
 45. Two-seed bounded appendability repairs H42's chain defect while retaining the rank implication. All 49 scanned survivors through eight speeds pass, including the exact H42 separator.
+46. Exact sliding-window sweeps select canonical handoff seeds from singleton-load cells. At the conjectured width, those seeds append every one of the 49 scanned survivors.
 
 ## Frontier
 
@@ -1112,6 +1131,7 @@ H0  selected nine-runner target is open
 - Primary: iterate H41 on relation clusters or a quotient without treating sums of unrelated relations as bridges; the target is `n-2` independent coefficient-two rows.
 - Primary: formulate a relation-annihilating dual polynomial whose constant term ignores the known circuit lattice, and test it first on `(1,2,3)` and the 42 scan survivors.
 - Primary: prove or kill H44. Analyze the nondismountable core left when coefficient-two appendability stalls; every crossing relation then contains at least two unresolved speeds.
+- Primary: prove or kill H45. In a hypothetical full cover, analyze the overload blocks separating singleton-owner cells and derive either a zero-load escape or a bounded relation involving the successive owners.
 - Primary: turn H39 plus the ambient margin into a uniform contradiction, using determinant bounds for coefficient-two nullspaces rather than enumerating patterns separately for every `n`.
 - Secondary: if stronger auditability is desired, make the published sieve proof-producing or independently reimplement its three levels.
 - Historical: the local H21 37-prime scan and p=47 branch certificates remain useful cross-checks, but no longer block the nine-runner theorem.

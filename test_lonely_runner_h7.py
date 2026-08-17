@@ -634,6 +634,32 @@ def test_eight_speed_first_band_tuple_separates_h42_from_appendability():
     assert [target for target, _ in steps] == [2, 3, 4, 5, 6, 7]
 
 
+def test_periodic_bad_window_profile_has_exact_subtwo_average_load():
+    speeds = (1, 2, 3)
+    delta = Fraction(1, 4)
+    cells = lrc.periodic_bad_window_cells(speeds, delta=delta)
+
+    assert cells[0][0] == 0
+    assert cells[-1][1] == 1
+    assert all(active for _, _, active in cells)
+    assert sum((right - left) * len(active) for left, right, active in cells) == (
+        2 * len(speeds) * delta
+    )
+    assert lrc.handoff_seed_pair(speeds, delta=delta) == (0, 2)
+
+
+def test_handoff_seeds_append_the_eight_speed_separator():
+    speeds = (1, 4, 5, 6, 7, 11, 13, 16)
+    seeds = lrc.handoff_seed_pair(speeds, delta=Fraction(1, 9))
+
+    assert seeds == (0, 7)
+    steps = lrc.bounded_appendability_from_seeds(
+        speeds, seeds=seeds, max_coefficient=2
+    )
+    assert steps is not None
+    assert len(steps) == len(speeds) - 2
+
+
 def test_two_parameter_pattern_reconstructs_common_nullspace():
     speeds = (1, 2, 7)
     pattern = lrc.bounded_relation_pattern(speeds, max_coefficient=2)
@@ -775,6 +801,7 @@ def test_first_band_scan_cli_emits_replayable_receipt():
     assert "ambient_maximum" in lines[0]
     assert "signed_dissociated_seeds" in lines[0]
     assert "two_seed_appendable" in lines[0]
+    assert "handoff_seed_appendable" in lines[0]
     assert "parameter_norm_squared_cutoff" in lines[0]
     assert any("1,2,6\t2/7" in line for line in lines[1:])
 
