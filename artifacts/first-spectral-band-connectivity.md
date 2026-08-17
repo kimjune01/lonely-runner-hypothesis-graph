@@ -514,6 +514,43 @@ satisfies `N | (v_r+v_{-r})`. This does not yet bound the quotient in that
 divisibility relation, but it is the first height-independent handoff
 skeleton retained after H52 and the central-cell shortcut fail.
 
+The skeleton already forces a bounded relation in a low-height regime. Write
+`w=N a` and choose one speed `v_r` from every unit residue class. For each
+opposite pair,
+
+```text
+v_r+v_{-r}=N q_r,       1 <= q_r <= 2a-1.
+```
+
+If `q_r=a`, then `v_r+v_{-r}=w`. If two pairs have the same quotient, their
+sums give a four-term coefficient-one relation. Consequently, avoiding every
+such relation requires the `phi(N)/2` pair quotients to be distinct and to
+avoid `a`, leaving only `2a-2` values. Thus
+
+```text
+phi(N)/2 > 2a-2
+```
+
+forces a coefficient-one relation supported on at most four unit speeds and
+possibly `w`. For example, the saturated `N=9`, `w=18` tuple
+`(1,2,3,4,5,7,8,18)` is forced into equal opposite-pair sums. This supplies a
+real bridge from reset saturation to the bounded-relation program.
+
+In fact the whole quotient partition gives independent rows. Let
+`P=phi(N)/2`, and let `d` be the number of distinct quotients other than `a`.
+Every pair in the `a` class gives a relation to `w`; every other quotient class
+of size `m` gives `m-1` independent pair-sum differences. Their supports are
+disjoint outside `w`, so the total rank is exactly
+
+```text
+P-d >= P-(2a-2).
+```
+
+The `N=9`, `w=18` fixture therefore receives two independent coefficient-one
+rows from its three equal pair sums. This is not yet the `n-2` independent
+rows required by H39; the next question is whether the remaining kernel
+classes and non-unit handoffs supply the rank deficit.
+
 The scheduling analogy is pinwheel/windows scheduling, where recurring tasks
 must receive service in every sliding window. Here the direction is dual: the
 periodic bad-window streams are fixed and one seeks a zero-load instant. The

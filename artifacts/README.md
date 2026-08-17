@@ -164,3 +164,5 @@ when the largest speed is uniquely divisible, proving the prime-modulus and
 H54 kills the tempting central-cell escape rule. H55 replaces it with the
 exact two-sided handoff skeleton forced at every unit grid point, pairing
 opposite unit residues through the unique divisible runner.
+H56 converts those pairs into a finite quotient palette and proves a
+coefficient-one relation-rank lower bound from collisions in that palette.

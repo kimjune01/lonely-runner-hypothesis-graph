@@ -997,6 +997,48 @@ def test_missing_unit_residue_leaves_a_handoff_side_empty():
     )
 
 
+def test_opposite_unit_pair_can_sum_to_the_divisible_speed():
+    speeds = (1, 2, 3, 5, 6)
+
+    row = lrc.opposite_unit_sum_relation(speeds)
+    assert row == (1, 0, 0, 1, -1)
+    assert sum(coefficient * speed for coefficient, speed in zip(row, speeds)) == 0
+
+
+def test_equal_opposite_pair_sums_give_a_four_term_relation():
+    speeds = (1, 3, 4, 6, 13, 15, 24)
+
+    assert lrc.largest_divisible_reset_blocked_indices(speeds) == tuple(range(8))
+    row = lrc.opposite_unit_sum_relation(speeds)
+    assert row == (1, -1, 0, 0, -1, 1, 0)
+    assert sum(coefficient * speed for coefficient, speed in zip(row, speeds)) == 0
+
+
+def test_low_height_pigeonhole_forces_an_opposite_pair_relation():
+    speeds = (1, 2, 3, 4, 5, 7, 8, 18)
+    modulus = 9
+    pair_count = 3
+    height_quotient = max(speeds) // modulus
+
+    assert pair_count > 2 * height_quotient - 2
+    row = lrc.opposite_unit_sum_relation(speeds)
+    assert row is not None
+    assert max(abs(coefficient) for coefficient in row) == 1
+    assert sum(coefficient * speed for coefficient, speed in zip(row, speeds)) == 0
+
+
+def test_opposite_pair_quotient_classes_supply_independent_relation_rows():
+    speeds = (1, 2, 3, 4, 5, 7, 8, 18)
+
+    rows = lrc.opposite_unit_sum_relation_basis(speeds)
+    assert len(rows) == 2
+    assert all(
+        sum(coefficient * speed for coefficient, speed in zip(row, speeds)) == 0
+        for row in rows
+    )
+    assert lrc.bounded_relation_rank(speeds, max_coefficient=1) >= len(rows)
+
+
 def test_handoff_seeds_append_the_eight_speed_separator():
     speeds = (1, 4, 5, 6, 7, 11, 13, 16)
     seeds = lrc.handoff_seed_pair(speeds, delta=Fraction(1, 9))

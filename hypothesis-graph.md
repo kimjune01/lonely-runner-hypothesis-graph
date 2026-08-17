@@ -204,6 +204,10 @@ H0  selected nine-runner target is open
                                                                                                                                                                   +--H55  unit-grid
                                                                                                                                                                            handoff skeleton
                                                                                                                                                                            PROVED
+                                                                                                                                                                           |
+                                                                                                                                                                           +--H56  opposite-unit
+                                                                                                                                                                                    quotient collision
+                                                                                                                                                                                    PROVED
 ```
 
 ## Nodes
@@ -1231,6 +1235,17 @@ H0  selected nine-runner target is open
 - Verification: `unit_grid_handoff_skeleton`, saturated sharp fixtures, and a missing-residue fixture with empty handoff sides.
 - Artifact: `artifacts/first-spectral-band-connectivity.md`.
 
+### H56 — Opposite-unit quotient collisions force a bounded relation
+
+- Mode: proved low-height bridge from reset saturation to relation rank
+- Statement: under H55 saturation write the unique divisible largest speed as `w=Na` and choose one representative `v_r` per unit residue. Each opposite pair has `v_r+v_{-r}=Nq_r` with `1<=q_r<=2a-1`. If `q_r=a`, the pair sums to `w`; equal non-`a` quotients give pair-sum differences. For `P=phi(N)/2` pairs and `d` distinct non-`a` quotients, these rows are independent and have rank `P-d>=P-(2a-2)`.
+- Pigeonhole corollary: if `phi(N)/2>2a-2`, at least one such coefficient-one relation is forced.
+- Evidence fixture: for `N=9`, `w=18`, the saturated tuple `(1,2,3,4,5,7,8,18)` has three opposite pairs but only two relation-free quotient values.
+- Limitation: H39 needs `n-2` independent rows; the lower bound can still be zero at large height and does not include the nonunit kernel classes.
+- Verdict: proved.
+- Verification: `opposite_unit_sum_relation_basis`, direct pair-sum and four-term fixtures, an exact rank regression, and the low-height pigeonhole regression.
+- Artifact: `artifacts/first-spectral-band-connectivity.md`.
+
 ## What the graph established
 
 1. The elementary measure branch recovers `1/(2n)` and dies by an exact factor-two deficit.
@@ -1289,6 +1304,7 @@ H0  selected nine-runner target is open
 54. A full reset block with a unique divisible largest speed needs every unit residue plus one proper kernel per prime divisor: exactly `phi(N)` blockers for prime `N`, or `phi(N)+omega(N)` for composite `N`. The runner count proves the subcase for prime `N` and `N=4`; `N=6` is tight.
 55. Reset saturation does not localize the escape to the central cells: `(1,2,3,5,6)` kills that shortcut. The gap location depends on the actual quotient data above the residues.
 56. At each unit grid point, however, the full sweep has a deterministic local skeleton: residue `k^{-1}` approaches from the left, residue `-k^{-1}` from the right, and the unique divisible runner lies between them. Full reset saturation forces every such two-sided handoff.
+57. Pairing the forced opposite unit residues turns height into a finite quotient palette. The quotient classes supply coefficient-one relation rank at least `phi(N)/2-[2(w/N)-2]`; a positive value forces a relation of support at most four.
 
 ## Frontier
 
@@ -1308,6 +1324,7 @@ H0  selected nine-runner target is open
 - Primary: extend H51 beyond fully blocked reset unions using the radius-one interval handoff chains between reset candidates. H52 shows that varying the backoff only across the divisible runner's own phase boundaries is insufficient; slower-runner entry and exit events are load-bearing.
 - Primary: in the equality and near-equality cases of H53, exploit the forced unit permutation and maximal-kernel residues to constrain those handoff events. Start with the tight `N=6` pattern rather than a prime-modulus branch.
 - Primary: turn H55's opposite-residue divisibilities into a height-independent quantity. Candidate: compare the quotients `(v_r+v_{-r})/N` around the unit-grid cycle and seek a telescoping difference, rather than bounding each quotient separately.
+- Primary: combine H56's unit-pair rank with relations forced by the maximal nonunit kernel classes. The target is to cover the remaining `n-2-[P-d]` rank without assuming that relation contraction preserves the reset obstruction.
 - Primary: turn H39 plus the ambient margin into a uniform contradiction, using determinant bounds for coefficient-two nullspaces rather than enumerating patterns separately for every `n`.
 - Secondary: if stronger auditability is desired, make the published sieve proof-producing or independently reimplement its three levels.
 - Historical: the local H21 37-prime scan and p=47 branch certificates remain useful cross-checks, but no longer block the nine-runner theorem.

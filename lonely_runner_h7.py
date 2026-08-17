@@ -378,6 +378,63 @@ def unit_grid_handoff_skeleton(
     )
 
 
+def opposite_unit_sum_relation_basis(
+    speeds: tuple[int, ...],
+) -> tuple[tuple[int, ...], ...]:
+    """Return independent coefficient-one rows from opposite unit pair sums.
+
+    Choose the smallest speed in every unit residue class modulo ``N``.  Each
+    pair summing to the largest speed gives one row.  Within every other equal
+    sum class, differences from the first pair give an independent row basis.
+    """
+    unit_grid_handoff_skeleton(speeds)
+    modulus = len(speeds) + 1
+    largest = max(speeds)
+    representative: dict[int, int] = {}
+    for speed in sorted(speed for speed in speeds if speed != largest):
+        residue = speed % modulus
+        if gcd(residue, modulus) == 1:
+            representative.setdefault(residue, speed)
+    units = tuple(
+        residue
+        for residue in range(1, modulus)
+        if gcd(residue, modulus) == 1
+    )
+    if any(residue not in representative for residue in units):
+        return ()
+
+    seen: dict[int, tuple[int, int]] = {}
+    rows: list[tuple[int, ...]] = []
+    for residue in units:
+        opposite = (-residue) % modulus
+        if residue >= opposite:
+            continue
+        pair = (representative[residue], representative[opposite])
+        pair_sum = sum(pair)
+        row = [0] * len(speeds)
+        if pair_sum == largest:
+            row[speeds.index(pair[0])] = 1
+            row[speeds.index(pair[1])] = 1
+            row[speeds.index(largest)] = -1
+            rows.append(tuple(row))
+        elif pair_sum in seen:
+            previous = seen[pair_sum]
+            row[speeds.index(previous[0])] = 1
+            row[speeds.index(previous[1])] = 1
+            row[speeds.index(pair[0])] = -1
+            row[speeds.index(pair[1])] = -1
+            rows.append(tuple(row))
+        else:
+            seen[pair_sum] = pair
+    return tuple(rows)
+
+
+def opposite_unit_sum_relation(speeds: tuple[int, ...]) -> tuple[int, ...] | None:
+    """Return the first row in the opposite-unit sum relation basis."""
+    rows = opposite_unit_sum_relation_basis(speeds)
+    return rows[0] if rows else None
+
+
 def largest_divisible_reset_witness(
     speeds: tuple[int, ...],
 ) -> Fraction | None:
